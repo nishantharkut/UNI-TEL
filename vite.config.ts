@@ -3,19 +3,21 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => ({
+export default defineConfig({
   server: {
-    host: "::",
-    port: 8080,
+    host: "::", // accessible on LAN
+    port: 5173,      // default Vite port
   },
   plugins: [
     react(),
-    mode === 'development' &&
-    componentTagger(),
-  ].filter(Boolean),
+  ],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      "@": path.resolve(__dirname, "./src"), // allows imports like "@/components/Button"
     },
   },
-}));
+  build: {
+    outDir: "dist",   // build output directory
+    sourcemap: false, // set to true if you want source maps in production
+  },
+});
