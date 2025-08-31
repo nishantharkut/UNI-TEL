@@ -1,1 +1,1 @@
-# UNI-TEL
+UNI-TEL : Your one stop platform for Academics
