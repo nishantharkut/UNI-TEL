@@ -4,16 +4,19 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
 import { useSemesters, useCreateSemester } from '@/hooks/useAcademic';
+import { useAcademicSummary } from '@/hooks/useAcademicSummary';
 import { SemesterCard } from '@/components/academic/SemesterCard';
 import { ImportExport } from '@/components/academic/ImportExport';
-import { Plus, BookOpen, GraduationCap, Sparkles } from 'lucide-react';
+import { Plus, BookOpen, GraduationCap, Sparkles, Award, TrendingUp } from 'lucide-react';
 
 export default function Semesters() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [semesterNumber, setSemesterNumber] = useState(1);
   
   const { data: semesters = [], isLoading } = useSemesters();
+  const { data: academicSummary } = useAcademicSummary();
   const createSemester = useCreateSemester();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -132,6 +135,25 @@ export default function Semesters() {
             </Dialog>
           </div>
         </div>
+
+        {/* CGPA Display Section */}
+        {academicSummary && academicSummary.cgpa !== null && (
+          <div className="mb-6">
+            <div className="bg-gradient-to-br from-green-50 to-green-100/30 border border-green-200/50 rounded-xl p-4 shadow-sm">
+              <div className="flex items-center justify-center gap-3">
+                <div className="p-2 rounded-lg bg-gradient-to-br from-green-500 to-green-600">
+                  <Award className="w-4 h-4 text-white" />
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-semibold text-green-800">CGPA:</span>
+                  <Badge className="bg-gradient-to-r from-green-500 to-green-600 text-white border-0 font-bold text-lg px-3 py-1">
+                    {academicSummary.cgpa}
+                  </Badge>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Semesters List */}
         {semesters.length > 0 ? (
