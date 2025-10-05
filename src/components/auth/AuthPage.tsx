@@ -7,9 +7,11 @@ import { Label } from '../ui/label';
 import { Card } from '../ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Mail, Lock, Eye, EyeOff, User, ArrowRight, CheckCircle, BarChart3, Shield, Zap } from 'lucide-react';
+import { useToast } from '../../hooks/use-toast';
 
 const AuthPage = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showSignupPassword, setShowSignupPassword] = useState(false);
@@ -33,8 +35,17 @@ const AuthPage = () => {
     });
 
     if (error) {
-      alert(error.message);
+      toast({
+        title: "Sign In Failed",
+        description: error.message,
+        variant: "destructive",
+      });
     } else {
+      toast({
+        title: "Welcome Back!",
+        description: "Successfully signed in to your account.",
+        variant: "default",
+      });
       navigate('/');
     }
     setLoading(false);
@@ -60,10 +71,17 @@ const AuthPage = () => {
     });
 
     if (error) {
-      alert(error.message);
+      toast({
+        title: "Sign Up Failed",
+        description: error.message,
+        variant: "destructive",
+      });
     } else {
-      alert('Check your email for the verification link!');
-      // The user will need to check their email and click the verification link
+      toast({
+        title: "Account Created!",
+        description: "Please check your email for the verification link.",
+        variant: "default",
+      });
     }
     setLoading(false);
   };
