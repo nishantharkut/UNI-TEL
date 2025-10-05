@@ -12,7 +12,6 @@ import Analytics from '@/pages/Analytics';
 import Settings from '@/pages/Settings';
 import ComingSoon from '@/pages/ComingSoon';
 import NotFound from '@/pages/NotFound';
-import RedirectToComingSoon from '@/components/RedirectToComingSoon';
 
 const queryClient = new QueryClient();
 
@@ -25,8 +24,8 @@ function App() {
           <Layout>
             <Routes>
               <Route path="/" element={<Index />} />
-              <Route path="/semesters" element={<RedirectToComingSoon />} />
-              <Route path="/attendance" element={<RedirectToComingSoon />} />
+              <Route path="/semesters" element={<Semesters />} />
+              <Route path="/attendance" element={<Attendance />} />
               <Route path="/marks" element={<Marks />} />
               <Route path="/analytics" element={<Analytics />} />
               <Route path="/settings" element={<Settings />} />
