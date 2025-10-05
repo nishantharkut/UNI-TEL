@@ -1,7 +1,5 @@
-
 import { useState } from "react"
 import { 
-  BookOpen, 
   BarChart3, 
   Calendar, 
   ClipboardList, 
@@ -12,21 +10,36 @@ import {
   GraduationCap,
   Home,
   Users,
-  FileText
+  FileText,
+  ChevronRight,
+  ChevronLeft,
+  User,
+  Sparkles,
+  Zap,
+  TrendingUp,
+  Bell,
+  Search,
+  Menu,
+  X,
+  Plus,
+  Star,
+  Download,
+  Upload,
+  MoreHorizontal,
+  Palette,
+  Images,
+  Thumbtack,
+  Heart,
+  ChartLine,
+  Fire,
+  Magic,
+  Gem,
+  CaretUp,
+  PanelLeftClose,
+  PanelLeftOpen
 } from "lucide-react"
 import { NavLink, useLocation } from "react-router-dom"
-
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  useSidebar,
-} from "@/components/ui/sidebar"
+import { useUserProfile } from "@/hooks/useUserProfile"
 
 const academicItems = [
   { title: "Dashboard", url: "/", icon: Home, description: "Overview & stats" },
@@ -37,189 +50,298 @@ const academicItems = [
 ]
 
 const hubItems = [
-  { title: "Browse Hub", url: "/hub", icon: FolderOpen, description: "Explore resources" },
-  { title: "My Uploads", url: "/hub/uploads", icon: FileText, description: "Your contributions" },
-  { title: "Bookmarks", url: "/hub/bookmarks", icon: BookmarkCheck, description: "Saved items" },
+  { title: "Browse Hub", url: "/coming-soon", icon: FolderOpen, description: "Explore resources" },
+  { title: "My Uploads", url: "/coming-soon", icon: Upload, description: "Your contributions" },
+  { title: "Bookmarks", url: "/coming-soon", icon: BookmarkCheck, description: "Saved items" },
 ]
 
 const adminItems = [
-  { title: "Moderation", url: "/moderation", icon: Shield, description: "Content review" },
-  { title: "Users", url: "/admin/users", icon: Users, description: "User management" },
+  { title: "Moderation", url: "/coming-soon", icon: Shield, description: "Content review" },
+  { title: "Users", url: "/coming-soon", icon: Users, description: "User management" },
 ]
 
-export function AppSidebar() {
-  const { state } = useSidebar()
+const settingsItem = [
+  { title: "Settings", url: "/settings", icon: Settings, description: "App preferences" },
+]
+
+interface AppSidebarProps {
+  onToggle?: () => void;
+}
+
+export function AppSidebar({ onToggle }: AppSidebarProps) {
+  const [isCollapsed, setIsCollapsed] = useState(false)
   const location = useLocation()
   const currentPath = location.pathname
-  const isCollapsed = state === "collapsed"
+  const { profile, loading: profileLoading } = useUserProfile()
+
+  const toggleSidebar = () => {
+    setIsCollapsed(!isCollapsed)
+    onToggle?.()
+  }
 
   const isActive = (path: string) => {
     if (path === "/") return currentPath === "/"
     return currentPath.startsWith(path)
   }
 
-  const getNavCls = (path: string) =>
-    `group flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 relative ${
-      isActive(path) 
-        ? "bg-gradient-to-r from-academic-primary to-academic-primary/90 text-primary-foreground shadow-md shadow-primary/20" 
-        : "hover:bg-muted/60 text-muted-foreground hover:text-foreground hover:shadow-sm"
-    }`
 
   return (
-    <Sidebar
-      className={`${isCollapsed ? "w-16" : "w-72"} transition-all duration-300 border-r border-border/50`}
-      collapsible="icon"
+    <div 
+      className="fixed left-4 top-4 h-[calc(100vh-2rem)] rounded-2xl flex flex-col font-sans overflow-hidden select-none transition-all duration-200 ease-out sidebar-container"
+      style={{ 
+        width: isCollapsed ? '80px' : '256px',
+        backgroundColor: 'hsl(var(--academic-secondary))',
+        color: 'hsl(var(--academic-accent))'
+      }}
     >
-      <SidebarContent className="bg-gradient-to-b from-sidebar via-sidebar to-sidebar/95 backdrop-blur-sm">
-        {/* Logo Section */}
-        <div className={`p-4 border-b border-sidebar-border/50 ${isCollapsed ? 'px-2' : ''}`}>
-          {!isCollapsed ? (
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-academic-primary to-academic-primary/80 rounded-xl flex items-center justify-center shadow-lg">
-                <BookOpen className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h2 className="font-bold text-xl text-sidebar-foreground tracking-tight">UNI-TEL</h2>
-                <p className="text-xs text-sidebar-foreground/70 font-medium">Academic Hub</p>
+      
+      {/* Header */}
+      <div 
+        className="relative w-full h-20 rounded-2xl z-10 flex items-center transition-all duration-200"
+        style={{ 
+          width: isCollapsed ? 'calc(80px - 16px)' : 'calc(256px - 16px)', 
+          left: '16px',
+          backgroundColor: 'hsl(var(--academic-secondary))'
+        }}
+      >
+        {!isCollapsed && (
+          <div className="flex items-center gap-2 ml-3">
+            <div className="w-6 h-6 bg-gradient-to-br from-academic-primary to-academic-primary/80 rounded-lg flex items-center justify-center">
+              <GraduationCap className="w-3 h-3 text-white" />
+            </div>
+            <span 
+              className="text-lg font-bold transition-opacity duration-1000 text-white"
+              style={{ 
+                opacity: isCollapsed ? 0 : 1, 
+                pointerEvents: isCollapsed ? 'none' : 'auto'
+              }}
+            >
+              UNI-TEL
+            </span>
+          </div>
+        )}
+        
+        <button
+          onClick={toggleSidebar}
+          className="absolute right-0 w-10 h-full flex items-center justify-center cursor-pointer hover:bg-white/10 rounded-lg transition-all duration-200"
+          style={{ left: isCollapsed ? 'calc(50% - 6px)' : 'auto', transform: isCollapsed ? 'translate(-50%)' : 'none' }}
+        >
+          {isCollapsed ? (
+            <PanelLeftOpen className="w-5 h-5 text-white transition-all duration-200 hover:scale-110" />
+          ) : (
+            <PanelLeftClose className="w-5 h-5 text-white transition-all duration-200 hover:scale-110" />
+          )}
+        </button>
+        
+        <hr 
+          className="mx-4 border-t border-white/20"
+        />
+      </div>
+
+      {/* Navigation Content */}
+      <div 
+        className="relative flex-1 w-full -mt-4 pt-4 transition-all duration-200 overflow-x-hidden"
+        style={{ 
+          width: isCollapsed ? '80px' : '256px',
+          backgroundColor: 'hsl(var(--academic-secondary))'
+        }}
+      >
+        
+
+        {/* Academic Section */}
+        <div className="relative z-10 mt-4">
+          {!isCollapsed && (
+            <div className="px-3 py-2">
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-white">
+                <GraduationCap className="w-3 h-3" />
+                Academic
               </div>
             </div>
-          ) : (
-            <div className="w-10 h-10 bg-gradient-to-br from-academic-primary to-academic-primary/80 rounded-xl flex items-center justify-center mx-auto shadow-lg">
-              <BookOpen className="w-5 h-5 text-white" />
+          )}
+          {academicItems.map((item, index) => (
+            <NavLink
+              key={item.title}
+              to={item.url}
+              end={item.url === "/"}
+              className="relative ml-3 h-[40px] flex items-center cursor-pointer z-10 transition-colors duration-200 text-white"
+            >
+              <item.icon 
+                className="text-center transition-all duration-200 text-white"
+                style={{ 
+                  minWidth: isCollapsed ? 'calc(100% - 12px)' : '2.5rem'
+                }} 
+              />
+              <span 
+                className="text-sm transition-opacity duration-1000 text-white"
+                style={{ 
+                  opacity: isCollapsed ? 0 : 1
+                }}
+              >
+                {item.title}
+              </span>
+            </NavLink>
+          ))}
+        </div>
+
+        {/* Divider */}
+        <div className="mx-3 my-4">
+          <hr className="border-t border-white/20" />
+        </div>
+
+        {/* Knowledge Hub Section */}
+        <div className="relative z-10">
+          {!isCollapsed && (
+            <div className="px-3 py-2">
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-white">
+                <FolderOpen className="w-3 h-3" />
+                Knowledge Hub
+              </div>
+            </div>
+          )}
+          {hubItems.map((item, index) => (
+            <NavLink
+              key={item.title}
+              to={item.url}
+              end={item.url === "/"}
+              className="relative ml-3 h-[40px] flex items-center cursor-pointer z-10 transition-colors duration-200 text-white"
+            >
+              <item.icon 
+                className="text-center transition-all duration-200 text-white"
+                style={{ 
+                  minWidth: isCollapsed ? 'calc(100% - 12px)' : '2.5rem'
+                }} 
+              />
+              <span 
+                className="text-sm transition-opacity duration-1000 text-white"
+                style={{ 
+                  opacity: isCollapsed ? 0 : 1
+                }}
+              >
+                {item.title}
+              </span>
+            </NavLink>
+          ))}
+        </div>
+
+        {/* Divider */}
+        <div className="mx-3 my-4">
+          <hr className="border-t border-white/20" />
+        </div>
+
+        {/* Administration Section */}
+        <div className="relative z-10">
+          {!isCollapsed && (
+            <div className="px-3 py-2">
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-white">
+                <Shield className="w-3 h-3" />
+                Administration
+              </div>
+            </div>
+          )}
+          {adminItems.map((item, index) => (
+            <NavLink
+              key={item.title}
+              to={item.url}
+              end={item.url === "/"}
+              className="relative ml-3 h-[40px] flex items-center cursor-pointer z-10 transition-colors duration-200 text-white"
+            >
+              <item.icon 
+                className="text-center transition-all duration-200 text-white"
+                style={{ 
+                  minWidth: isCollapsed ? 'calc(100% - 12px)' : '2.5rem'
+                }} 
+              />
+              <span 
+                className="text-sm transition-opacity duration-1000 text-white"
+                style={{ 
+                  opacity: isCollapsed ? 0 : 1
+                }}
+              >
+                {item.title}
+              </span>
+            </NavLink>
+          ))}
+        </div>
+
+        {/* Divider */}
+        <div className="mx-3 my-4">
+          <hr className="border-t border-white/20" />
+        </div>
+
+        {/* Settings Section - Special styling */}
+        <div className="relative z-10">
+          {settingsItem.map((item, index) => (
+            <NavLink
+              key={item.title}
+              to={item.url}
+              end={item.url === "/"}
+              className="relative ml-3 h-[40px] flex items-center cursor-pointer z-10 transition-colors duration-200 text-white"
+            >
+              <item.icon 
+                className="text-center transition-all duration-200 text-white"
+                style={{ 
+                  minWidth: isCollapsed ? 'calc(100% - 12px)' : '2.5rem'
+                }} 
+              />
+              <span 
+                className="text-sm transition-opacity duration-1000 text-white"
+                style={{ 
+                  opacity: isCollapsed ? 0 : 1
+                }}
+              >
+                {item.title}
+              </span>
+            </NavLink>
+          ))}
+        </div>
+
+        {/* Spacing between Settings and Footer */}
+        <div className="h-6"></div>
+      </div>
+
+      {/* Footer */}
+      <div 
+        className="relative w-full h-[60px] rounded-2xl flex flex-col z-10 transition-all duration-200"
+        style={{ 
+          width: isCollapsed ? '80px' : '256px',
+          backgroundColor: 'hsl(var(--academic-primary))'
+        }}
+      >
+        <div className="relative w-full h-[60px] flex items-center">
+          <div 
+            className="relative w-6 h-6 rounded-full overflow-hidden transition-all duration-200"
+            style={{ 
+              marginLeft: isCollapsed ? '0' : '12px',
+              left: isCollapsed ? '50%' : '0',
+              transform: isCollapsed ? 'translate(-50%)' : 'translate(0)'
+            }}
+          >
+            <div className="w-full h-full bg-gradient-to-br from-academic-accent to-academic-accent/80 rounded-full flex items-center justify-center">
+              <User className="w-3 h-3 text-white" />
+            </div>
+          </div>
+          
+          {!isCollapsed && (
+            <div 
+              className="relative ml-3 flex flex-col justify-center py-2 transition-opacity duration-1000"
+              style={{ 
+                opacity: isCollapsed ? 0 : 1, 
+                pointerEvents: isCollapsed ? 'none' : 'auto' 
+              }}
+            >
+              <span className="text-xs font-medium text-white leading-tight">
+                {profileLoading ? 'Loading...' : profile?.full_name || 'User'}
+              </span>
+              <span className="text-xs text-white/70 leading-tight">
+                {profile?.college || 'University'}
+              </span>
+              <span className="text-xs text-white/50 capitalize leading-tight">
+                {profile?.role || 'Student'}
+              </span>
             </div>
           )}
         </div>
-
-        {/* Academic Section */}
-        <SidebarGroup className="px-3 py-4">
-          <SidebarGroupLabel className={`text-sidebar-foreground/80 font-semibold text-xs uppercase tracking-wider mb-3 ${isCollapsed ? 'sr-only' : ''}`}>
-            Academic
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu className="space-y-2">
-              {academicItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink 
-                      to={item.url} 
-                      end={item.url === "/"}
-                      className={getNavCls(item.url)}
-                      title={isCollapsed ? `${item.title} - ${item.description}` : undefined}
-                    >
-                      <item.icon className="w-5 h-5 flex-shrink-0" />
-                      {!isCollapsed && (
-                        <div className="flex-1 min-w-0">
-                          <span className="font-medium text-sm truncate block">{item.title}</span>
-                          <span className="text-xs opacity-70 truncate block">{item.description}</span>
-                        </div>
-                      )}
-                      {isActive(item.url) && (
-                        <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-1 h-8 bg-primary-foreground/80 rounded-l-full" />
-                      )}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        {/* Knowledge Hub Section */}
-        <SidebarGroup className="px-3 py-4">
-          <SidebarGroupLabel className={`text-sidebar-foreground/80 font-semibold text-xs uppercase tracking-wider mb-3 ${isCollapsed ? 'sr-only' : ''}`}>
-            Knowledge Hub
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu className="space-y-2">
-              {hubItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink 
-                      to={item.url} 
-                      className={getNavCls(item.url)}
-                      title={isCollapsed ? `${item.title} - ${item.description}` : undefined}
-                    >
-                      <item.icon className="w-5 h-5 flex-shrink-0" />
-                      {!isCollapsed && (
-                        <div className="flex-1 min-w-0">
-                          <span className="font-medium text-sm truncate block">{item.title}</span>
-                          <span className="text-xs opacity-70 truncate block">{item.description}</span>
-                        </div>
-                      )}
-                      {isActive(item.url) && (
-                        <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-1 h-8 bg-primary-foreground/80 rounded-l-full" />
-                      )}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        {/* Admin Section */}
-        <SidebarGroup className="px-3 py-4">
-          <SidebarGroupLabel className={`text-sidebar-foreground/80 font-semibold text-xs uppercase tracking-wider mb-3 ${isCollapsed ? 'sr-only' : ''}`}>
-            Administration
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu className="space-y-2">
-              {adminItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink 
-                      to={item.url} 
-                      className={getNavCls(item.url)}
-                      title={isCollapsed ? `${item.title} - ${item.description}` : undefined}
-                    >
-                      <item.icon className="w-5 h-5 flex-shrink-0" />
-                      {!isCollapsed && (
-                        <div className="flex-1 min-w-0">
-                          <span className="font-medium text-sm truncate block">{item.title}</span>
-                          <span className="text-xs opacity-70 truncate block">{item.description}</span>
-                        </div>
-                      )}
-                      {isActive(item.url) && (
-                        <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-1 h-8 bg-primary-foreground/80 rounded-l-full" />
-                      )}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        {/* Settings at bottom */}
-        <div className="mt-auto border-t border-sidebar-border/50 px-3 py-4">
-          <SidebarGroup>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild>
-                    <NavLink 
-                      to="/settings" 
-                      className={getNavCls("/settings")}
-                      title={isCollapsed ? "Settings - App preferences" : undefined}
-                    >
-                      <Settings className="w-5 h-5 flex-shrink-0" />
-                      {!isCollapsed && (
-                        <div className="flex-1 min-w-0">
-                          <span className="font-medium text-sm truncate block">Settings</span>
-                          <span className="text-xs opacity-70 truncate block">App preferences</span>
-                        </div>
-                      )}
-                      {isActive("/settings") && (
-                        <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-1 h-8 bg-primary-foreground/80 rounded-l-full" />
-                      )}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        </div>
-      </SidebarContent>
-    </Sidebar>
+      </div>
+    </div>
   )
 }

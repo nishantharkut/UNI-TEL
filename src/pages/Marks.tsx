@@ -4,9 +4,22 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, FileText, Target, TrendingUp } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/ui/badge';
+import { 
+  Search, 
+  FileText, 
+  Target, 
+  TrendingUp,
+  Award,
+  Star,
+  CheckCircle,
+  Activity,
+  BookOpen,
+  BarChart3
+} from 'lucide-react';
 import { useMarks, useSemesters } from '@/hooks/useAcademic';
-import { ActiveMarksCard } from '@/components/academic/ActiveMarksCard';
+import { MarksEditor } from '@/components/academic/MarksEditor';
 
 export default function Marks() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -39,109 +52,216 @@ export default function Marks() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading marks records...</p>
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/10">
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center py-16">
+            <div className="relative mb-6">
+              <div className="animate-spin rounded-full h-12 w-12 border-3 border-academic-primary/20 border-t-academic-primary mx-auto"></div>
+              <div className="absolute inset-0 rounded-full h-12 w-12 border-3 border-transparent border-t-academic-primary/40 animate-spin [animation-direction:reverse] [animation-duration:1.5s]"></div>
+            </div>
+            <p className="text-lg font-medium text-muted-foreground">Loading marks records...</p>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-6 space-y-6 max-w-7xl">
-      {/* Header */}
-      <div className="text-center sm:text-left">
-        <h1 className="text-2xl sm:text-3xl font-bold">Marks & Performance</h1>
-        <p className="text-muted-foreground mt-1">Track exam scores with weightage system</p>
-      </div>
-
-      {/* Stats Cards - Mobile First */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Card>
-          <CardContent className="p-4 sm:p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Total Records</p>
-                <p className="text-xl sm:text-2xl font-bold">{totalRecords}</p>
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/10">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 max-w-7xl space-y-6 sm:space-y-8">
+        
+        {/* Hero Section - Marks */}
+        <div className="relative overflow-hidden rounded-3xl color-warning p-6 sm:p-8 lg:p-12 shadow-2xl">
+          <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-20"></div>
+          
+          <div className="relative z-10">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+              <div className="space-y-4 sm:space-y-6">
+                <div className="flex items-center gap-3">
+                  <div className="p-3 rounded-2xl bg-white/20 backdrop-blur-sm">
+                    <BarChart3 className="w-6 h-6 sm:w-8 sm:h-8" />
+                  </div>
+                  <div>
+                    <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white">
+                      Marks & Performance
+                    </h1>
+                    <p className="text-white/80 text-sm sm:text-base">
+                      Track exam scores with weightage system
+                    </p>
+                  </div>
+                </div>
+                
+                {averagePercentage > 0 && (
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-xl bg-white/20">
+                        <Target className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="text-sm text-white/80">Average Score</p>
+                        <p className="text-2xl sm:text-3xl font-bold text-white">{averagePercentage}%</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge className="color-primary border-0 px-4 py-2 text-sm font-semibold">
+                        <Activity className="w-4 h-4 mr-2" />
+                        {totalRecords} Record{totalRecords !== 1 ? 's' : ''}
+                      </Badge>
+                      {excellentMarks > 0 && (
+                        <Badge className="color-accent border-0 px-4 py-2 text-sm font-semibold">
+                          <Star className="w-4 h-4 mr-2" />
+                          {excellentMarks} Excellent
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
-              <FileText className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4 sm:p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Average Score</p>
-                <p className="text-xl sm:text-2xl font-bold">{averagePercentage}%</p>
-              </div>
-              <Target className="w-6 h-6 sm:w-8 sm:h-8 text-green-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4 sm:p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Excellent Scores</p>
-                <p className="text-xl sm:text-2xl font-bold">{excellentMarks}</p>
-              </div>
-              <TrendingUp className="w-6 h-6 sm:w-8 sm:h-8 text-purple-600" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Filters - Mobile Optimized */}
-      <Card>
-        <CardContent className="p-4 sm:p-6">
-          <div className="flex flex-col gap-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                placeholder="Search subjects..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Select value={selectedSemester} onValueChange={setSelectedSemester}>
-                <SelectTrigger>
-                  <SelectValue placeholder="All semesters" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Semesters</SelectItem>
-                  {semesters.map((semester) => (
-                    <SelectItem key={semester.id} value={semester.id}>
-                      Semester {semester.number}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Select value={selectedExamType} onValueChange={setSelectedExamType}>
-                <SelectTrigger>
-                  <SelectValue placeholder="All exam types" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Exam Types</SelectItem>
-                  {examTypes.map((type) => (
-                    <SelectItem key={type} value={type}>
-                      {type}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
 
-      {/* Active Marks Tracking */}
-      <ActiveMarksCard records={filteredMarks} />
+        {/* Enhanced Stats Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+          {/* Total Records Card */}
+          <Card className="group relative overflow-hidden border-0 color-primary-light hover:shadow-xl transition-all duration-300 hover:scale-[1.02]">
+            <div className="absolute inset-0 bg-gradient-to-br from-academic-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <CardContent className="relative p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="p-3 rounded-2xl color-primary-light group-hover:bg-academic-primary/20 transition-colors duration-300">
+                  <FileText className="h-6 w-6 text-academic-primary" />
+                </div>
+                <div className="text-right">
+                  <div className="text-3xl sm:text-4xl font-bold text-academic-primary">
+                    {totalRecords}
+                  </div>
+                  <p className="text-sm font-medium text-academic-primary/80">Total Records</p>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-academic-primary/70">Active</span>
+                  <span className="font-semibold text-academic-primary">
+                    {totalRecords > 0 ? '100%' : '0%'}
+                  </span>
+                </div>
+                <Progress 
+                  value={totalRecords > 0 ? 100 : 0} 
+                  className="h-2 bg-academic-primary/20"
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Average Score Card */}
+          <Card className="group relative overflow-hidden border-0 color-secondary-light hover:shadow-xl transition-all duration-300 hover:scale-[1.02]">
+            <div className="absolute inset-0 bg-gradient-to-br from-academic-secondary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <CardContent className="relative p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="p-3 rounded-2xl color-secondary-light group-hover:bg-academic-secondary/20 transition-colors duration-300">
+                  <Target className="h-6 w-6 text-academic-secondary" />
+                </div>
+                <div className="text-right">
+                  <div className="text-3xl sm:text-4xl font-bold text-academic-secondary">
+                    {averagePercentage}%
+                  </div>
+                  <p className="text-sm font-medium text-academic-secondary/80">Average Score</p>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-academic-secondary/70">Performance</span>
+                  <span className="font-semibold text-academic-secondary">
+                    {averagePercentage >= 90 ? 'Excellent' : averagePercentage >= 80 ? 'Good' : averagePercentage >= 70 ? 'Average' : 'Needs Improvement'}
+                  </span>
+                </div>
+                <Progress 
+                  value={averagePercentage} 
+                  className="h-2 bg-academic-secondary/20"
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Excellent Scores Card */}
+          <Card className="group relative overflow-hidden border-0 color-accent-light hover:shadow-xl transition-all duration-300 hover:scale-[1.02]">
+            <div className="absolute inset-0 bg-gradient-to-br from-academic-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <CardContent className="relative p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="p-3 rounded-2xl color-accent-light group-hover:bg-academic-accent/20 transition-colors duration-300">
+                  <Star className="h-6 w-6 text-academic-secondary" />
+                </div>
+                <div className="text-right">
+                  <div className="text-3xl sm:text-4xl font-bold text-academic-secondary">
+                    {excellentMarks}
+                  </div>
+                  <p className="text-sm font-medium text-academic-secondary/80">Excellent Scores</p>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-academic-secondary/70">Achievement</span>
+                  <span className="font-semibold text-academic-secondary">
+                    {excellentMarks > 0 ? `${Math.round((excellentMarks / totalRecords) * 100)}%` : '0%'}
+                  </span>
+                </div>
+                <Progress 
+                  value={totalRecords > 0 ? (excellentMarks / totalRecords) * 100 : 0} 
+                  className="h-2 bg-academic-accent/30"
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Enhanced Filters */}
+        <Card className="border-0 shadow-lg bg-gradient-to-br from-card to-card/80 backdrop-blur-sm">
+          <CardContent className="p-6">
+            <div className="flex flex-col gap-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search subjects..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 h-12 rounded-xl border-2 focus:border-academic-primary transition-colors"
+                />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Select value={selectedSemester} onValueChange={setSelectedSemester}>
+                  <SelectTrigger className="h-12 rounded-xl border-2 focus:border-academic-primary transition-colors">
+                    <SelectValue placeholder="All semesters" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Semesters</SelectItem>
+                    {semesters.map((semester) => (
+                      <SelectItem key={semester.id} value={semester.id}>
+                        Semester {semester.number}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select value={selectedExamType} onValueChange={setSelectedExamType}>
+                  <SelectTrigger className="h-12 rounded-xl border-2 focus:border-academic-primary transition-colors">
+                    <SelectValue placeholder="All exam types" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Exam Types</SelectItem>
+                    {examTypes.map((type) => (
+                      <SelectItem key={type} value={type}>
+                        {type}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Marks Editor with Custom Exam Types & Weightages */}
+        <MarksEditor />
+      </div>
     </div>
   );
 }

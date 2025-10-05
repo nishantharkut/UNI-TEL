@@ -48,6 +48,8 @@ export interface MarksRecord {
   total_marks: number;
   obtained_marks: number;
   percentage?: number;
+  weightage?: number;
+  weighted_percentage?: number;
   source_json_import: boolean;
   created_at: string;
   updated_at: string;

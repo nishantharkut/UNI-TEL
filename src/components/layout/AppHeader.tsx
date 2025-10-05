@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { SidebarTrigger } from "@/components/ui/sidebar"
+import { NotificationsDropdown } from "@/components/ui/notifications-dropdown"
 
 interface AppHeaderProps {
   user?: {
@@ -34,80 +34,87 @@ export function AppHeader({ user, onSignOut }: AppHeaderProps) {
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/80 shadow-sm">
+    <header className="sticky top-0 z-50 w-full border-b border-border/30 bg-background/98 backdrop-blur-xl supports-[backdrop-filter]:bg-background/95 shadow-lg shadow-black/5">
       <div className="flex h-16 items-center justify-between px-4 lg:px-6">
-        {/* Left side - Sidebar trigger and branding */}
+        {/* Left side - Branding only */}
         <div className="flex items-center gap-3">
-          <SidebarTrigger className="hover:bg-muted/80 transition-colors" />
-            <div className="hidden sm:flex items-center gap-2">
-              <img src="/logo.png" alt="UNI-TEL Logo" className="h-10 w-10 object-contain" />
-              <h1 className="text-lg font-bold text-foreground tracking-tight">UNI-TEL</h1>
-            </div>
+          <div className="relative">
+            <img src="/logo.png" alt="UNI-TEL Logo" className="h-9 w-9 object-contain drop-shadow-sm" />
+            <div className="absolute inset-0 bg-gradient-to-br from-academic-primary/20 to-transparent rounded-lg blur-sm"></div>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground font-medium">Academic Hub</p>
+          </div>
         </div>
 
         {/* Center - Search (hidden on mobile, shown on tablet+) */}
-        <div className="hidden md:flex flex-1 max-w-md mx-6">
-          <div className="relative w-full">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+        <div className="hidden md:flex flex-1 max-w-lg mx-8">
+          <div className="relative w-full group">
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-academic-primary transition-colors duration-200" />
             <Input
               placeholder="Search notes, papers, subjects..."
-              className="pl-10 bg-muted/30 border-muted-foreground/20 focus:bg-background transition-all duration-200 rounded-full h-10"
+              className="pl-11 pr-4 bg-muted/40 border-muted-foreground/30 focus:bg-background focus:border-academic-primary/50 focus:ring-2 focus:ring-academic-primary/20 transition-all duration-300 rounded-xl h-11 shadow-sm hover:shadow-md"
             />
           </div>
         </div>
 
         {/* Right side - Actions */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           {/* Mobile search button */}
-          <Button variant="ghost" size="icon" className="md:hidden h-10 w-10 hover:bg-muted/80 transition-colors">
+          <Button variant="ghost" size="icon" className="md:hidden h-11 w-11 hover:bg-muted/60 transition-all duration-200 rounded-xl">
             <Search className="w-5 h-5" />
           </Button>
 
           {/* Notifications */}
-          <Button variant="ghost" size="icon" className="relative h-10 w-10 hover:bg-muted/80 transition-colors">
-            <Bell className="w-5 h-5" />
-            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-academic-danger rounded-full animate-pulse"></span>
-          </Button>
+          <NotificationsDropdown />
 
           {/* User dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-10 w-10 rounded-full hover:bg-muted/80 transition-colors">
-                <Avatar className="h-9 w-9 ring-2 ring-primary/10 hover:ring-primary/20 transition-all">
+              <Button variant="ghost" className="relative h-11 w-11 rounded-xl hover:bg-muted/60 transition-all duration-200 p-0">
+                <Avatar className="h-9 w-9 ring-2 ring-academic-primary/20 hover:ring-academic-primary/40 transition-all duration-200 shadow-sm">
                   <AvatarImage src={user?.avatar_url} alt={user?.full_name || "User"} />
-                  <AvatarFallback className="bg-gradient-to-br from-academic-primary to-academic-primary/80 text-white font-semibold text-sm">
+                  <AvatarFallback className="bg-gradient-to-br from-academic-primary to-academic-primary/80 text-white font-semibold text-sm shadow-sm">
                     {getInitials(user?.full_name)}
                   </AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-64 mr-2 bg-background/95 backdrop-blur-md border shadow-lg" align="end">
-              <DropdownMenuLabel className="p-4">
-                <div className="flex flex-col space-y-2">
-                  <p className="text-sm font-semibold leading-none">
-                    {user?.full_name || "User"}
-                  </p>
-                  <p className="text-xs leading-none text-muted-foreground">
-                    {user?.email}
-                  </p>
+            <DropdownMenuContent className="w-72 mr-2 bg-background/98 backdrop-blur-xl border border-border/50 shadow-xl shadow-black/10" align="end">
+              <DropdownMenuLabel className="p-5">
+                <div className="flex items-center space-x-3">
+                  <Avatar className="h-12 w-12 ring-2 ring-academic-primary/20">
+                    <AvatarImage src={user?.avatar_url} alt={user?.full_name || "User"} />
+                    <AvatarFallback className="bg-gradient-to-br from-academic-primary to-academic-primary/80 text-white font-semibold">
+                      {getInitials(user?.full_name)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-semibold leading-none text-foreground">
+                      {user?.full_name || "User"}
+                    </p>
+                    <p className="text-xs leading-none text-muted-foreground">
+                      {user?.email}
+                    </p>
+                  </div>
                 </div>
               </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="p-3 cursor-pointer hover:bg-muted/50">
-                <User className="mr-3 h-4 w-4" />
-                <span>Profile Settings</span>
+              <DropdownMenuSeparator className="bg-border/50" />
+              <DropdownMenuItem className="p-4 cursor-pointer hover:bg-muted/60 transition-colors duration-200 rounded-lg mx-2 my-1">
+                <User className="mr-3 h-4 w-4 text-muted-foreground" />
+                <span className="font-medium">Profile Settings</span>
               </DropdownMenuItem>
-              <DropdownMenuItem className="p-3 cursor-pointer hover:bg-muted/50">
-                <Bell className="mr-3 h-4 w-4" />
-                <span>Notifications</span>
+              <DropdownMenuItem className="p-4 cursor-pointer hover:bg-muted/60 transition-colors duration-200 rounded-lg mx-2 my-1">
+                <Bell className="mr-3 h-4 w-4 text-muted-foreground" />
+                <span className="font-medium">Notifications</span>
               </DropdownMenuItem>
-              <DropdownMenuSeparator />
+              <DropdownMenuSeparator className="bg-border/50" />
               <DropdownMenuItem 
                 onClick={onSignOut} 
-                className="p-3 cursor-pointer text-destructive focus:text-destructive hover:bg-destructive/10"
+                className="p-4 cursor-pointer text-destructive focus:text-destructive hover:bg-destructive/10 transition-colors duration-200 rounded-lg mx-2 my-1"
               >
                 <LogOut className="mr-3 h-4 w-4" />
-                <span>Sign out</span>
+                <span className="font-medium">Sign out</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

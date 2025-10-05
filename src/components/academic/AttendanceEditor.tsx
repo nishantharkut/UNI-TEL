@@ -34,7 +34,7 @@ export function AttendanceEditor({ semesterId }: AttendanceEditorProps) {
   const deleteAttendance = useDeleteAttendance();
 
   const filteredRecords = semesterId 
-    ? attendanceRecords.filter((record: any) => record.semester_id === semesterId)
+    ? attendanceRecords.filter((record: { semester_id: string }) => record.semester_id === semesterId)
     : attendanceRecords;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -283,7 +283,7 @@ export function AttendanceEditor({ semesterId }: AttendanceEditorProps) {
             <p>No attendance records added yet</p>
           </div>
         ) : (
-          filteredRecords.map((record: any) => {
+          filteredRecords.map((record: { id: string; subject_name: string; percentage?: number; attended_classes: number; total_classes: number; note?: string; semester_id: string }) => {
             const attendanceStatus = getAttendanceStatus(record.percentage || 0);
             const isLow = (record.percentage || 0) < 75;
             

@@ -15,7 +15,7 @@ interface SemesterCardProps {
 
 export function SemesterCard({ semester }: SemesterCardProps) {
   const [showSubjectDialog, setShowSubjectDialog] = useState(false);
-  const [editingSubject, setEditingSubject] = useState<any>(null);
+  const [editingSubject, setEditingSubject] = useState<{ id: string; name: string; credits: number; grade?: string; semester_id: string } | null>(null);
   
   const { data: subjects = [] } = useSubjectsBySemester(semester.id);
   const deleteSemester = useDeleteSemester();
@@ -26,7 +26,7 @@ export function SemesterCard({ semester }: SemesterCardProps) {
     }
   };
 
-  const handleEditSubject = (e: React.MouseEvent, subject: any) => {
+  const handleEditSubject = (e: React.MouseEvent, subject: { id: string; name: string; credits: number; grade?: string; semester_id: string }) => {
     e.preventDefault();
     e.stopPropagation();
     console.log('Editing subject:', subject);

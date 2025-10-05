@@ -1,15 +1,16 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Edit, Plus, Trash2, FileText } from 'lucide-react';
+import { Edit, Plus, Trash2, FileText, Target } from 'lucide-react';
 import { useMarks, useCreateMarks, useUpdateMarks, useDeleteMarks, useSemesters } from '@/hooks/useAcademic';
 import type { MarksRecord } from '@/services/academicService';
 
-const EXAM_TYPES = ['Quiz', 'Mid', 'End', 'Assignment', 'Lab', 'Project', 'Other'];
+// Default exam types - user can create custom ones
+const DEFAULT_EXAM_TYPES = ['Quiz', 'Mid Term', 'End Term', 'Assignment', 'Lab Exam', 'Viva', 'Project', 'Presentation', 'Practical', 'Other'];
 
 interface MarksEditorProps {
   semesterId?: string;
@@ -21,11 +22,16 @@ export function MarksEditor({ semesterId }: MarksEditorProps) {
   const [formData, setFormData] = useState({
     subject_name: '',
     exam_type: '',
-    total_marks: 0,
+    total_marks: 100,
     obtained_marks: 0,
+    weightage: 100,
     semester_id: semesterId || '',
     source_json_import: false
   });
+
+  const [customExamTypes, setCustomExamTypes] = useState<string[]>([]);
+  const [newExamType, setNewExamType] = useState('');
+  const [showAddExamType, setShowAddExamType] = useState(false);
 
   const { data: marksRecords = [], isLoading } = useMarks();
   const { data: semesters = [] } = useSemesters();
@@ -33,8 +39,39 @@ export function MarksEditor({ semesterId }: MarksEditorProps) {
   const updateMarks = useUpdateMarks();
   const deleteMarks = useDeleteMarks();
 
+  // Load custom exam types from localStorage
+  React.useEffect(() => {
+    const saved = localStorage.getItem('customExamTypes');
+    if (saved) {
+      setCustomExamTypes(JSON.parse(saved));
+    }
+  }, []);
+
+  // Save custom exam types to localStorage
+  const saveCustomExamTypes = (types: string[]) => {
+    setCustomExamTypes(types);
+    localStorage.setItem('customExamTypes', JSON.stringify(types));
+  };
+
+  // Add new custom exam type
+  const handleAddExamType = () => {
+    if (newExamType.trim() && !customExamTypes.includes(newExamType.trim())) {
+      const updated = [...customExamTypes, newExamType.trim()];
+      saveCustomExamTypes(updated);
+      setFormData({ ...formData, exam_type: newExamType.trim() });
+      setNewExamType('');
+      setShowAddExamType(false);
+    }
+  };
+
+  // Remove custom exam type
+  const handleRemoveExamType = (examType: string) => {
+    const updated = customExamTypes.filter(type => type !== examType);
+    saveCustomExamTypes(updated);
+  };
+
   const filteredRecords = semesterId 
-    ? marksRecords.filter((record: any) => record.semester_id === semesterId)
+    ? marksRecords.filter((record: { semester_id: string }) => record.semester_id === semesterId)
     : marksRecords;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -44,10 +81,16 @@ export function MarksEditor({ semesterId }: MarksEditorProps) {
       if (editingRecord) {
         await updateMarks.mutateAsync({
           id: editingRecord.id,
-          updates: formData
+          updates: {
+            ...formData,
+            weightage: Number(formData.weightage)
+          }
         });
       } else {
-        await createMarks.mutateAsync(formData);
+        await createMarks.mutateAsync({
+          ...formData,
+          weightage: Number(formData.weightage)
+        });
       }
       
       setIsDialogOpen(false);
@@ -81,8 +124,9 @@ export function MarksEditor({ semesterId }: MarksEditorProps) {
     setFormData({
       subject_name: '',
       exam_type: '',
-      total_marks: 0,
+      total_marks: 100,
       obtained_marks: 0,
+      weightage: 100,
       semester_id: semesterId || '',
       source_json_import: false
     });
@@ -171,21 +215,83 @@ export function MarksEditor({ semesterId }: MarksEditorProps) {
 
               <div>
                 <Label htmlFor="exam_type">Exam Type</Label>
-                <Select 
-                  value={formData.exam_type} 
-                  onValueChange={(value) => setFormData({ ...formData, exam_type: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select exam type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {EXAM_TYPES.map((type) => (
-                      <SelectItem key={type} value={type}>
-                        {type}
+                <div className="space-y-2">
+                  <Select 
+                    value={formData.exam_type} 
+                    onValueChange={(value) => {
+                      if (value === '__create_new__') {
+                        setShowAddExamType(true);
+                      } else {
+                        setFormData({ ...formData, exam_type: value });
+                      }
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select or create exam type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {[...DEFAULT_EXAM_TYPES, ...customExamTypes].map((type) => (
+                        <SelectItem key={type} value={type}>
+                          {type}
+                        </SelectItem>
+                      ))}
+                      <SelectItem value="__create_new__" className="text-blue-600">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Create New Exam Type
                       </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                    </SelectContent>
+                  </Select>
+
+                  {showAddExamType && (
+                    <div className="flex gap-2 p-3 bg-muted/50 rounded-lg">
+                      <Input
+                        value={newExamType}
+                        onChange={(e) => setNewExamType(e.target.value)}
+                        placeholder="Enter custom exam type"
+                        className="flex-1"
+                      />
+                      <Button 
+                        type="button" 
+                        onClick={handleAddExamType}
+                        size="sm"
+                        disabled={!newExamType.trim()}
+                      >
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                      <Button 
+                        type="button" 
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setShowAddExamType(false)}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  )}
+
+                  {/* Custom Exam Types Management */}
+                  {customExamTypes.length > 0 && (
+                    <div className="space-y-2">
+                      <Label className="text-sm text-muted-foreground">Your Custom Exam Types:</Label>
+                      <div className="flex flex-wrap gap-2">
+                        {customExamTypes.map((type) => (
+                          <Badge key={type} variant="secondary" className="flex items-center gap-1">
+                            {type}
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="h-4 w-4 p-0 hover:bg-destructive hover:text-destructive-foreground"
+                              onClick={() => handleRemoveExamType(type)}
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
               
               <div className="grid grid-cols-2 gap-4">
@@ -224,17 +330,58 @@ export function MarksEditor({ semesterId }: MarksEditorProps) {
                 </div>
               </div>
 
+              <div>
+                <Label htmlFor="weightage">Weightage (%)</Label>
+                <div className="space-y-2">
+                  <Input
+                    id="weightage"
+                    type="number"
+                    min="0"
+                    max="100"
+                    step="0.1"
+                    value={formData.weightage}
+                    onChange={(e) => setFormData({ 
+                      ...formData, 
+                      weightage: Math.min(100, Math.max(0, parseFloat(e.target.value) || 0))
+                    })}
+                    required
+                  />
+                  <div className="text-sm text-muted-foreground">
+                    This determines how much this exam contributes to the overall subject grade (0-100%)
+                  </div>
+                </div>
+              </div>
+
               {formData.total_marks > 0 && (
-                <div className="p-3 bg-muted rounded-lg">
-                  <p className="text-sm">
-                    Score: {formData.obtained_marks} / {formData.total_marks}
-                  </p>
-                  <p className="text-sm font-medium">
-                    Percentage: {getPreviewPercentage()}%
-                  </p>
-                  <Badge className={getPercentageColor(getPreviewPercentage())}>
-                    {getPerformanceLabel(getPreviewPercentage())}
-                  </Badge>
+                <div className="p-3 bg-muted rounded-lg space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Target className="h-4 w-4" />
+                    <span className="font-medium">Performance Preview</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span className="text-muted-foreground">Raw Score:</span>
+                      <div className="font-medium">
+                        {formData.obtained_marks} / {formData.total_marks} 
+                        ({getPreviewPercentage()}%)
+                      </div>
+                      <Badge className={getPercentageColor(getPreviewPercentage())}>
+                        {getPerformanceLabel(getPreviewPercentage())}
+                      </Badge>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Weighted Score:</span>
+                      <div className="font-medium">
+                        {Math.round(getPreviewPercentage() * formData.weightage / 100 * 100) / 100}%
+                      </div>
+                      <Badge className={getPercentageColor(Math.round(getPreviewPercentage() * formData.weightage / 100 * 100) / 100)}>
+                        Weighted
+                      </Badge>
+                    </div>
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    Weighted Score = Raw Percentage × Weightage ÷ 100
+                  </div>
                 </div>
               )}
 
@@ -259,13 +406,13 @@ export function MarksEditor({ semesterId }: MarksEditorProps) {
           </div>
         ) : (
           Object.entries(
-            filteredRecords.reduce((groups: any, record: any) => {
+            filteredRecords.reduce((groups: Record<string, MarksRecord[]>, record: MarksRecord) => {
               const key = record.subject_name;
               if (!groups[key]) groups[key] = [];
               groups[key].push(record);
               return groups;
             }, {})
-          ).map(([subjectName, records]: [string, any]) => (
+          ).map(([subjectName, records]: [string, MarksRecord[]]) => (
             <div key={subjectName} className="border rounded-lg p-4">
               <h4 className="font-medium mb-3 flex items-center gap-2">
                 {subjectName}
@@ -276,7 +423,7 @@ export function MarksEditor({ semesterId }: MarksEditorProps) {
                 )}
               </h4>
               <div className="grid gap-2">
-                {records.map((record: any) => (
+                {records.map((record: MarksRecord) => (
                   <div key={record.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-md">
                     <div className="flex items-center gap-4">
                       <Badge variant="outline" className="min-w-fit">

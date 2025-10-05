@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -48,9 +48,9 @@ export function AttendanceDialog({
     } else {
       resetForm();
     }
-  }, [editingRecord, semesterId]);
+  }, [editingRecord, semesterId, resetForm]);
 
-  const resetForm = () => {
+  const resetForm = useCallback(() => {
     setFormData({
       subject_name: '',
       total_classes: 0,
@@ -58,7 +58,7 @@ export function AttendanceDialog({
       note: '',
       semester_id: semesterId || ''
     });
-  };
+  }, [semesterId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

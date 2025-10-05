@@ -13,7 +13,7 @@ interface SubjectDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   semesterId: string;
-  editingSubject?: any;
+  editingSubject?: { id: string; name: string; credits: number; grade?: string; semester_id: string } | null;
 }
 
 const GRADES = ['A', 'A-', 'B', 'B-', 'C', 'C-', 'D', 'E', 'F', 'I'];

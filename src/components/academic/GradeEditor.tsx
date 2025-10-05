@@ -34,7 +34,7 @@ export function GradeEditor({ semesterId }: GradeEditorProps) {
   const deleteSubject = useDeleteSubject();
 
   const filteredSubjects = semesterId 
-    ? subjects.filter((subject: any) => subject.semester_id === semesterId)
+    ? subjects.filter((subject: { semester_id: string }) => subject.semester_id === semesterId)
     : subjects;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -221,7 +221,7 @@ export function GradeEditor({ semesterId }: GradeEditorProps) {
             <p>No subjects added yet</p>
           </div>
         ) : (
-          filteredSubjects.map((subject: any) => (
+          filteredSubjects.map((subject: { id: string; name: string; credits: number; grade?: string; semester_id: string }) => (
             <div key={subject.id} className="flex items-center justify-between p-4 border rounded-lg hover:shadow-sm transition-shadow">
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-2">

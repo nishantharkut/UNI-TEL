@@ -48,21 +48,21 @@ export const getGradeColor = (grade?: string): string => {
   switch (grade) {
     case 'A':
     case 'A-':
-      return 'bg-green-100 text-green-800 border-green-200';
+      return 'color-accent-light';
     case 'B':
     case 'B-':
-      return 'bg-blue-100 text-blue-800 border-blue-200';
+      return 'color-primary-light';
     case 'C':
     case 'C-':
-      return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      return 'color-warning-light';
     default:
-      return 'bg-red-100 text-red-800 border-red-200';
+      return 'color-danger-light';
   }
 };
 
 export const getAttendanceStatus = (percentage: number): { status: string; color: string } => {
-  if (percentage >= 90) return { status: 'Excellent', color: 'bg-green-100 text-green-800' };
-  if (percentage >= 80) return { status: 'Good', color: 'bg-blue-100 text-blue-800' };
-  if (percentage >= 75) return { status: 'Average', color: 'bg-yellow-100 text-yellow-800' };
-  return { status: 'Poor', color: 'bg-red-100 text-red-800' };
+  if (percentage >= 90) return { status: 'Excellent', color: 'color-accent-light' };
+  if (percentage >= 80) return { status: 'Good', color: 'color-primary-light' };
+  if (percentage >= 75) return { status: 'Average', color: 'color-warning-light' };
+  return { status: 'Poor', color: 'color-danger-light' };
 };

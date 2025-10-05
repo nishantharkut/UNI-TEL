@@ -38,25 +38,25 @@
 
     --radius: 0.75rem;
 
-    /* Academic Theme Colors */
-    --academic-primary: 217 91% 60%;
-    --academic-secondary: 220 13% 18%;
-    --academic-accent: 142 76% 36%;
-    --academic-success: 142 71% 45%;
-    --academic-warning: 38 92% 50%;
-    --academic-danger: 0 84% 60%;
+    /* Academic Theme Colors - New Color Scheme */
+    --academic-primary: 197 100% 30%; /* #3C6E71 */
+    --academic-secondary: 210 100% 20%; /* #284B63 */
+    --academic-accent: 35 100% 85%; /* #F3DFC1 */
+    --academic-success: 35 100% 85%; /* #F3DFC1 */
+    --academic-warning: 25 100% 80%; /* #DDBEA8 */
+    --academic-danger: 0 0% 21%; /* #353535 */
 
-    /* Grade specific colors */
-    --grade-excellent: 142 76% 36%;
-    --grade-good: 217 91% 60%;
-    --grade-average: 38 92% 50%;
-    --grade-poor: 0 84% 60%;
+    /* Grade specific colors - New Color Scheme */
+    --grade-excellent: 35 100% 85%; /* #F3DFC1 */
+    --grade-good: 197 100% 30%; /* #3C6E71 */
+    --grade-average: 25 100% 80%; /* #DDBEA8 */
+    --grade-poor: 0 0% 21%; /* #353535 */
 
-    /* Attendance status colors */
-    --attendance-excellent: 142 76% 36%;
-    --attendance-good: 217 91% 60%;
-    --attendance-average: 38 92% 50%;
-    --attendance-poor: 0 84% 60%;
+    /* Attendance status colors - New Color Scheme */
+    --attendance-excellent: 35 100% 85%; /* #F3DFC1 */
+    --attendance-good: 197 100% 30%; /* #3C6E71 */
+    --attendance-average: 25 100% 80%; /* #DDBEA8 */
+    --attendance-poor: 0 0% 21%; /* #353535 */
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -90,10 +90,21 @@
     --space-xl: clamp(1.5rem, 5vw, 2rem);
     --space-2xl: clamp(2rem, 6vw, 3rem);
 
-    /* Mobile-first button heights */
-    --button-sm: clamp(2.25rem, 4vw, 2.5rem);
-    --button-md: clamp(2.75rem, 5vw, 3rem);
-    --button-lg: clamp(3.25rem, 6vw, 3.5rem);
+  /* Mobile-first button heights */
+  --button-sm: clamp(2.25rem, 4vw, 2.5rem);
+  --button-md: clamp(2.75rem, 5vw, 3rem);
+  --button-lg: clamp(3.25rem, 6vw, 3.5rem);
+
+  /* Enhanced shadows and effects */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  
+  /* Glass morphism effects */
+  --glass-bg: rgba(255, 255, 255, 0.8);
+  --glass-border: rgba(255, 255, 255, 0.2);
+  --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
   }
 
   .dark {
@@ -125,25 +136,25 @@
     --input: 215 27.9% 16.9%;
     --ring: 216 12.2% 83.9%;
 
-    /* Dark mode academic colors */
-    --academic-primary: 217 91% 70%;
-    --academic-secondary: 210 20% 85%;
-    --academic-accent: 142 76% 46%;
-    --academic-success: 142 71% 55%;
-    --academic-warning: 38 92% 60%;
-    --academic-danger: 0 84% 70%;
+    /* Dark mode academic colors - New Color Scheme */
+    --academic-primary: 197 100% 40%; /* Lighter #3C6E71 */
+    --academic-secondary: 210 100% 30%; /* Lighter #284B63 */
+    --academic-accent: 35 100% 90%; /* Lighter #F3DFC1 */
+    --academic-success: 35 100% 90%; /* Lighter #F3DFC1 */
+    --academic-warning: 25 100% 85%; /* Lighter #DDBEA8 */
+    --academic-danger: 0 0% 31%; /* Lighter #353535 */
 
-    /* Dark mode grade colors */
-    --grade-excellent: 142 76% 46%;
-    --grade-good: 217 91% 70%;
-    --grade-average: 38 92% 60%;
-    --grade-poor: 0 84% 70%;
+    /* Dark mode grade colors - New Color Scheme */
+    --grade-excellent: 35 100% 90%; /* Lighter #F3DFC1 */
+    --grade-good: 197 100% 40%; /* Lighter #3C6E71 */
+    --grade-average: 25 100% 85%; /* Lighter #DDBEA8 */
+    --grade-poor: 0 0% 31%; /* Lighter #353535 */
 
-    /* Dark mode attendance colors */
-    --attendance-excellent: 142 76% 46%;
-    --attendance-good: 217 91% 70%;
-    --attendance-average: 38 92% 60%;
-    --attendance-poor: 0 84% 70%;
+    /* Dark mode attendance colors - New Color Scheme */
+    --attendance-excellent: 35 100% 90%; /* Lighter #F3DFC1 */
+    --attendance-good: 197 100% 40%; /* Lighter #3C6E71 */
+    --attendance-average: 25 100% 85%; /* Lighter #DDBEA8 */
+    --attendance-poor: 0 0% 31%; /* Lighter #353535 */
 
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
@@ -334,6 +345,47 @@
     @apply bg-academic-success text-white hover:bg-academic-success/90 shadow-md hover:shadow-lg;
   }
 
+  /* New Color Scheme Utility Classes */
+  .color-primary {
+    @apply bg-academic-primary text-white;
+  }
+
+  .color-primary-light {
+    @apply bg-academic-primary/10 text-academic-primary;
+  }
+
+  .color-secondary {
+    @apply bg-academic-secondary text-white;
+  }
+
+  .color-secondary-light {
+    @apply bg-academic-secondary/10 text-academic-secondary;
+  }
+
+  .color-accent {
+    @apply bg-academic-accent text-academic-secondary;
+  }
+
+  .color-accent-light {
+    @apply bg-academic-accent/30 text-academic-secondary;
+  }
+
+  .color-warning {
+    @apply bg-academic-warning text-academic-secondary;
+  }
+
+  .color-warning-light {
+    @apply bg-academic-warning/30 text-academic-secondary;
+  }
+
+  .color-danger {
+    @apply bg-academic-danger text-white;
+  }
+
+  .color-danger-light {
+    @apply bg-academic-danger/10 text-academic-danger;
+  }
+
   /* Layout utilities */
   .academic-container {
     @apply container mx-auto;
@@ -496,5 +548,49 @@
     @apply rounded-xl border border-border bg-background transition-colors touch-target;
     font-size: var(--text-base);
     padding: var(--space-md) var(--space-lg);
+  }
+
+  /* Enhanced UI utilities */
+  .glass-effect {
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+  }
+  
+  .card-hover {
+    @apply transition-all duration-300 hover:shadow-lg hover:shadow-black/5 hover:-translate-y-1;
+  }
+  
+  .button-glow {
+    @apply relative overflow-hidden;
+  }
+  
+  .button-glow::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+  }
+  
+  .button-glow:hover::before {
+    left: 100%;
+  }
+  
+  .gradient-text {
+    @apply bg-gradient-to-r from-academic-primary to-academic-secondary bg-clip-text text-transparent;
+  }
+  
+  .floating-animation {
+    animation: float 6s ease-in-out infinite;
+  }
+  
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
   }
 }
