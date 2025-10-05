@@ -5,7 +5,6 @@ import { useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { LazyAppSidebar } from './LazyAppSidebar';
 import { LazyAppHeader } from './LazyAppHeader';
-import AuthPage from '@/components/auth/AuthPage';
 
 interface LayoutProps {
   children: ReactNode;
@@ -76,10 +75,6 @@ export default function Layout({ children }: LayoutProps) {
         </div>
       </div>
     );
-  }
-
-  if (!user) {
-    return <AuthPage />;
   }
 
   return (

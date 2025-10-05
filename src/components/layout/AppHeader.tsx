@@ -54,12 +54,17 @@ export function AppHeader({ user, onSignOut, onMobileMenuToggle, mobileMenuOpen 
             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </Button>
           
-          <div className="relative">
-            <img src="/logo.png" alt="UNI-TEL Logo" className="h-9 w-9 object-contain drop-shadow-sm" />
-            <div className="absolute inset-0 bg-gradient-to-br from-academic-primary/20 to-transparent rounded-lg blur-sm"></div>
-          </div>
-          <div>
-            <p className="text-xs text-muted-foreground font-medium">Academic Hub</p>
+          <div className="flex items-center gap-2">
+            <div className="relative">
+              <img src="/logo.png" alt="UNI-TEL Logo" className="h-8 w-8 sm:h-9 sm:w-9 object-contain drop-shadow-sm" />
+              <div className="absolute inset-0 bg-gradient-to-br from-academic-primary/20 to-transparent rounded-lg blur-sm"></div>
+            </div>
+            <div>
+              <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-academic-primary to-academic-secondary bg-clip-text text-transparent">
+                UNI-TEL
+              </span>
+              <p className="text-xs text-muted-foreground font-medium -mt-1">Academic Hub</p>
+            </div>
           </div>
         </div>
 
