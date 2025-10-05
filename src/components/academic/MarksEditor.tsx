@@ -77,19 +77,27 @@ export function MarksEditor({ semesterId }: MarksEditorProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Convert null values to appropriate defaults
+    const submitData = {
+      ...formData,
+      total_marks: formData.total_marks || 0,
+      obtained_marks: formData.obtained_marks || 0,
+      weightage: formData.weightage || 100
+    };
+    
     try {
       if (editingRecord) {
         await updateMarks.mutateAsync({
           id: editingRecord.id,
           updates: {
-            ...formData,
-            weightage: Number(formData.weightage)
+            ...submitData,
+            weightage: Number(submitData.weightage)
           }
         });
       } else {
         await createMarks.mutateAsync({
-          ...formData,
-          weightage: Number(formData.weightage)
+          ...submitData,
+          weightage: Number(submitData.weightage)
         });
       }
       
@@ -138,8 +146,10 @@ export function MarksEditor({ semesterId }: MarksEditorProps) {
   };
 
   const getPreviewPercentage = () => {
-    if (formData.total_marks === 0) return 0;
-    return Math.round((formData.obtained_marks / formData.total_marks) * 100 * 100) / 100;
+    const total = formData.total_marks || 0;
+    const obtained = formData.obtained_marks || 0;
+    if (total === 0) return 0;
+    return Math.round((obtained / total) * 100 * 100) / 100;
   };
 
   const getPercentageColor = (percentage: number): string => {
@@ -301,11 +311,22 @@ export function MarksEditor({ semesterId }: MarksEditorProps) {
                     id="total_marks"
                     type="number"
                     min="1"
-                    value={formData.total_marks}
-                    onChange={(e) => setFormData({ 
-                      ...formData, 
-                      total_marks: parseInt(e.target.value) || 0 
-                    })}
+                    value={formData.total_marks || ''}
+                    onChange={(e) => {
+                      const value = e.target.value === '' ? null : parseInt(e.target.value);
+                      setFormData({ 
+                        ...formData, 
+                        total_marks: value
+                      });
+                    }}
+                    onBlur={(e) => {
+                      if (e.target.value === '') {
+                        setFormData({ 
+                          ...formData, 
+                          total_marks: 0 
+                        });
+                      }
+                    }}
                     required
                   />
                 </div>
@@ -316,15 +337,23 @@ export function MarksEditor({ semesterId }: MarksEditorProps) {
                     id="obtained_marks"
                     type="number"
                     min="0"
-                    max={formData.total_marks}
-                    value={formData.obtained_marks}
-                    onChange={(e) => setFormData({ 
-                      ...formData, 
-                      obtained_marks: Math.min(
-                        parseInt(e.target.value) || 0, 
-                        formData.total_marks
-                      )
-                    })}
+                    max={formData.total_marks || undefined}
+                    value={formData.obtained_marks || ''}
+                    onChange={(e) => {
+                      const value = e.target.value === '' ? null : parseInt(e.target.value);
+                      setFormData({ 
+                        ...formData, 
+                        obtained_marks: value
+                      });
+                    }}
+                    onBlur={(e) => {
+                      if (e.target.value === '') {
+                        setFormData({ 
+                          ...formData, 
+                          obtained_marks: 0 
+                        });
+                      }
+                    }}
                     required
                   />
                 </div>
@@ -339,11 +368,22 @@ export function MarksEditor({ semesterId }: MarksEditorProps) {
                     min="0"
                     max="100"
                     step="0.1"
-                    value={formData.weightage}
-                    onChange={(e) => setFormData({ 
-                      ...formData, 
-                      weightage: Math.min(100, Math.max(0, parseFloat(e.target.value) || 0))
-                    })}
+                    value={formData.weightage || ''}
+                    onChange={(e) => {
+                      const value = e.target.value === '' ? null : parseFloat(e.target.value);
+                      setFormData({ 
+                        ...formData, 
+                        weightage: value
+                      });
+                    }}
+                    onBlur={(e) => {
+                      if (e.target.value === '') {
+                        setFormData({ 
+                          ...formData, 
+                          weightage: 100 
+                        });
+                      }
+                    }}
                     required
                   />
                   <div className="text-sm text-muted-foreground">

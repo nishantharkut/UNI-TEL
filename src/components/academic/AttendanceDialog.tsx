@@ -63,15 +63,22 @@ export function AttendanceDialog({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Convert null values to appropriate defaults
+    const submitData = {
+      ...formData,
+      total_classes: formData.total_classes || 0,
+      attended_classes: formData.attended_classes || 0
+    };
+    
     try {
       if (editingRecord) {
         await updateAttendance.mutateAsync({
           id: editingRecord.id,
-          updates: formData
+          updates: submitData
         });
       } else {
         await createAttendance.mutateAsync({
-          ...formData,
+          ...submitData,
           source_json_import: false
         });
       }
@@ -190,15 +197,23 @@ export function AttendanceDialog({
                 id="attended_classes"
                 type="number"
                 min="0"
-                max={formData.total_classes}
-                value={formData.attended_classes}
-                onChange={(e) => setFormData({ 
-                  ...formData, 
-                  attended_classes: Math.min(
-                    parseInt(e.target.value) || 0,
-                    formData.total_classes
-                  )
-                })}
+                max={formData.total_classes || undefined}
+                value={formData.attended_classes || ''}
+                onChange={(e) => {
+                  const value = e.target.value === '' ? null : parseInt(e.target.value);
+                  setFormData({ 
+                    ...formData, 
+                    attended_classes: value
+                  });
+                }}
+                onBlur={(e) => {
+                  if (e.target.value === '') {
+                    setFormData({ 
+                      ...formData, 
+                      attended_classes: 0 
+                    });
+                  }
+                }}
                 required
               />
             </div>
@@ -208,14 +223,22 @@ export function AttendanceDialog({
                 id="total_classes"
                 type="number"
                 min="1"
-                value={formData.total_classes}
+                value={formData.total_classes || ''}
                 onChange={(e) => {
-                  const total = parseInt(e.target.value) || 0;
+                  const value = e.target.value === '' ? null : parseInt(e.target.value);
                   setFormData({ 
                     ...formData, 
-                    total_classes: total,
-                    attended_classes: Math.min(formData.attended_classes, total)
+                    total_classes: value,
+                    attended_classes: value ? Math.min(formData.attended_classes || 0, value) : formData.attended_classes
                   });
+                }}
+                onBlur={(e) => {
+                  if (e.target.value === '') {
+                    setFormData({ 
+                      ...formData, 
+                      total_classes: 0 
+                    });
+                  }
                 }}
                 required
               />

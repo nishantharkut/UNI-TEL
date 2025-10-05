@@ -40,14 +40,21 @@ export function AttendanceEditor({ semesterId }: AttendanceEditorProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Convert null values to appropriate defaults
+    const submitData = {
+      ...formData,
+      total_classes: formData.total_classes || 0,
+      attended_classes: formData.attended_classes || 0
+    };
+    
     try {
       if (editingRecord) {
         await updateAttendance.mutateAsync({
           id: editingRecord.id,
-          updates: formData
+          updates: submitData
         });
       } else {
-        await createAttendance.mutateAsync(formData);
+        await createAttendance.mutateAsync(submitData);
       }
       
       setIsDialogOpen(false);
@@ -216,15 +223,23 @@ export function AttendanceEditor({ semesterId }: AttendanceEditorProps) {
                     id="attended_classes"
                     type="number"
                     min="0"
-                    max={formData.total_classes}
-                    value={formData.attended_classes}
-                    onChange={(e) => setFormData({ 
-                      ...formData, 
-                      attended_classes: Math.min(
-                        parseInt(e.target.value) || 0, 
-                        formData.total_classes
-                      )
-                    })}
+                    max={formData.total_classes || undefined}
+                    value={formData.attended_classes || ''}
+                    onChange={(e) => {
+                      const value = e.target.value === '' ? null : parseInt(e.target.value);
+                      setFormData({ 
+                        ...formData, 
+                        attended_classes: value
+                      });
+                    }}
+                    onBlur={(e) => {
+                      if (e.target.value === '') {
+                        setFormData({ 
+                          ...formData, 
+                          attended_classes: 0 
+                        });
+                      }
+                    }}
                     className="text-center"
                   />
                   <Button 

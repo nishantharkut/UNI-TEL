@@ -84,12 +84,17 @@ export function MarksDialog({
       return;
     }
 
-    if (formData.total_marks <= 0) {
+    // Convert null values to appropriate defaults
+    const totalMarks = formData.total_marks || 0;
+    const obtainedMarks = formData.obtained_marks || 0;
+    const weightage = formData.weightage || 100;
+
+    if (totalMarks <= 0) {
       console.error('Total marks must be greater than 0');
       return;
     }
 
-    if (formData.obtained_marks < 0 || formData.obtained_marks > formData.total_marks) {
+    if (obtainedMarks < 0 || obtainedMarks > totalMarks) {
       console.error('Obtained marks must be between 0 and total marks');
       return;
     }
@@ -98,9 +103,9 @@ export function MarksDialog({
       const payload = {
         subject_name: formData.subject_name.trim(),
         exam_type: formData.exam_type,
-        total_marks: Number(formData.total_marks),
-        obtained_marks: Number(formData.obtained_marks),
-        weightage: Number(formData.weightage),
+        total_marks: Number(totalMarks),
+        obtained_marks: Number(obtainedMarks),
+        weightage: Number(weightage),
         semester_id: formData.semester_id,
         source_json_import: false
       };
@@ -212,12 +217,20 @@ export function MarksDialog({
                 step="1"
                 value={formData.total_marks || ''}
                 onChange={(e) => {
-                  const value = parseInt(e.target.value) || 0;
+                  const value = e.target.value === '' ? null : parseInt(e.target.value);
                   setFormData({ 
                     ...formData, 
                     total_marks: value,
-                    obtained_marks: Math.min(formData.obtained_marks, value)
+                    obtained_marks: value ? Math.min(formData.obtained_marks || 0, value) : formData.obtained_marks
                   });
+                }}
+                onBlur={(e) => {
+                  if (e.target.value === '') {
+                    setFormData({ 
+                      ...formData, 
+                      total_marks: 0 
+                    });
+                  }
                 }}
                 required
               />
@@ -228,15 +241,23 @@ export function MarksDialog({
                 id="obtained_marks"
                 type="number"
                 min="0"
-                max={formData.total_marks}
+                max={formData.total_marks || undefined}
                 step="1"
                 value={formData.obtained_marks || ''}
                 onChange={(e) => {
-                  const value = parseInt(e.target.value) || 0;
+                  const value = e.target.value === '' ? null : parseInt(e.target.value);
                   setFormData({ 
                     ...formData, 
-                    obtained_marks: Math.min(value, formData.total_marks)
+                    obtained_marks: value
                   });
+                }}
+                onBlur={(e) => {
+                  if (e.target.value === '') {
+                    setFormData({ 
+                      ...formData, 
+                      obtained_marks: 0 
+                    });
+                  }
                 }}
                 required
               />
@@ -253,10 +274,21 @@ export function MarksDialog({
                 max="100"
                 step="0.1"
                 value={formData.weightage || ''}
-                onChange={(e) => setFormData({ 
-                  ...formData, 
-                  weightage: Math.min(100, Math.max(0, parseFloat(e.target.value) || 0))
-                })}
+                onChange={(e) => {
+                  const value = e.target.value === '' ? null : parseFloat(e.target.value);
+                  setFormData({ 
+                    ...formData, 
+                    weightage: value
+                  });
+                }}
+                onBlur={(e) => {
+                  if (e.target.value === '') {
+                    setFormData({ 
+                      ...formData, 
+                      weightage: 100 
+                    });
+                  }
+                }}
                 required
               />
               <div className="text-sm text-muted-foreground">
