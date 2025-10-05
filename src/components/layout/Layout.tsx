@@ -1,6 +1,7 @@
 
-import { ReactNode, useState, useEffect } from 'react';
+import { ReactNode, useState, useEffect, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
+import { useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { LazyAppSidebar } from './LazyAppSidebar';
 import { LazyAppHeader } from './LazyAppHeader';
@@ -16,6 +17,7 @@ export default function Layout({ children }: LayoutProps) {
   const [loading, setLoading] = useState(true);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
     // Set up auth state listener
@@ -41,13 +43,23 @@ export default function Layout({ children }: LayoutProps) {
     await supabase.auth.signOut();
   };
 
-  const handleMobileMenuToggle = () => {
+  const handleMobileMenuToggle = useCallback(() => {
     setMobileMenuOpen(!mobileMenuOpen);
-  };
+  }, [mobileMenuOpen]);
 
-  const handleMobileMenuClose = () => {
+  const handleMobileMenuClose = useCallback(() => {
     setMobileMenuOpen(false);
-  };
+  }, []);
+
+  // Auto-collapse mobile sidebar when navigating
+  useEffect(() => {
+    // Check if we're on mobile (screen width < 1024px)
+    const isMobile = window.innerWidth < 1024;
+    if (isMobile) {
+      // Close mobile sidebar when navigating
+      setMobileMenuOpen(false);
+    }
+  }, [location.pathname]); // Only depend on location.pathname
 
   if (loading) {
     return (
@@ -82,14 +94,14 @@ export default function Layout({ children }: LayoutProps) {
       
       {/* Desktop Sidebar */}
       <div className="hidden lg:block">
-        <LazyAppSidebar onToggle={() => setSidebarCollapsed(!sidebarCollapsed)} />
+        <LazyAppSidebar onToggle={() => setSidebarCollapsed(!sidebarCollapsed)} mobileMenuOpen={false} />
       </div>
       
       {/* Mobile Sidebar */}
       <div className={`lg:hidden fixed inset-y-0 left-0 z-50 w-80 transform transition-transform duration-300 ${
         mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
-        <LazyAppSidebar onToggle={handleMobileMenuClose} />
+        <LazyAppSidebar onToggle={handleMobileMenuClose} mobileMenuOpen={mobileMenuOpen} />
       </div>
       
       {/* Main Content Area */}

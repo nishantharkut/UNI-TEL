@@ -77,10 +77,10 @@ export default function Attendance() {
                     <Calendar className="w-6 h-6 sm:w-8 sm:h-8" />
                   </div>
                   <div>
-                    <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white">
+                    <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-gray-900">
                       Attendance Tracker
                     </h1>
-                    <p className="text-white/80 text-sm sm:text-base">
+                    <p className="text-gray-700 text-sm sm:text-base">
                       Mark attendance and track your progress
                     </p>
                   </div>
@@ -93,8 +93,8 @@ export default function Attendance() {
                         <TrendingUp className="w-5 h-5" />
                       </div>
                       <div>
-                        <p className="text-sm text-white/80">Average Attendance</p>
-                        <p className="text-2xl sm:text-3xl font-bold text-white">{averageAttendance}%</p>
+                        <p className="text-sm text-gray-700">Average Attendance</p>
+                        <p className="text-2xl sm:text-3xl font-bold text-gray-900">{averageAttendance}%</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">

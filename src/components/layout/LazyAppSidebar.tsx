@@ -6,12 +6,13 @@ const AppSidebar = lazy(() => import('./AppSidebar').then(module => ({ default: 
 
 interface LazyAppSidebarProps {
   onToggle?: () => void;
+  mobileMenuOpen?: boolean;
 }
 
-export function LazyAppSidebar({ onToggle }: LazyAppSidebarProps) {
+export function LazyAppSidebar({ onToggle, mobileMenuOpen }: LazyAppSidebarProps) {
   return (
     <Suspense fallback={<ComponentLoader message="Loading sidebar..." />}>
-      <AppSidebar onToggle={onToggle} />
+      <AppSidebar onToggle={onToggle} mobileMenuOpen={mobileMenuOpen} />
     </Suspense>
   );
 }

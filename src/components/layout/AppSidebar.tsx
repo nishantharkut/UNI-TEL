@@ -66,23 +66,16 @@ const settingsItem = [
 
 interface AppSidebarProps {
   onToggle?: () => void;
+  mobileMenuOpen?: boolean;
 }
 
-export function AppSidebar({ onToggle }: AppSidebarProps) {
+export function AppSidebar({ onToggle, mobileMenuOpen }: AppSidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const location = useLocation()
   const currentPath = location.pathname
   const { profile, loading: profileLoading } = useUserProfile()
 
-  // Auto-collapse sidebar on mobile when navigating
-  useEffect(() => {
-    // Check if we're on mobile (screen width < 1024px)
-    const isMobile = window.innerWidth < 1024;
-    if (isMobile) {
-      // Close mobile sidebar when navigating
-      onToggle?.();
-    }
-  }, [currentPath, onToggle]);
+  // Note: Auto-collapse is now handled in the Layout component
 
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed)
@@ -177,16 +170,26 @@ export function AppSidebar({ onToggle }: AppSidebarProps) {
               key={item.title}
               to={item.url}
               end={item.url === "/"}
-              className="relative ml-3 h-[40px] flex items-center cursor-pointer z-10 transition-colors duration-200 text-white"
+              className={({ isActive }) => 
+                `relative ml-3 h-[40px] flex items-center cursor-pointer z-10 transition-all duration-200 rounded-lg mx-2 my-1 group ${
+                  isActive 
+                    ? 'bg-white/20 text-white shadow-lg' 
+                    : 'text-white/80 hover:text-white hover:bg-white/10 hover:shadow-md'
+                }`
+              }
             >
               <item.icon 
-                className="text-center transition-all duration-200 text-white"
+                className={`text-center transition-all duration-200 ${
+                  isActive ? 'text-white' : 'text-white/80'
+                }`}
                 style={{ 
                   minWidth: isCollapsed ? 'calc(100% - 12px)' : '2.5rem'
                 }} 
               />
               <span 
-                className="text-sm transition-opacity duration-1000 text-white"
+                className={`text-sm transition-opacity duration-1000 ${
+                  isActive ? 'text-white font-medium' : 'text-white/80'
+                }`}
                 style={{ 
                   opacity: isCollapsed ? 0 : 1
                 }}
@@ -217,16 +220,26 @@ export function AppSidebar({ onToggle }: AppSidebarProps) {
               key={item.title}
               to={item.url}
               end={item.url === "/"}
-              className="relative ml-3 h-[40px] flex items-center cursor-pointer z-10 transition-colors duration-200 text-white"
+              className={({ isActive }) => 
+                `relative ml-3 h-[40px] flex items-center cursor-pointer z-10 transition-all duration-200 rounded-lg mx-2 my-1 group ${
+                  isActive 
+                    ? 'bg-white/20 text-white shadow-lg' 
+                    : 'text-white/80 hover:text-white hover:bg-white/10 hover:shadow-md'
+                }`
+              }
             >
               <item.icon 
-                className="text-center transition-all duration-200 text-white"
+                className={`text-center transition-all duration-200 ${
+                  isActive ? 'text-white' : 'text-white/80'
+                }`}
                 style={{ 
                   minWidth: isCollapsed ? 'calc(100% - 12px)' : '2.5rem'
                 }} 
               />
               <span 
-                className="text-sm transition-opacity duration-1000 text-white"
+                className={`text-sm transition-opacity duration-1000 ${
+                  isActive ? 'text-white font-medium' : 'text-white/80'
+                }`}
                 style={{ 
                   opacity: isCollapsed ? 0 : 1
                 }}
@@ -257,16 +270,26 @@ export function AppSidebar({ onToggle }: AppSidebarProps) {
               key={item.title}
               to={item.url}
               end={item.url === "/"}
-              className="relative ml-3 h-[40px] flex items-center cursor-pointer z-10 transition-colors duration-200 text-white"
+              className={({ isActive }) => 
+                `relative ml-3 h-[40px] flex items-center cursor-pointer z-10 transition-all duration-200 rounded-lg mx-2 my-1 group ${
+                  isActive 
+                    ? 'bg-white/20 text-white shadow-lg' 
+                    : 'text-white/80 hover:text-white hover:bg-white/10 hover:shadow-md'
+                }`
+              }
             >
               <item.icon 
-                className="text-center transition-all duration-200 text-white"
+                className={`text-center transition-all duration-200 ${
+                  isActive ? 'text-white' : 'text-white/80'
+                }`}
                 style={{ 
                   minWidth: isCollapsed ? 'calc(100% - 12px)' : '2.5rem'
                 }} 
               />
               <span 
-                className="text-sm transition-opacity duration-1000 text-white"
+                className={`text-sm transition-opacity duration-1000 ${
+                  isActive ? 'text-white font-medium' : 'text-white/80'
+                }`}
                 style={{ 
                   opacity: isCollapsed ? 0 : 1
                 }}
@@ -289,16 +312,26 @@ export function AppSidebar({ onToggle }: AppSidebarProps) {
               key={item.title}
               to={item.url}
               end={item.url === "/"}
-              className="relative ml-3 h-[40px] flex items-center cursor-pointer z-10 transition-colors duration-200 text-white"
+              className={({ isActive }) => 
+                `relative ml-3 h-[40px] flex items-center cursor-pointer z-10 transition-all duration-200 rounded-lg mx-2 my-1 group ${
+                  isActive 
+                    ? 'bg-white/20 text-white shadow-lg' 
+                    : 'text-white/80 hover:text-white hover:bg-white/10 hover:shadow-md'
+                }`
+              }
             >
               <item.icon 
-                className="text-center transition-all duration-200 text-white"
+                className={`text-center transition-all duration-200 ${
+                  isActive ? 'text-white' : 'text-white/80'
+                }`}
                 style={{ 
                   minWidth: isCollapsed ? 'calc(100% - 12px)' : '2.5rem'
                 }} 
               />
               <span 
-                className="text-sm transition-opacity duration-1000 text-white"
+                className={`text-sm transition-opacity duration-1000 ${
+                  isActive ? 'text-white font-medium' : 'text-white/80'
+                }`}
                 style={{ 
                   opacity: isCollapsed ? 0 : 1
                 }}
