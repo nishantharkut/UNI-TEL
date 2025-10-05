@@ -19,7 +19,7 @@ import {
   BarChart3
 } from 'lucide-react';
 import { useMarks, useSemesters } from '@/hooks/useAcademic';
-import { MarksEditor } from '@/components/academic/MarksEditor';
+import { LazyMarksEditor } from '@/components/academic/LazyMarksEditor';
 
 export default function Marks() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -260,7 +260,7 @@ export default function Marks() {
         </Card>
 
         {/* Marks Editor with Custom Exam Types & Weightages */}
-        <MarksEditor />
+        <LazyMarksEditor />
       </div>
     </div>
   );

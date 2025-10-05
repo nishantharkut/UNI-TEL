@@ -19,7 +19,7 @@ import {
   BookOpen
 } from 'lucide-react';
 import { useAttendance, useSemesters } from '@/hooks/useAcademic';
-import { ActiveAttendanceCard } from '@/components/academic/ActiveAttendanceCard';
+import { LazyActiveAttendanceCard } from '@/components/academic/LazyActiveAttendanceCard';
 
 export default function Attendance() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -242,7 +242,7 @@ export default function Attendance() {
         </Card>
 
         {/* Active Attendance Tracking */}
-        <ActiveAttendanceCard records={filteredAttendance} />
+        <LazyActiveAttendanceCard records={filteredAttendance} />
       </div>
     </div>
   );

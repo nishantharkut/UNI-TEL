@@ -8,8 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { useSemesters, useCreateSemester } from '@/hooks/useAcademic';
 import { useAcademicSummary } from '@/hooks/useAcademicSummary';
-import { SemesterCard } from '@/components/academic/SemesterCard';
-import { ImportExport } from '@/components/academic/ImportExport';
+import { LazySemesterCard } from '@/components/academic/LazySemesterCard';
+import { LazyImportExport } from '@/components/academic/LazyImportExport';
 import { 
   Plus, 
   BookOpen, 
@@ -110,7 +110,7 @@ export default function Semesters() {
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mb-8">
           <div className="flex-1">
-            <ImportExport />
+            <LazyImportExport />
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
@@ -184,7 +184,7 @@ export default function Semesters() {
             {semesters
               .sort((a, b) => b.number - a.number) // Most recent first
               .map((semester) => (
-                <SemesterCard key={semester.id} semester={semester} />
+                <LazySemesterCard key={semester.id} semester={semester} />
               ))}
           </div>
         ) : (

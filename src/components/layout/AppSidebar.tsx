@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { 
   BarChart3, 
   Calendar, 
@@ -74,6 +74,16 @@ export function AppSidebar({ onToggle }: AppSidebarProps) {
   const currentPath = location.pathname
   const { profile, loading: profileLoading } = useUserProfile()
 
+  // Auto-collapse sidebar on mobile when navigating
+  useEffect(() => {
+    // Check if we're on mobile (screen width < 1024px)
+    const isMobile = window.innerWidth < 1024;
+    if (isMobile) {
+      // Close mobile sidebar when navigating
+      onToggle?.();
+    }
+  }, [currentPath, onToggle]);
+
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed)
     onToggle?.()
@@ -87,7 +97,11 @@ export function AppSidebar({ onToggle }: AppSidebarProps) {
 
   return (
     <div 
-      className="fixed left-4 top-4 h-[calc(100vh-2rem)] rounded-2xl flex flex-col font-sans overflow-hidden select-none transition-all duration-200 ease-out sidebar-container"
+      className={`
+        fixed top-0 h-full flex flex-col font-sans overflow-hidden select-none transition-all duration-200 ease-out sidebar-container
+        lg:left-4 lg:top-4 lg:h-[calc(100vh-2rem)] lg:rounded-2xl
+        w-80 lg:w-auto
+      `}
       style={{ 
         width: isCollapsed ? '80px' : '256px',
         backgroundColor: 'hsl(var(--academic-secondary))',
@@ -123,7 +137,7 @@ export function AppSidebar({ onToggle }: AppSidebarProps) {
         
         <button
           onClick={toggleSidebar}
-          className="absolute right-0 w-10 h-full flex items-center justify-center cursor-pointer hover:bg-white/10 rounded-lg transition-all duration-200"
+          className="hidden lg:flex absolute right-0 w-10 h-full items-center justify-center cursor-pointer hover:bg-white/10 rounded-lg transition-all duration-200"
           style={{ left: isCollapsed ? 'calc(50% - 6px)' : 'auto', transform: isCollapsed ? 'translate(-50%)' : 'none' }}
         >
           {isCollapsed ? (

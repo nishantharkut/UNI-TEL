@@ -76,7 +76,7 @@ export function NotificationsDropdown() {
         </Button>
       </DropdownMenuTrigger>
       
-      <DropdownMenuContent align="end" className="w-80">
+      <DropdownMenuContent align="end" className="w-80 max-w-[calc(100vw-2rem)] sm:max-w-none">
         <DropdownMenuLabel className="flex items-center justify-between">
           <div>
             <h4 className="font-semibold">Notifications</h4>
@@ -98,7 +98,7 @@ export function NotificationsDropdown() {
         
         <Separator />
         
-        <ScrollArea className="h-96">
+        <ScrollArea className="h-64 sm:h-96">
           {loading ? (
             <div className="p-4 text-center text-sm text-muted-foreground">
               Loading notifications...

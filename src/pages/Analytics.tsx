@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { useSemesters, useSubjects, useAttendance, useMarks, useAcademicSummary } from '@/hooks/useAcademic';
 import { computeCGPA, getGradeColor, getAttendanceStatus } from '@/utils/gradeCalculations';
+import { LazyAnalyticsPanel } from '@/components/academic/LazyAnalyticsPanel';
 
 export default function Analytics() {
   const { data: semesters = [] } = useSemesters();

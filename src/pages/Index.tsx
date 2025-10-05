@@ -25,9 +25,7 @@ import {
   TrendingUp as TrendingUpIcon
 } from 'lucide-react';
 import { useAcademicSummary } from '@/hooks/useAcademicSummary';
-import { DashboardStats } from '@/components/academic/DashboardStats';
-import { QuickActions } from '@/components/academic/QuickActions';
-import { PerformanceTrends } from '@/components/academic/PerformanceTrends';
+import { LazyPerformanceTrends } from '@/components/academic/LazyPerformanceTrends';
 import { Link } from 'react-router-dom';
 
 export default function Index() {
@@ -383,7 +381,7 @@ export default function Index() {
               </CardHeader>
               <CardContent>
                 {summary?.total_semesters > 0 ? (
-                  <PerformanceTrends />
+                  <LazyPerformanceTrends />
                 ) : (
                   <div className="text-center py-12 lg:py-16">
                     <div className="relative mb-8">

@@ -1,5 +1,7 @@
 
-import { Bell, Search, User, LogOut } from "lucide-react"
+import { useState } from "react"
+import { Bell, Search, User, LogOut, Menu, X } from "lucide-react"
+import { MobileSearchModal } from "@/components/ui/MobileSearchModal"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -20,9 +22,13 @@ interface AppHeaderProps {
     avatar_url?: string
   }
   onSignOut?: () => void
+  onMobileMenuToggle?: () => void
+  mobileMenuOpen?: boolean
 }
 
-export function AppHeader({ user, onSignOut }: AppHeaderProps) {
+export function AppHeader({ user, onSignOut, onMobileMenuToggle, mobileMenuOpen }: AppHeaderProps) {
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+
   const getInitials = (name?: string) => {
     if (!name) return "U"
     return name
@@ -36,8 +42,18 @@ export function AppHeader({ user, onSignOut }: AppHeaderProps) {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/30 bg-background/98 backdrop-blur-xl supports-[backdrop-filter]:bg-background/95 shadow-lg shadow-black/5">
       <div className="flex h-16 items-center justify-between px-4 lg:px-6">
-        {/* Left side - Branding only */}
+        {/* Left side - Mobile menu + Branding */}
         <div className="flex items-center gap-3">
+          {/* Mobile Menu Button */}
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="lg:hidden h-11 w-11 hover:bg-muted/60 transition-all duration-200 rounded-xl"
+            onClick={onMobileMenuToggle}
+          >
+            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </Button>
+          
           <div className="relative">
             <img src="/logo.png" alt="UNI-TEL Logo" className="h-9 w-9 object-contain drop-shadow-sm" />
             <div className="absolute inset-0 bg-gradient-to-br from-academic-primary/20 to-transparent rounded-lg blur-sm"></div>
@@ -61,7 +77,12 @@ export function AppHeader({ user, onSignOut }: AppHeaderProps) {
         {/* Right side - Actions */}
         <div className="flex items-center gap-3">
           {/* Mobile search button */}
-          <Button variant="ghost" size="icon" className="md:hidden h-11 w-11 hover:bg-muted/60 transition-all duration-200 rounded-xl">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="md:hidden h-11 w-11 hover:bg-muted/60 transition-all duration-200 rounded-xl"
+            onClick={() => setMobileSearchOpen(true)}
+          >
             <Search className="w-5 h-5" />
           </Button>
 
@@ -120,6 +141,12 @@ export function AppHeader({ user, onSignOut }: AppHeaderProps) {
           </DropdownMenu>
         </div>
       </div>
+      
+      {/* Mobile Search Modal */}
+      <MobileSearchModal 
+        isOpen={mobileSearchOpen} 
+        onClose={() => setMobileSearchOpen(false)} 
+      />
     </header>
   )
 }
