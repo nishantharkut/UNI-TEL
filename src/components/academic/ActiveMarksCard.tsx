@@ -265,35 +265,38 @@ export function ActiveMarksCard({ records }: ActiveMarksCardProps) {
                     {subjectRecords.map((record) => {
                       const percentage = (record.obtained_marks / record.total_marks) * 100;
                       return (
-                        <div key={record.id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 p-3 border rounded-lg">
-                          <div className="flex-1">
-                            <div className="flex flex-wrap items-center gap-2 mb-1">
-                              <span className="font-medium">{record.exam_type}</span>
-                              <Badge variant="outline">{getSemesterName(record.semester_id)}</Badge>
+                        <div key={record.id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 p-3 border rounded-lg">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex flex-wrap items-center gap-2 mb-2">
+                              <span className="font-medium text-sm sm:text-base">{record.exam_type}</span>
+                              <Badge variant="outline" className="text-xs">{getSemesterName(record.semester_id)}</Badge>
                             </div>
                             <div className="text-sm text-muted-foreground">
                               {record.obtained_marks}/{record.total_marks} marks ({percentage.toFixed(1)}%)
                             </div>
                           </div>
-                          <div className="flex items-center gap-2">
+                          <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
                             <Badge className={getPerformanceColor(percentage)}>
                               {getPerformanceLabel(percentage)}
                             </Badge>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setEditingRecord(record)}
-                            >
-                              <Edit className="w-4 h-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleDelete(record.id)}
-                              className="text-red-600 hover:text-red-700"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
+                            <div className="flex items-center gap-1">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setEditingRecord(record)}
+                                className="h-8 w-8 p-0"
+                              >
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDelete(record.id)}
+                                className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
                           </div>
                         </div>
                       );

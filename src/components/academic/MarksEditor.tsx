@@ -464,22 +464,26 @@ export function MarksEditor({ semesterId }: MarksEditorProps) {
               </h4>
               <div className="grid gap-2">
                 {records.map((record: MarksRecord) => (
-                  <div key={record.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-md">
-                    <div className="flex items-center gap-4">
-                      <Badge variant="outline" className="min-w-fit">
-                        {record.exam_type}
-                      </Badge>
-                      <span className="text-sm">
-                        {record.obtained_marks} / {record.total_marks}
-                      </span>
-                      <span className="text-sm font-medium">
-                        {record.percentage?.toFixed(1)}%
-                      </span>
-                      <Badge className={getPercentageColor(record.percentage || 0)}>
-                        {getPerformanceLabel(record.percentage || 0)}
-                      </Badge>
+                  <div key={record.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-muted/30 rounded-md gap-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Badge variant="outline" className="min-w-fit">
+                          {record.exam_type}
+                        </Badge>
+                        <span className="text-sm font-medium">
+                          {record.obtained_marks} / {record.total_marks}
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-sm font-medium text-academic-primary">
+                          {record.percentage?.toFixed(1)}%
+                        </span>
+                        <Badge className={getPercentageColor(record.percentage || 0)}>
+                          {getPerformanceLabel(record.percentage || 0)}
+                        </Badge>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 self-end sm:self-center">
                       <Button variant="ghost" size="sm" onClick={() => handleEdit(record)}>
                         <Edit className="w-4 h-4" />
                       </Button>

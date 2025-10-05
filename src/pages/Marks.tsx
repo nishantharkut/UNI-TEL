@@ -122,16 +122,16 @@ export default function Marks() {
         </div>
 
         {/* Enhanced Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {/* Total Records Card */}
           <Card className="group relative overflow-hidden border-0 color-primary-light hover:shadow-xl transition-all duration-300 hover:scale-[1.02]">
             <div className="absolute inset-0 bg-gradient-to-br from-academic-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             <CardContent className="relative p-6">
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
                 <div className="p-3 rounded-2xl color-primary-light group-hover:bg-academic-primary/20 transition-colors duration-300">
                   <FileText className="h-6 w-6 text-academic-primary" />
                 </div>
-                <div className="text-right">
+                <div className="text-left sm:text-right">
                   <div className="text-3xl sm:text-4xl font-bold text-academic-primary">
                     {totalRecords}
                   </div>
@@ -157,11 +157,11 @@ export default function Marks() {
           <Card className="group relative overflow-hidden border-0 color-secondary-light hover:shadow-xl transition-all duration-300 hover:scale-[1.02]">
             <div className="absolute inset-0 bg-gradient-to-br from-academic-secondary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             <CardContent className="relative p-6">
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
                 <div className="p-3 rounded-2xl color-secondary-light group-hover:bg-academic-secondary/20 transition-colors duration-300">
                   <Target className="h-6 w-6 text-academic-secondary" />
                 </div>
-                <div className="text-right">
+                <div className="text-left sm:text-right">
                   <div className="text-3xl sm:text-4xl font-bold text-academic-secondary">
                     {averagePercentage}%
                   </div>
@@ -187,11 +187,11 @@ export default function Marks() {
           <Card className="group relative overflow-hidden border-0 color-accent-light hover:shadow-xl transition-all duration-300 hover:scale-[1.02]">
             <div className="absolute inset-0 bg-gradient-to-br from-academic-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             <CardContent className="relative p-6">
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
                 <div className="p-3 rounded-2xl color-accent-light group-hover:bg-academic-accent/20 transition-colors duration-300">
                   <Star className="h-6 w-6 text-academic-secondary" />
                 </div>
-                <div className="text-right">
+                <div className="text-left sm:text-right">
                   <div className="text-3xl sm:text-4xl font-bold text-academic-secondary">
                     {excellentMarks}
                   </div>
