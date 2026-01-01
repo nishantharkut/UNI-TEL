@@ -481,7 +481,9 @@ export default function Analytics() {
                     <div className="text-right">
                       <p className="font-bold text-lg">{mark.obtained_marks}/{mark.total_marks}</p>
                       <p className="text-sm text-muted-foreground">
-                        {Math.round((mark.obtained_marks / mark.total_marks) * 100)}%
+                        {mark.total_marks > 0 
+                          ? `${Math.round((mark.obtained_marks / mark.total_marks) * 100)}%`
+                          : 'N/A'}
                       </p>
                     </div>
                   </div>

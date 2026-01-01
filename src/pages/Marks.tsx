@@ -39,12 +39,14 @@ export default function Marks() {
 
   // Calculate stats
   const totalRecords = marks.length;
-  const averagePercentage = marks.length > 0 
-    ? Math.round(marks.reduce((sum, record) => 
+  // Filter out records with zero total_marks to avoid division by zero
+  const validMarks = marks.filter(record => record.total_marks > 0);
+  const averagePercentage = validMarks.length > 0 
+    ? Math.round(validMarks.reduce((sum, record) => 
         sum + (record.obtained_marks / record.total_marks * 100), 0
-      ) / marks.length)
+      ) / validMarks.length)
     : 0;
-  const excellentMarks = marks.filter(record => 
+  const excellentMarks = validMarks.filter(record => 
     (record.obtained_marks / record.total_marks * 100) >= 90
   ).length;
 

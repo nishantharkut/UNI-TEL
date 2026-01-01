@@ -277,6 +277,7 @@ export function ActiveMarksCard({ records }: ActiveMarksCardProps) {
           Object.entries(groupedRecords).map(([subjectName, subjectRecords]) => {
             // Calculate weighted average
             const totalWeightedScore = subjectRecords.reduce((sum, record) => {
+              if (record.total_marks === 0) return sum; // Skip records with zero total marks
               const percentage = (record.obtained_marks / record.total_marks) * 100;
               const weightage = 100 / subjectRecords.length; // Equal weightage if not specified
               return sum + (percentage * weightage / 100);
@@ -305,7 +306,9 @@ export function ActiveMarksCard({ records }: ActiveMarksCardProps) {
                 <CardContent>
                   <div className="space-y-3">
                     {subjectRecords.map((record) => {
-                      const percentage = (record.obtained_marks / record.total_marks) * 100;
+                      const percentage = record.total_marks > 0 
+                        ? (record.obtained_marks / record.total_marks) * 100 
+                        : 0;
                       return (
                         <div key={record.id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 p-3 border rounded-lg">
                           <div className="flex-1 min-w-0">
