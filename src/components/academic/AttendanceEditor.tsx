@@ -412,10 +412,23 @@ export function AttendanceEditor({ semesterId }: AttendanceEditorProps) {
                   </Button>
                   <Input
                     id="total_classes"
-                    type="number"
-                    min="0"
-                    value={formData.total_classes}
-                    onChange={(e) => handleFieldChange('total_classes', parseInt(e.target.value) || 0)}
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    value={formData.total_classes === 0 ? '' : String(formData.total_classes)}
+                    onChange={(e) => {
+                      const value = e.target.value.trim();
+                      if (value === '') {
+                        handleFieldChange('total_classes', 0);
+                        return;
+                      }
+                      if (/^\d+$/.test(value)) {
+                        const numValue = parseInt(value, 10);
+                        if (!isNaN(numValue)) {
+                          handleFieldChange('total_classes', numValue);
+                        }
+                      }
+                    }}
                     onBlur={() => handleFieldBlur('total_classes')}
                     className={cn(
                       "h-11 text-center",
@@ -456,13 +469,24 @@ export function AttendanceEditor({ semesterId }: AttendanceEditorProps) {
                   </Button>
                   <Input
                     id="attended_classes"
-                    type="number"
-                    min="0"
-                    max={formData.total_classes || undefined}
-                    value={formData.attended_classes || ''}
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    value={formData.attended_classes === 0 ? '' : String(formData.attended_classes)}
                     onChange={(e) => {
-                      const value = e.target.value === '' ? 0 : parseInt(e.target.value) || 0;
-                      handleFieldChange('attended_classes', value);
+                      const value = e.target.value.trim();
+                      if (value === '') {
+                        handleFieldChange('attended_classes', 0);
+                        return;
+                      }
+                      if (/^\d+$/.test(value)) {
+                        const numValue = parseInt(value, 10);
+                        if (!isNaN(numValue)) {
+                          const maxValue = formData.total_classes || undefined;
+                          const finalValue = maxValue ? Math.min(numValue, maxValue) : numValue;
+                          handleFieldChange('attended_classes', finalValue);
+                        }
+                      }
                     }}
                     onBlur={(e) => {
                       if (e.target.value === '') {

@@ -310,22 +310,26 @@ export function MarksEditor({ semesterId }: MarksEditorProps) {
                   <Label htmlFor="total_marks">Total Marks</Label>
                   <Input
                     id="total_marks"
-                    type="number"
-                    min="1"
-                    value={formData.total_marks || ''}
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    value={formData.total_marks === 0 ? '' : String(formData.total_marks)}
                     onChange={(e) => {
-                      const value = e.target.value === '' ? null : parseInt(e.target.value);
-                      setFormData({ 
-                        ...formData, 
-                        total_marks: value
-                      });
+                      const value = e.target.value.trim();
+                      if (value === '') {
+                        setFormData({ ...formData, total_marks: 0 });
+                        return;
+                      }
+                      if (/^\d+$/.test(value)) {
+                        const numValue = parseInt(value, 10);
+                        if (!isNaN(numValue)) {
+                          setFormData({ ...formData, total_marks: numValue });
+                        }
+                      }
                     }}
                     onBlur={(e) => {
                       if (e.target.value === '') {
-                        setFormData({ 
-                          ...formData, 
-                          total_marks: 0 
-                        });
+                        setFormData({ ...formData, total_marks: 0 });
                       }
                     }}
                     required
@@ -336,23 +340,28 @@ export function MarksEditor({ semesterId }: MarksEditorProps) {
                   <Label htmlFor="obtained_marks">Obtained Marks</Label>
                   <Input
                     id="obtained_marks"
-                    type="number"
-                    min="0"
-                    max={formData.total_marks || undefined}
-                    value={formData.obtained_marks || ''}
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    value={formData.obtained_marks === 0 ? '' : String(formData.obtained_marks)}
                     onChange={(e) => {
-                      const value = e.target.value === '' ? null : parseInt(e.target.value);
-                      setFormData({ 
-                        ...formData, 
-                        obtained_marks: value
-                      });
+                      const value = e.target.value.trim();
+                      if (value === '') {
+                        setFormData({ ...formData, obtained_marks: 0 });
+                        return;
+                      }
+                      if (/^\d+$/.test(value)) {
+                        const numValue = parseInt(value, 10);
+                        if (!isNaN(numValue)) {
+                          const maxValue = formData.total_marks || undefined;
+                          const finalValue = maxValue ? Math.min(numValue, maxValue) : numValue;
+                          setFormData({ ...formData, obtained_marks: finalValue });
+                        }
+                      }
                     }}
                     onBlur={(e) => {
                       if (e.target.value === '') {
-                        setFormData({ 
-                          ...formData, 
-                          obtained_marks: 0 
-                        });
+                        setFormData({ ...formData, obtained_marks: 0 });
                       }
                     }}
                     required
@@ -365,24 +374,27 @@ export function MarksEditor({ semesterId }: MarksEditorProps) {
                 <div className="space-y-2">
                   <Input
                     id="weightage"
-                    type="number"
-                    min="0"
-                    max="100"
-                    step="0.1"
-                    value={formData.weightage || ''}
+                    type="text"
+                    inputMode="decimal"
+                    pattern="[0-9]*\.?[0-9]*"
+                    value={formData.weightage === 0 ? '' : String(formData.weightage)}
                     onChange={(e) => {
-                      const value = e.target.value === '' ? null : parseFloat(e.target.value);
-                      setFormData({ 
-                        ...formData, 
-                        weightage: value
-                      });
+                      const value = e.target.value.trim();
+                      if (value === '') {
+                        setFormData({ ...formData, weightage: 0 });
+                        return;
+                      }
+                      // Allow decimal numbers
+                      if (/^\d*\.?\d*$/.test(value)) {
+                        const numValue = parseFloat(value);
+                        if (!isNaN(numValue) && numValue >= 0 && numValue <= 100) {
+                          setFormData({ ...formData, weightage: numValue });
+                        }
+                      }
                     }}
                     onBlur={(e) => {
                       if (e.target.value === '') {
-                        setFormData({ 
-                          ...formData, 
-                          weightage: 100 
-                        });
+                        setFormData({ ...formData, weightage: 100 });
                       }
                     }}
                     required

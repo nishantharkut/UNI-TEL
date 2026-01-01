@@ -259,23 +259,28 @@ export function AttendanceDialog({
               <Label htmlFor="attended_classes">Attended Classes</Label>
               <Input
                 id="attended_classes"
-                type="number"
-                min="0"
-                max={formData.total_classes || undefined}
-                value={formData.attended_classes || ''}
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                value={formData.attended_classes === 0 ? '' : String(formData.attended_classes)}
                 onChange={(e) => {
-                  const value = e.target.value === '' ? null : parseInt(e.target.value);
-                  setFormData({ 
-                    ...formData, 
-                    attended_classes: value
-                  });
+                  const value = e.target.value.trim();
+                  if (value === '') {
+                    setFormData({ ...formData, attended_classes: 0 });
+                    return;
+                  }
+                  if (/^\d+$/.test(value)) {
+                    const numValue = parseInt(value, 10);
+                    if (!isNaN(numValue)) {
+                      const maxValue = formData.total_classes || undefined;
+                      const finalValue = maxValue ? Math.min(numValue, maxValue) : numValue;
+                      setFormData({ ...formData, attended_classes: finalValue });
+                    }
+                  }
                 }}
                 onBlur={(e) => {
                   if (e.target.value === '') {
-                    setFormData({ 
-                      ...formData, 
-                      attended_classes: 0 
-                    });
+                    setFormData({ ...formData, attended_classes: 0 });
                   }
                 }}
                 required
@@ -285,23 +290,30 @@ export function AttendanceDialog({
               <Label htmlFor="total_classes">Total Classes</Label>
               <Input
                 id="total_classes"
-                type="number"
-                min="1"
-                value={formData.total_classes || ''}
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                value={formData.total_classes === 0 ? '' : String(formData.total_classes)}
                 onChange={(e) => {
-                  const value = e.target.value === '' ? null : parseInt(e.target.value);
-                  setFormData({ 
-                    ...formData, 
-                    total_classes: value,
-                    attended_classes: value ? Math.min(formData.attended_classes || 0, value) : formData.attended_classes
-                  });
+                  const value = e.target.value.trim();
+                  if (value === '') {
+                    setFormData({ ...formData, total_classes: 0 });
+                    return;
+                  }
+                  if (/^\d+$/.test(value)) {
+                    const numValue = parseInt(value, 10);
+                    if (!isNaN(numValue)) {
+                      setFormData({ 
+                        ...formData, 
+                        total_classes: numValue,
+                        attended_classes: numValue ? Math.min(formData.attended_classes || 0, numValue) : formData.attended_classes
+                      });
+                    }
+                  }
                 }}
                 onBlur={(e) => {
                   if (e.target.value === '') {
-                    setFormData({ 
-                      ...formData, 
-                      total_classes: 0 
-                    });
+                    setFormData({ ...formData, total_classes: 0 });
                   }
                 }}
                 required

@@ -334,16 +334,25 @@ export function MarksDialog({
               <Label htmlFor="total_marks">Total Marks *</Label>
               <Input
                 id="total_marks"
-                type="number"
-                min="1"
-                step="1"
-                value={formData.total_marks || ''}
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                value={formData.total_marks === 0 ? '' : String(formData.total_marks)}
                 onChange={(e) => {
-                  const value = e.target.value === '' ? 0 : parseInt(e.target.value) || 0;
-                  handleFieldChange('total_marks', value);
-                  // Auto-adjust obtained marks if it exceeds new total
-                  if (value > 0 && formData.obtained_marks > value) {
-                    handleFieldChange('obtained_marks', value);
+                  const value = e.target.value.trim();
+                  if (value === '') {
+                    handleFieldChange('total_marks', 0);
+                    return;
+                  }
+                  if (/^\d+$/.test(value)) {
+                    const numValue = parseInt(value, 10);
+                    if (!isNaN(numValue)) {
+                      handleFieldChange('total_marks', numValue);
+                      // Auto-adjust obtained marks if it exceeds new total
+                      if (numValue > 0 && formData.obtained_marks > numValue) {
+                        handleFieldChange('obtained_marks', numValue);
+                      }
+                    }
                   }
                 }}
                 onBlur={(e) => {
@@ -366,14 +375,24 @@ export function MarksDialog({
               <Label htmlFor="obtained_marks">Obtained Marks *</Label>
               <Input
                 id="obtained_marks"
-                type="number"
-                min="0"
-                max={formData.total_marks || undefined}
-                step="1"
-                value={formData.obtained_marks || ''}
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                value={formData.obtained_marks === 0 ? '' : String(formData.obtained_marks)}
                 onChange={(e) => {
-                  const value = e.target.value === '' ? 0 : parseInt(e.target.value) || 0;
-                  handleFieldChange('obtained_marks', value);
+                  const value = e.target.value.trim();
+                  if (value === '') {
+                    handleFieldChange('obtained_marks', 0);
+                    return;
+                  }
+                  if (/^\d+$/.test(value)) {
+                    const numValue = parseInt(value, 10);
+                    if (!isNaN(numValue)) {
+                      const maxValue = formData.total_marks || undefined;
+                      const finalValue = maxValue ? Math.min(numValue, maxValue) : numValue;
+                      handleFieldChange('obtained_marks', finalValue);
+                    }
+                  }
                 }}
                 onBlur={(e) => {
                   if (e.target.value === '') {
@@ -403,14 +422,23 @@ export function MarksDialog({
             <div className="space-y-2">
               <Input
                 id="weightage"
-                type="number"
-                min="0"
-                max="100"
-                step="0.1"
-                value={formData.weightage || ''}
+                type="text"
+                inputMode="decimal"
+                pattern="[0-9]*\.?[0-9]*"
+                value={formData.weightage === 0 ? '' : String(formData.weightage)}
                 onChange={(e) => {
-                  const value = e.target.value === '' ? 0 : parseFloat(e.target.value) || 0;
-                  handleFieldChange('weightage', value);
+                  const value = e.target.value.trim();
+                  if (value === '') {
+                    handleFieldChange('weightage', 0);
+                    return;
+                  }
+                  // Allow decimal numbers
+                  if (/^\d*\.?\d*$/.test(value)) {
+                    const numValue = parseFloat(value);
+                    if (!isNaN(numValue) && numValue >= 0 && numValue <= 100) {
+                      handleFieldChange('weightage', numValue);
+                    }
+                  }
                 }}
                 onBlur={(e) => {
                   if (e.target.value === '') {

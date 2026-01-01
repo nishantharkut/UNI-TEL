@@ -303,17 +303,46 @@ export function ActiveAttendanceCard({ records }: ActiveAttendanceCardProps) {
                 <div>
                   <Label>Total Classes</Label>
                   <Input
-                    type="number"
-                    value={editingRecord.total_classes}
-                    onChange={(e) => setEditingRecord({ ...editingRecord, total_classes: parseInt(e.target.value) || 0 })}
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    value={editingRecord.total_classes === 0 ? '' : String(editingRecord.total_classes)}
+                    onChange={(e) => {
+                      const value = e.target.value.trim();
+                      if (value === '') {
+                        setEditingRecord({ ...editingRecord, total_classes: 0 });
+                        return;
+                      }
+                      if (/^\d+$/.test(value)) {
+                        const numValue = parseInt(value, 10);
+                        if (!isNaN(numValue)) {
+                          setEditingRecord({ ...editingRecord, total_classes: numValue });
+                        }
+                      }
+                    }}
                   />
                 </div>
                 <div>
                   <Label>Attended</Label>
                   <Input
-                    type="number"
-                    value={editingRecord.attended_classes}
-                    onChange={(e) => setEditingRecord({ ...editingRecord, attended_classes: Math.min(parseInt(e.target.value) || 0, editingRecord.total_classes) })}
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    value={editingRecord.attended_classes === 0 ? '' : String(editingRecord.attended_classes)}
+                    onChange={(e) => {
+                      const value = e.target.value.trim();
+                      if (value === '') {
+                        setEditingRecord({ ...editingRecord, attended_classes: 0 });
+                        return;
+                      }
+                      if (/^\d+$/.test(value)) {
+                        const numValue = parseInt(value, 10);
+                        if (!isNaN(numValue)) {
+                          const finalValue = Math.min(numValue, editingRecord.total_classes);
+                          setEditingRecord({ ...editingRecord, attended_classes: finalValue });
+                        }
+                      }
+                    }}
                   />
                 </div>
               </div>

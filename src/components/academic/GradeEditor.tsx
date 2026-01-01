@@ -146,11 +146,28 @@ export function GradeEditor({ semesterId }: GradeEditorProps) {
                 <Label htmlFor="credits">Credits</Label>
                 <Input
                   id="credits"
-                  type="number"
-                  min="1"
-                  max="6"
-                  value={formData.credits}
-                  onChange={(e) => setFormData({ ...formData, credits: parseInt(e.target.value) })}
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  value={formData.credits === 0 ? '' : String(formData.credits)}
+                  onChange={(e) => {
+                    const value = e.target.value.trim();
+                    if (value === '') {
+                      setFormData({ ...formData, credits: 0 });
+                      return;
+                    }
+                    if (/^\d+$/.test(value)) {
+                      const numValue = parseInt(value, 10);
+                      if (!isNaN(numValue) && numValue >= 1 && numValue <= 6) {
+                        setFormData({ ...formData, credits: numValue });
+                      }
+                    }
+                  }}
+                  onBlur={(e) => {
+                    if (formData.credits === 0) {
+                      setFormData({ ...formData, credits: 1 });
+                    }
+                  }}
                   required
                 />
               </div>

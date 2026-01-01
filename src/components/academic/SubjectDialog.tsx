@@ -213,18 +213,32 @@ export function SubjectDialog({ open, onOpenChange, semesterId, editingSubject }
               </Label>
               <Input
                 id="credits"
-                type="number"
-                min="1"
-                max="10"
-                value={credits}
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                value={credits === 0 ? '' : String(credits)}
                 onChange={(e) => {
-                  const value = parseInt(e.target.value) || 1;
-                  setCredits(value);
-                  if (creditsTouched) {
-                    validateCredits(value);
+                  const value = e.target.value.trim();
+                  if (value === '') {
+                    setCredits(0);
+                    return;
+                  }
+                  if (/^\d+$/.test(value)) {
+                    const numValue = parseInt(value, 10);
+                    if (!isNaN(numValue) && numValue >= 1 && numValue <= 10) {
+                      setCredits(numValue);
+                      if (creditsTouched) {
+                        validateCredits(numValue);
+                      }
+                    }
                   }
                 }}
-                onBlur={() => setCreditsTouched(true)}
+                onBlur={() => {
+                  if (credits === 0) {
+                    setCredits(1);
+                  }
+                  setCreditsTouched(true);
+                }}
                 required
                 className={cn(
                   "h-11 text-base",

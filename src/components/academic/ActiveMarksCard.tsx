@@ -176,26 +176,68 @@ export function ActiveMarksCard({ records }: ActiveMarksCardProps) {
                 <div>
                   <Label>Total Marks</Label>
                   <Input
-                    type="number"
-                    value={newRecord.total_marks}
-                    onChange={(e) => setNewRecord({ ...newRecord, total_marks: parseInt(e.target.value) || 100 })}
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    value={newRecord.total_marks === 0 ? '' : String(newRecord.total_marks)}
+                    onChange={(e) => {
+                      const value = e.target.value.trim();
+                      if (value === '') {
+                        setNewRecord({ ...newRecord, total_marks: 0 });
+                        return;
+                      }
+                      if (/^\d+$/.test(value)) {
+                        const numValue = parseInt(value, 10);
+                        if (!isNaN(numValue)) {
+                          setNewRecord({ ...newRecord, total_marks: numValue });
+                        }
+                      }
+                    }}
                   />
                 </div>
                 <div>
                   <Label>Obtained Marks</Label>
                   <Input
-                    type="number"
-                    value={newRecord.obtained_marks}
-                    onChange={(e) => setNewRecord({ ...newRecord, obtained_marks: Math.min(parseInt(e.target.value) || 0, newRecord.total_marks) })}
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    value={newRecord.obtained_marks === 0 ? '' : String(newRecord.obtained_marks)}
+                    onChange={(e) => {
+                      const value = e.target.value.trim();
+                      if (value === '') {
+                        setNewRecord({ ...newRecord, obtained_marks: 0 });
+                        return;
+                      }
+                      if (/^\d+$/.test(value)) {
+                        const numValue = parseInt(value, 10);
+                        if (!isNaN(numValue)) {
+                          setNewRecord({ ...newRecord, obtained_marks: Math.min(numValue, newRecord.total_marks) });
+                        }
+                      }
+                    }}
                   />
                 </div>
               </div>
               <div>
                 <Label>Weightage (%)</Label>
                 <Input
-                  type="number"
-                  value={newRecord.weightage}
-                  onChange={(e) => setNewRecord({ ...newRecord, weightage: Math.min(Math.max(parseInt(e.target.value) || 0, 0), 100) })}
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  value={newRecord.weightage === 0 ? '' : String(newRecord.weightage)}
+                  onChange={(e) => {
+                    const value = e.target.value.trim();
+                    if (value === '') {
+                      setNewRecord({ ...newRecord, weightage: 0 });
+                      return;
+                    }
+                    if (/^\d+$/.test(value)) {
+                      const numValue = parseInt(value, 10);
+                      if (!isNaN(numValue)) {
+                        setNewRecord({ ...newRecord, weightage: Math.min(Math.max(numValue, 0), 100) });
+                      }
+                    }
+                  }}
                   placeholder="e.g., 30"
                 />
               </div>
@@ -335,17 +377,45 @@ export function ActiveMarksCard({ records }: ActiveMarksCardProps) {
                 <div>
                   <Label>Total Marks</Label>
                   <Input
-                    type="number"
-                    value={editingRecord.total_marks}
-                    onChange={(e) => setEditingRecord({ ...editingRecord, total_marks: parseInt(e.target.value) || 0 })}
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    value={editingRecord.total_marks === 0 ? '' : String(editingRecord.total_marks)}
+                    onChange={(e) => {
+                      const value = e.target.value.trim();
+                      if (value === '') {
+                        setEditingRecord({ ...editingRecord, total_marks: 0 });
+                        return;
+                      }
+                      if (/^\d+$/.test(value)) {
+                        const numValue = parseInt(value, 10);
+                        if (!isNaN(numValue)) {
+                          setEditingRecord({ ...editingRecord, total_marks: numValue });
+                        }
+                      }
+                    }}
                   />
                 </div>
                 <div>
                   <Label>Obtained Marks</Label>
                   <Input
-                    type="number"
-                    value={editingRecord.obtained_marks}
-                    onChange={(e) => setEditingRecord({ ...editingRecord, obtained_marks: Math.min(parseInt(e.target.value) || 0, editingRecord.total_marks) })}
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    value={editingRecord.obtained_marks === 0 ? '' : String(editingRecord.obtained_marks)}
+                    onChange={(e) => {
+                      const value = e.target.value.trim();
+                      if (value === '') {
+                        setEditingRecord({ ...editingRecord, obtained_marks: 0 });
+                        return;
+                      }
+                      if (/^\d+$/.test(value)) {
+                        const numValue = parseInt(value, 10);
+                        if (!isNaN(numValue)) {
+                          setEditingRecord({ ...editingRecord, obtained_marks: Math.min(numValue, editingRecord.total_marks) });
+                        }
+                      }
+                    }}
                   />
                 </div>
               </div>

@@ -342,17 +342,26 @@ export function EnhancedMarksDialog({
               <Label htmlFor="total_marks">Total Marks *</Label>
               <Input
                 id="total_marks"
-                type="number"
-                min="1"
-                step="1"
-                value={formData.total_marks || ''}
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                value={formData.total_marks === 0 ? '' : String(formData.total_marks)}
                 onChange={(e) => {
-                  const value = parseInt(e.target.value) || 0;
-                  setFormData({ 
-                    ...formData, 
-                    total_marks: value,
-                    obtained_marks: Math.min(formData.obtained_marks, value)
-                  });
+                  const value = e.target.value.trim();
+                  if (value === '') {
+                    setFormData({ ...formData, total_marks: 0 });
+                    return;
+                  }
+                  if (/^\d+$/.test(value)) {
+                    const numValue = parseInt(value, 10);
+                    if (!isNaN(numValue)) {
+                      setFormData({ 
+                        ...formData, 
+                        total_marks: numValue,
+                        obtained_marks: Math.min(formData.obtained_marks, numValue)
+                      });
+                    }
+                  }
                 }}
                 required
               />
@@ -361,16 +370,25 @@ export function EnhancedMarksDialog({
               <Label htmlFor="obtained_marks">Obtained Marks *</Label>
               <Input
                 id="obtained_marks"
-                type="number"
-                min="0"
-                step="1"
-                value={formData.obtained_marks || ''}
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                value={formData.obtained_marks === 0 ? '' : String(formData.obtained_marks)}
                 onChange={(e) => {
-                  const value = parseInt(e.target.value) || 0;
-                  setFormData({ 
-                    ...formData, 
-                    obtained_marks: Math.min(value, formData.total_marks)
-                  });
+                  const value = e.target.value.trim();
+                  if (value === '') {
+                    setFormData({ ...formData, obtained_marks: 0 });
+                    return;
+                  }
+                  if (/^\d+$/.test(value)) {
+                    const numValue = parseInt(value, 10);
+                    if (!isNaN(numValue)) {
+                      setFormData({ 
+                        ...formData, 
+                        obtained_marks: Math.min(numValue, formData.total_marks)
+                      });
+                    }
+                  }
                 }}
                 required
               />
@@ -382,15 +400,26 @@ export function EnhancedMarksDialog({
             <div className="space-y-2">
               <Input
                 id="weightage"
-                type="number"
-                min="0"
-                max="100"
-                step="0.1"
-                value={formData.weightage || ''}
-                onChange={(e) => setFormData({ 
-                  ...formData, 
-                  weightage: Math.min(100, Math.max(0, parseFloat(e.target.value) || 0))
-                })}
+                type="text"
+                inputMode="decimal"
+                pattern="[0-9]*\.?[0-9]*"
+                value={formData.weightage === 0 ? '' : String(formData.weightage)}
+                onChange={(e) => {
+                  const value = e.target.value.trim();
+                  if (value === '') {
+                    setFormData({ ...formData, weightage: 0 });
+                    return;
+                  }
+                  if (/^\d*\.?\d*$/.test(value)) {
+                    const numValue = parseFloat(value);
+                    if (!isNaN(numValue)) {
+                      setFormData({ 
+                        ...formData, 
+                        weightage: Math.min(100, Math.max(0, numValue))
+                      });
+                    }
+                  }
+                }}
                 required
               />
               <div className="text-sm text-muted-foreground">
