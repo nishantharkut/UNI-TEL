@@ -21,8 +21,8 @@ BEGIN
   WHERE semester_id = sem_id 
     AND user_id = usr_id
     AND grade IS NOT NULL
-    AND grade IN ('A', 'A-', 'B', 'B-', 'C', 'C-', 'D', 'E', 'F', 'I')
-  
+    AND grade IN ('A', 'A-', 'B', 'B-', 'C', 'C-', 'D', 'E', 'F', 'I');
+
   IF total_credits_sum > 0 THEN
     calculated_sgpa := ROUND(weighted_points / total_credits_sum, 2);
   ELSE
@@ -56,7 +56,7 @@ BEGIN
   FROM public.subjects
   WHERE user_id = target_user_id
     AND grade IS NOT NULL
-    AND grade IN ('A', 'A-', 'B', 'B-', 'C', 'C-', 'D', 'E', 'F', 'I')
+    AND grade IN ('A', 'A-', 'B', 'B-', 'C', 'C-', 'D', 'E', 'F', 'I');
 
   IF total_credits_sum > 0 THEN
     calculated_cgpa := ROUND(total_weighted_points / total_credits_sum, 2);
