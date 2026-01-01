@@ -17,7 +17,7 @@ interface LazyAppHeaderProps {
 
 export function LazyAppHeader({ user, onSignOut, onMobileMenuToggle, mobileMenuOpen }: LazyAppHeaderProps) {
   return (
-    <Suspense fallback={<ComponentLoader message="Loading header..." />}>
+    <Suspense fallback={<ComponentLoader message="Loading header..." size="sm" variant="minimal" />}>
       <AppHeader 
         user={user} 
         onSignOut={onSignOut} 

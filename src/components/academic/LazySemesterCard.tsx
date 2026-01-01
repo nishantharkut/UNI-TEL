@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { ComponentLoader } from '@/components/ui/PageLoader';
+import { SkeletonSemesterCard } from '@/components/ui/skeleton';
 
 // Lazy load the SemesterCard component
 const SemesterCard = lazy(() => import('./SemesterCard').then(module => ({ default: module.SemesterCard })));
@@ -10,7 +10,7 @@ interface LazySemesterCardProps {
 
 export function LazySemesterCard({ semester }: LazySemesterCardProps) {
   return (
-    <Suspense fallback={<ComponentLoader message="Loading semester..." />}>
+    <Suspense fallback={<SkeletonSemesterCard />}>
       <SemesterCard semester={semester} />
     </Suspense>
   );

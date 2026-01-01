@@ -1,12 +1,12 @@
 import { lazy, Suspense } from 'react';
-import { ComponentLoader } from '@/components/ui/PageLoader';
+import { SkeletonCard } from '@/components/ui/skeleton';
 
 // Lazy load the ImportExport component
 const ImportExport = lazy(() => import('./ImportExport').then(module => ({ default: module.ImportExport })));
 
 export function LazyImportExport() {
   return (
-    <Suspense fallback={<ComponentLoader message="Loading import/export..." />}>
+    <Suspense fallback={<SkeletonCard />}>
       <ImportExport />
     </Suspense>
   );

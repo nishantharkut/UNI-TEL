@@ -11,7 +11,7 @@ interface LazyAppSidebarProps {
 
 export function LazyAppSidebar({ onToggle, mobileMenuOpen }: LazyAppSidebarProps) {
   return (
-    <Suspense fallback={<ComponentLoader message="Loading sidebar..." />}>
+    <Suspense fallback={<ComponentLoader message="Loading sidebar..." size="sm" variant="minimal" />}>
       <AppSidebar onToggle={onToggle} mobileMenuOpen={mobileMenuOpen} />
     </Suspense>
   );

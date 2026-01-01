@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { ComponentLoader } from '@/components/ui/PageLoader';
+import { SkeletonAttendanceCard } from '@/components/ui/skeleton';
 
 // Lazy load the heavy ActiveAttendanceCard component
 const ActiveAttendanceCard = lazy(() => import('./ActiveAttendanceCard').then(module => ({ default: module.ActiveAttendanceCard })));
@@ -10,7 +10,13 @@ interface LazyActiveAttendanceCardProps {
 
 export function LazyActiveAttendanceCard({ records }: LazyActiveAttendanceCardProps) {
   return (
-    <Suspense fallback={<ComponentLoader message="Loading attendance records..." />}>
+    <Suspense fallback={
+      <div className="space-y-4">
+        <SkeletonAttendanceCard />
+        <SkeletonAttendanceCard />
+        <SkeletonAttendanceCard />
+      </div>
+    }>
       <ActiveAttendanceCard records={records} />
     </Suspense>
   );

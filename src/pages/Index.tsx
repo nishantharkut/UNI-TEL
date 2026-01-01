@@ -27,23 +27,18 @@ import {
 import { useAcademicSummary } from '@/hooks/useAcademicSummary';
 import { LazyPerformanceTrends } from '@/components/academic/LazyPerformanceTrends';
 import { Link } from 'react-router-dom';
+import { PageLoader } from '@/components/ui/PageLoader';
 
 export default function Index() {
   const { data: summary, isLoading } = useAcademicSummary();
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/10">
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-center py-16">
-            <div className="relative mb-6">
-              <div className="animate-spin rounded-full h-12 w-12 border-3 border-primary/20 border-t-primary mx-auto"></div>
-              <div className="absolute inset-0 rounded-full h-12 w-12 border-3 border-transparent border-t-academic-primary/40 animate-spin [animation-direction:reverse] [animation-duration:1.5s]"></div>
-            </div>
-            <p className="text-lg font-medium text-muted-foreground">Loading your academic dashboard...</p>
-          </div>
-        </div>
-      </div>
+      <PageLoader 
+        message="Loading your academic dashboard" 
+        subMessage="Fetching your academic data..."
+        variant="default"
+      />
     );
   }
 

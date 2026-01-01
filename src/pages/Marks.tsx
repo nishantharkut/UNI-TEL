@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { useMarks, useSemesters } from '@/hooks/useAcademic';
 import { LazyMarksEditor } from '@/components/academic/LazyMarksEditor';
+import { PageLoader } from '@/components/ui/PageLoader';
 
 export default function Marks() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -52,17 +53,11 @@ export default function Marks() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/10">
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-center py-16">
-            <div className="relative mb-6">
-              <div className="animate-spin rounded-full h-12 w-12 border-3 border-academic-primary/20 border-t-academic-primary mx-auto"></div>
-              <div className="absolute inset-0 rounded-full h-12 w-12 border-3 border-transparent border-t-academic-primary/40 animate-spin [animation-direction:reverse] [animation-duration:1.5s]"></div>
-            </div>
-            <p className="text-lg font-medium text-muted-foreground">Loading marks records...</p>
-          </div>
-        </div>
-      </div>
+      <PageLoader 
+        message="Loading marks records" 
+        subMessage="Retrieving your exam results..."
+        variant="default"
+      />
     );
   }
 

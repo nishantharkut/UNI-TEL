@@ -9,6 +9,7 @@ import { Edit, Plus, Trash2, GraduationCap } from 'lucide-react';
 import { useSubjects, useCreateSubject, useUpdateSubject, useDeleteSubject, useSemesters } from '@/hooks/useAcademic';
 import { gradeToPoints, getGradeColor, computeSGPA } from '@/utils/gradeCalculations';
 import type { Subject } from '@/services/academicService';
+import { SkeletonList } from '@/components/ui/skeleton';
 
 const GRADES = ['A', 'A-', 'B', 'B-', 'C', 'C-', 'D', 'E', 'F', 'I'];
 
@@ -102,7 +103,11 @@ export function GradeEditor({ semesterId }: GradeEditorProps) {
   };
 
   if (isLoading) {
-    return <div className="text-center py-4">Loading subjects...</div>;
+    return (
+      <div className="space-y-4">
+        <SkeletonList items={3} />
+      </div>
+    );
   }
 
   return (

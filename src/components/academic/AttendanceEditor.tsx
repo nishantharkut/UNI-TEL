@@ -14,6 +14,7 @@ import type { AttendanceRecord } from '@/services/academicService';
 import { useToast } from '@/hooks/use-toast';
 import { FormFieldError } from '@/components/ui/form-field-error';
 import { cn } from '@/lib/utils';
+import { SkeletonAttendanceCard } from '@/components/ui/skeleton';
 
 interface AttendanceEditorProps {
   semesterId?: string;
@@ -270,7 +271,12 @@ export function AttendanceEditor({ semesterId }: AttendanceEditorProps) {
   };
 
   if (isLoading) {
-    return <div className="text-center py-4">Loading attendance records...</div>;
+    return (
+      <div className="space-y-4">
+        <SkeletonAttendanceCard />
+        <SkeletonAttendanceCard />
+      </div>
+    );
   }
 
   return (

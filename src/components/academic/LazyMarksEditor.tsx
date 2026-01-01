@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { ComponentLoader } from '@/components/ui/PageLoader';
+import { SkeletonCard, SkeletonList } from '@/components/ui/skeleton';
 
 // Lazy load the heavy MarksEditor component
 const MarksEditor = lazy(() => import('./MarksEditor').then(module => ({ default: module.MarksEditor })));
@@ -10,7 +10,12 @@ interface LazyMarksEditorProps {
 
 export function LazyMarksEditor({ semesterId }: LazyMarksEditorProps) {
   return (
-    <Suspense fallback={<ComponentLoader message="Loading marks editor..." />}>
+    <Suspense fallback={
+      <div className="space-y-4">
+        <SkeletonCard />
+        <SkeletonList items={3} />
+      </div>
+    }>
       <MarksEditor semesterId={semesterId} />
     </Suspense>
   );

@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Edit, Plus, Trash2, FileText, Target } from 'lucide-react';
 import { useMarks, useCreateMarks, useUpdateMarks, useDeleteMarks, useSemesters } from '@/hooks/useAcademic';
 import type { MarksRecord } from '@/services/academicService';
+import { SkeletonList } from '@/components/ui/skeleton';
 
 // Default exam types - user can create custom ones
 const DEFAULT_EXAM_TYPES = ['Quiz', 'Mid Term', 'End Term', 'Assignment', 'Lab Exam', 'Viva', 'Project', 'Presentation', 'Practical', 'Other'];

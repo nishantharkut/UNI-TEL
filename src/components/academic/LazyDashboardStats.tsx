@@ -1,12 +1,12 @@
 import { lazy, Suspense } from 'react';
-import { ComponentLoader } from '@/components/ui/PageLoader';
+import { SkeletonStats } from '@/components/ui/skeleton';
 
 // Lazy load the DashboardStats component
 const DashboardStats = lazy(() => import('./DashboardStats').then(module => ({ default: module.DashboardStats })));
 
 export function LazyDashboardStats() {
   return (
-    <Suspense fallback={<ComponentLoader message="Loading dashboard stats..." />}>
+    <Suspense fallback={<SkeletonStats />}>
       <DashboardStats />
     </Suspense>
   );
