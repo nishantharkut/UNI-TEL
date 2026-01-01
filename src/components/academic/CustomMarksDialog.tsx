@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Calculator, Plus, Edit, Trash2, Target } from 'lucide-react';
+import { Calculator, Plus, Edit, Trash2, Target, Calendar as CalendarIcon } from 'lucide-react';
 import { useCreateMarks, useUpdateMarks, useSemesters, useSubjectsBySemester, useSubjects } from '@/hooks/useAcademic';
 import { useMarks } from '@/hooks/useMarks';
 import type { MarksRecord } from '@/services/academicService';
@@ -29,10 +29,12 @@ export function CustomMarksDialog({
   const [formData, setFormData] = useState({
     subject_name: '',
     exam_type: '',
-    total_marks: 100,
+    total_marks: 0,
     obtained_marks: 0,
     weightage: 100,
     semester_id: semesterId || '',
+    exam_date: '',
+    exam_time: '',
     source_json_import: false
   });
 
@@ -53,16 +55,20 @@ export function CustomMarksDialog({
     ? semesterSubjects 
     : allSubjects;
   
-  // Get existing marks subject names to exclude from dropdown
-  const existingMarksSubjects = marksRecords
+  // Get existing marks records with subject_name AND exam_type combination to exclude from dropdown
+  // Only exclude if the same subject AND exam_type combination already exists
+  const existingMarksCombinations = marksRecords
     .filter(r => (!editingRecord || r.id !== editingRecord.id))
     .filter(r => (formData.semester_id || semesterId) ? r.semester_id === (formData.semester_id || semesterId) : true)
-    .map(r => r.subject_name.toLowerCase().trim());
+    .map(r => `${r.subject_name.toLowerCase().trim()}_${r.exam_type.toLowerCase().trim()}`);
   
-  // Filter out subjects that already have marks records
-  const selectableSubjects = availableSubjects.filter((subject: { name: string }) => 
-    !existingMarksSubjects.includes(subject.name.toLowerCase().trim())
-  );
+  // Filter out subjects that already have marks records with the SAME exam_type
+  // Allow same subject with different exam types
+  const selectableSubjects = availableSubjects.filter((subject: { name: string }) => {
+    if (!formData.exam_type) return true; // If no exam type selected yet, show all subjects
+    const combination = `${subject.name.toLowerCase().trim()}_${formData.exam_type.toLowerCase().trim()}`;
+    return !existingMarksCombinations.includes(combination);
+  });
   
   // Allow manual entry option
   const [useManualEntry, setUseManualEntry] = useState(false);
@@ -102,10 +108,12 @@ export function CustomMarksDialog({
     setFormData({
       subject_name: '',
       exam_type: '',
-      total_marks: 100,
+      total_marks: 0,
       obtained_marks: 0,
       weightage: 100,
       semester_id: semesterId || '',
+      exam_date: '',
+      exam_time: '',
       source_json_import: false
     });
     setUseManualEntry(false);
@@ -121,6 +129,8 @@ export function CustomMarksDialog({
         obtained_marks: editingRecord.obtained_marks,
         weightage: (editingRecord as any).weightage || 100,
         semester_id: editingRecord.semester_id,
+        exam_date: editingRecord.exam_date || '',
+        exam_time: editingRecord.exam_time || '',
         source_json_import: editingRecord.source_json_import
       });
       // Check if the subject exists in the semester's subjects
@@ -147,14 +157,17 @@ export function CustomMarksDialog({
     if (!formData.semester_id) {
       errors.push('Semester is required');
     }
-    if (formData.total_marks <= 0) {
-      errors.push('Total marks must be greater than 0');
-    }
-    if (formData.obtained_marks < 0 || formData.obtained_marks > formData.total_marks) {
-      errors.push('Obtained marks must be between 0 and total marks');
-    }
     if (formData.weightage < 0 || formData.weightage > 100) {
       errors.push('Weightage must be between 0 and 100');
+    }
+    // Marks are optional - only validate if provided
+    if (formData.total_marks > 0) {
+      if (formData.total_marks <= 0) {
+        errors.push('Total marks must be greater than 0');
+      }
+      if (formData.obtained_marks < 0 || formData.obtained_marks > formData.total_marks) {
+        errors.push('Obtained marks must be between 0 and total marks');
+      }
     }
 
     if (errors.length > 0) {
@@ -170,10 +183,12 @@ export function CustomMarksDialog({
       const payload = {
         subject_name: formData.subject_name.trim(),
         exam_type: formData.exam_type.trim(),
-        total_marks: Number(formData.total_marks),
-        obtained_marks: Number(formData.obtained_marks),
+        total_marks: Number(formData.total_marks) || 0,
+        obtained_marks: Number(formData.obtained_marks) || 0,
         weightage: Number(formData.weightage),
         semester_id: formData.semester_id,
+        exam_date: formData.exam_date || undefined,
+        exam_time: formData.exam_time || undefined,
         source_json_import: false
       };
 
@@ -240,6 +255,28 @@ export function CustomMarksDialog({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {!semesterId && (
+            <div>
+              <Label htmlFor="semester">Semester *</Label>
+              <Select 
+                value={formData.semester_id} 
+                onValueChange={(value) => setFormData({ ...formData, semester_id: value })}
+                required
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select semester" />
+                </SelectTrigger>
+                <SelectContent>
+                  {semesters.map((semester) => (
+                    <SelectItem key={semester.id} value={semester.id}>
+                      Semester {semester.number}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
           <div>
             <div className="flex items-center justify-between mb-2">
               <Label htmlFor="subject_name">Subject Name *</Label>
@@ -292,28 +329,6 @@ export function CustomMarksDialog({
             )}
           </div>
 
-          {!semesterId && (
-            <div>
-              <Label htmlFor="semester">Semester *</Label>
-              <Select 
-                value={formData.semester_id} 
-                onValueChange={(value) => setFormData({ ...formData, semester_id: value })}
-                required
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select semester" />
-                </SelectTrigger>
-                <SelectContent>
-                  {semesters.map((semester) => (
-                    <SelectItem key={semester.id} value={semester.id}>
-                      Semester {semester.number}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-
           <div>
             <Label htmlFor="exam_type">Exam Type *</Label>
             <div className="space-y-2">
@@ -359,64 +374,6 @@ export function CustomMarksDialog({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="total_marks">Total Marks *</Label>
-              <Input
-                id="total_marks"
-                type="text"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                value={formData.total_marks === 0 ? '' : String(formData.total_marks)}
-                onChange={(e) => {
-                  const value = e.target.value.trim();
-                  if (value === '') {
-                    setFormData({ ...formData, total_marks: 0 });
-                    return;
-                  }
-                  if (/^\d+$/.test(value)) {
-                    const numValue = parseInt(value, 10);
-                    if (!isNaN(numValue)) {
-                      setFormData({ 
-                        ...formData, 
-                        total_marks: numValue,
-                        obtained_marks: Math.min(formData.obtained_marks, numValue)
-                      });
-                    }
-                  }
-                }}
-                required
-              />
-            </div>
-            <div>
-              <Label htmlFor="obtained_marks">Obtained Marks *</Label>
-              <Input
-                id="obtained_marks"
-                type="text"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                value={formData.obtained_marks === 0 ? '' : String(formData.obtained_marks)}
-                onChange={(e) => {
-                  const value = e.target.value.trim();
-                  if (value === '') {
-                    setFormData({ ...formData, obtained_marks: 0 });
-                    return;
-                  }
-                  if (/^\d+$/.test(value)) {
-                    const numValue = parseInt(value, 10);
-                    if (!isNaN(numValue)) {
-                      setFormData({ 
-                        ...formData, 
-                        obtained_marks: Math.min(numValue, formData.total_marks)
-                      });
-                    }
-                  }
-                }}
-                required
-              />
-            </div>
-          </div>
-
           <div>
             <Label htmlFor="weightage">Weightage (%) *</Label>
             <div className="space-y-2">
@@ -444,11 +401,131 @@ export function CustomMarksDialog({
                 }}
                 required
               />
-              <div className="text-sm text-muted-foreground">
-                This determines how much this exam contributes to the overall subject grade
-              </div>
+              <p className="text-xs text-muted-foreground">
+                You can enter marks later. For now, just set the weightage.
+              </p>
             </div>
           </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="total_marks">Total Marks</Label>
+              <Input
+                id="total_marks"
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                value={formData.total_marks === 0 ? '' : String(formData.total_marks)}
+                onChange={(e) => {
+                  const value = e.target.value.trim();
+                  if (value === '') {
+                    setFormData({ ...formData, total_marks: 0 });
+                    return;
+                  }
+                  if (/^\d+$/.test(value)) {
+                    const numValue = parseInt(value, 10);
+                    if (!isNaN(numValue)) {
+                      setFormData({ 
+                        ...formData, 
+                        total_marks: numValue,
+                        obtained_marks: Math.min(formData.obtained_marks, numValue)
+                      });
+                    }
+                  }
+                }}
+                placeholder="Optional - enter later"
+              />
+            </div>
+            <div>
+              <Label htmlFor="obtained_marks">Obtained Marks</Label>
+              <Input
+                id="obtained_marks"
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                value={formData.obtained_marks === 0 ? '' : String(formData.obtained_marks)}
+                onChange={(e) => {
+                  const value = e.target.value.trim();
+                  if (value === '') {
+                    setFormData({ ...formData, obtained_marks: 0 });
+                    return;
+                  }
+                  if (/^\d+$/.test(value)) {
+                    const numValue = parseInt(value, 10);
+                    if (!isNaN(numValue)) {
+                      setFormData({ 
+                        ...formData, 
+                        obtained_marks: Math.min(numValue, formData.total_marks)
+                      });
+                    }
+                  }
+                }}
+                placeholder="Optional - enter later"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="exam_date">Exam Date</Label>
+              <Input
+                id="exam_date"
+                type="date"
+                value={formData.exam_date}
+                onChange={(e) => setFormData({ ...formData, exam_date: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label htmlFor="exam_time">Exam Time</Label>
+              <Input
+                id="exam_time"
+                type="time"
+                value={formData.exam_time}
+                onChange={(e) => setFormData({ ...formData, exam_time: e.target.value })}
+              />
+            </div>
+          </div>
+
+          {formData.exam_date && (
+            <div className="p-3 bg-blue-50 dark:bg-blue-950 rounded-lg space-y-2">
+              <div className="flex items-center gap-2">
+                <CalendarIcon className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                <span className="font-medium text-blue-900 dark:text-blue-100">Exam Schedule</span>
+              </div>
+              <div className="text-sm text-blue-800 dark:text-blue-200">
+                <div>Date: {new Date(formData.exam_date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</div>
+                {formData.exam_time && (
+                  <div>Time: {new Date(`2000-01-01T${formData.exam_time}`).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}</div>
+                )}
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="w-full"
+                onClick={() => {
+                  const dateTime = formData.exam_date + (formData.exam_time ? `T${formData.exam_time}` : '');
+                  const startDate = new Date(dateTime);
+                  const endDate = new Date(startDate.getTime() + 2 * 60 * 60 * 1000); // 2 hours duration
+                  
+                  const googleCalendarUrl = new URL('https://calendar.google.com/calendar/render');
+                  googleCalendarUrl.searchParams.set('action', 'TEMPLATE');
+                  googleCalendarUrl.searchParams.set('text', `${formData.subject_name} - ${formData.exam_type}`);
+                  googleCalendarUrl.searchParams.set('dates', `${startDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z/${endDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z`);
+                  googleCalendarUrl.searchParams.set('details', `Subject: ${formData.subject_name}\nExam Type: ${formData.exam_type}\nWeightage: ${formData.weightage}%`);
+                  
+                  window.open(googleCalendarUrl.toString(), '_blank');
+                  toast({
+                    title: 'Opening Google Calendar',
+                    description: 'Add this exam to your calendar for reminders.',
+                  });
+                }}
+              >
+                <CalendarIcon className="w-4 h-4 mr-2" />
+                Add to Google Calendar
+              </Button>
+            </div>
+          )}
 
           {/* Performance Preview */}
           <div className="p-4 bg-muted/50 rounded-lg space-y-2">

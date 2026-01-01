@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Edit, Plus, Trash2, FileText, Target } from 'lucide-react';
+import { Edit, Plus, Trash2, FileText, Target, Calendar as CalendarIcon } from 'lucide-react';
 import { useMarks, useCreateMarks, useUpdateMarks, useDeleteMarks, useSemesters, useSubjectsBySemester, useSubjects } from '@/hooks/useAcademic';
 import type { MarksRecord } from '@/services/academicService';
 import { SkeletonList } from '@/components/ui/skeleton';
@@ -23,10 +23,12 @@ export function MarksEditor({ semesterId }: MarksEditorProps) {
   const [formData, setFormData] = useState({
     subject_name: '',
     exam_type: '',
-    total_marks: 100,
+    total_marks: 0,
     obtained_marks: 0,
     weightage: 100,
     semester_id: semesterId || '',
+    exam_date: '',
+    exam_time: '',
     source_json_import: false
   });
 
@@ -47,19 +49,23 @@ export function MarksEditor({ semesterId }: MarksEditorProps) {
     ? semesterSubjects 
     : allSubjects;
   
-  // Get existing marks subject names to exclude from dropdown
+  // Get existing marks records with subject_name AND exam_type combination to exclude from dropdown
+  // Only exclude if the same subject AND exam_type combination already exists
   const filteredMarks = semesterId 
     ? marksRecords.filter((r: { semester_id: string }) => r.semester_id === semesterId)
     : marksRecords;
   
-  const existingMarksSubjects = filteredMarks
+  const existingMarksCombinations = filteredMarks
     .filter(r => (!editingRecord || r.id !== editingRecord.id))
-    .map(r => r.subject_name.toLowerCase().trim());
+    .map(r => `${r.subject_name.toLowerCase().trim()}_${r.exam_type.toLowerCase().trim()}`);
   
-  // Filter out subjects that already have marks records
-  const selectableSubjects = availableSubjects.filter((subject: { name: string }) => 
-    !existingMarksSubjects.includes(subject.name.toLowerCase().trim())
-  );
+  // Filter out subjects that already have marks records with the SAME exam_type
+  // Allow same subject with different exam types
+  const selectableSubjects = availableSubjects.filter((subject: { name: string }) => {
+    if (!formData.exam_type) return true; // If no exam type selected yet, show all subjects
+    const combination = `${subject.name.toLowerCase().trim()}_${formData.exam_type.toLowerCase().trim()}`;
+    return !existingMarksCombinations.includes(combination);
+  });
   
   // Allow manual entry option
   const [useManualEntry, setUseManualEntry] = useState(false);
@@ -107,7 +113,9 @@ export function MarksEditor({ semesterId }: MarksEditorProps) {
       ...formData,
       total_marks: formData.total_marks || 0,
       obtained_marks: formData.obtained_marks || 0,
-      weightage: formData.weightage || 100
+      weightage: formData.weightage || 100,
+      exam_date: formData.exam_date || undefined,
+      exam_time: formData.exam_time || undefined
     };
     
     try {
@@ -140,7 +148,10 @@ export function MarksEditor({ semesterId }: MarksEditorProps) {
       exam_type: record.exam_type,
       total_marks: record.total_marks,
       obtained_marks: record.obtained_marks,
+      weightage: (record as any).weightage || 100,
       semester_id: record.semester_id,
+      exam_date: record.exam_date || '',
+      exam_time: record.exam_time || '',
       source_json_import: record.source_json_import
     });
     // Check if the subject exists in the semester's subjects
@@ -162,12 +173,15 @@ export function MarksEditor({ semesterId }: MarksEditorProps) {
     setFormData({
       subject_name: '',
       exam_type: '',
-      total_marks: 100,
+      total_marks: 0,
       obtained_marks: 0,
       weightage: 100,
       semester_id: semesterId || '',
+      exam_date: '',
+      exam_time: '',
       source_json_import: false
     });
+    setUseManualEntry(false);
   };
 
   const getSemesterNumber = (semesterId: string) => {
@@ -221,9 +235,31 @@ export function MarksEditor({ semesterId }: MarksEditorProps) {
               </DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
+              {!semesterId && (
+                <div>
+                  <Label htmlFor="semester">Semester *</Label>
+                  <Select 
+                    value={formData.semester_id} 
+                    onValueChange={(value) => setFormData({ ...formData, semester_id: value })}
+                    required
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select semester" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {semesters.map((semester) => (
+                        <SelectItem key={semester.id} value={semester.id}>
+                          Semester {semester.number}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <Label htmlFor="subject_name">Subject Name</Label>
+                  <Label htmlFor="subject_name">Subject Name *</Label>
                   {selectableSubjects.length > 0 && (
                     <Button
                       type="button"
@@ -272,27 +308,6 @@ export function MarksEditor({ semesterId }: MarksEditorProps) {
                   </p>
                 )}
               </div>
-
-              {!semesterId && (
-                <div>
-                  <Label htmlFor="semester">Semester</Label>
-                  <Select 
-                    value={formData.semester_id} 
-                    onValueChange={(value) => setFormData({ ...formData, semester_id: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select semester" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {semesters.map((semester) => (
-                        <SelectItem key={semester.id} value={semester.id}>
-                          Semester {semester.number}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
 
               <div>
                 <Label htmlFor="exam_type">Exam Type</Label>
@@ -375,6 +390,42 @@ export function MarksEditor({ semesterId }: MarksEditorProps) {
                 </div>
               </div>
               
+              <div>
+                <Label htmlFor="weightage">Weightage (%) *</Label>
+                <div className="space-y-2">
+                  <Input
+                    id="weightage"
+                    type="text"
+                    inputMode="decimal"
+                    pattern="[0-9]*\.?[0-9]*"
+                    value={formData.weightage === 0 ? '' : String(formData.weightage)}
+                    onChange={(e) => {
+                      const value = e.target.value.trim();
+                      if (value === '') {
+                        setFormData({ ...formData, weightage: 0 });
+                        return;
+                      }
+                      // Allow decimal numbers
+                      if (/^\d*\.?\d*$/.test(value)) {
+                        const numValue = parseFloat(value);
+                        if (!isNaN(numValue) && numValue >= 0 && numValue <= 100) {
+                          setFormData({ ...formData, weightage: numValue });
+                        }
+                      }
+                    }}
+                    onBlur={(e) => {
+                      if (e.target.value === '') {
+                        setFormData({ ...formData, weightage: 100 });
+                      }
+                    }}
+                    required
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    You can enter marks later. For now, just set the weightage.
+                  </p>
+                </div>
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="total_marks">Total Marks</Label>
@@ -402,7 +453,7 @@ export function MarksEditor({ semesterId }: MarksEditorProps) {
                         setFormData({ ...formData, total_marks: 0 });
                       }
                     }}
-                    required
+                    placeholder="Optional - enter later"
                   />
                 </div>
 
@@ -434,46 +485,72 @@ export function MarksEditor({ semesterId }: MarksEditorProps) {
                         setFormData({ ...formData, obtained_marks: 0 });
                       }
                     }}
-                    required
+                    placeholder="Optional - enter later"
                   />
                 </div>
               </div>
 
-              <div>
-                <Label htmlFor="weightage">Weightage (%)</Label>
-                <div className="space-y-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="exam_date">Exam Date</Label>
                   <Input
-                    id="weightage"
-                    type="text"
-                    inputMode="decimal"
-                    pattern="[0-9]*\.?[0-9]*"
-                    value={formData.weightage === 0 ? '' : String(formData.weightage)}
-                    onChange={(e) => {
-                      const value = e.target.value.trim();
-                      if (value === '') {
-                        setFormData({ ...formData, weightage: 0 });
-                        return;
-                      }
-                      // Allow decimal numbers
-                      if (/^\d*\.?\d*$/.test(value)) {
-                        const numValue = parseFloat(value);
-                        if (!isNaN(numValue) && numValue >= 0 && numValue <= 100) {
-                          setFormData({ ...formData, weightage: numValue });
-                        }
-                      }
-                    }}
-                    onBlur={(e) => {
-                      if (e.target.value === '') {
-                        setFormData({ ...formData, weightage: 100 });
-                      }
-                    }}
-                    required
+                    id="exam_date"
+                    type="date"
+                    value={formData.exam_date}
+                    onChange={(e) => setFormData({ ...formData, exam_date: e.target.value })}
                   />
-                  <div className="text-sm text-muted-foreground">
-                    This determines how much this exam contributes to the overall subject grade (0-100%)
-                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="exam_time">Exam Time</Label>
+                  <Input
+                    id="exam_time"
+                    type="time"
+                    value={formData.exam_time}
+                    onChange={(e) => setFormData({ ...formData, exam_time: e.target.value })}
+                  />
                 </div>
               </div>
+
+              {formData.exam_date && (
+                <div className="p-3 bg-blue-50 dark:bg-blue-950 rounded-lg space-y-2">
+                  <div className="flex items-center gap-2">
+                    <CalendarIcon className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                    <span className="font-medium text-blue-900 dark:text-blue-100">Exam Schedule</span>
+                  </div>
+                  <div className="text-sm text-blue-800 dark:text-blue-200">
+                    <div>Date: {new Date(formData.exam_date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</div>
+                    {formData.exam_time && (
+                      <div>Time: {new Date(`2000-01-01T${formData.exam_time}`).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}</div>
+                    )}
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                    onClick={() => {
+                      const dateTime = formData.exam_date + (formData.exam_time ? `T${formData.exam_time}` : '');
+                      const startDate = new Date(dateTime);
+                      const endDate = new Date(startDate.getTime() + 2 * 60 * 60 * 1000); // 2 hours duration
+                      
+                      const googleCalendarUrl = new URL('https://calendar.google.com/calendar/render');
+                      googleCalendarUrl.searchParams.set('action', 'TEMPLATE');
+                      googleCalendarUrl.searchParams.set('text', `${formData.subject_name} - ${formData.exam_type}`);
+                      googleCalendarUrl.searchParams.set('dates', `${startDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z/${endDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z`);
+                      googleCalendarUrl.searchParams.set('details', `Subject: ${formData.subject_name}\nExam Type: ${formData.exam_type}\nWeightage: ${formData.weightage}%`);
+                      
+                      window.open(googleCalendarUrl.toString(), '_blank');
+                      toast({
+                        title: 'Opening Google Calendar',
+                        description: 'Add this exam to your calendar for reminders.',
+                      });
+                    }}
+                  >
+                    <CalendarIcon className="w-4 h-4 mr-2" />
+                    Add to Google Calendar
+                  </Button>
+                </div>
+              )}
 
               {formData.total_marks > 0 && (
                 <div className="p-3 bg-muted rounded-lg space-y-3">

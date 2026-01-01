@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Calculator } from 'lucide-react';
+import { Calculator, Calendar as CalendarIcon } from 'lucide-react';
 import { useCreateMarks, useUpdateMarks, useSemesters, useSubjectsBySemester, useSubjects } from '@/hooks/useAcademic';
 import { useMarks } from '@/hooks/useMarks';
 import type { MarksRecord } from '@/services/academicService';
@@ -33,10 +33,12 @@ export function MarksDialog({
   const [formData, setFormData] = useState({
     subject_name: '',
     exam_type: '',
-    total_marks: 100,
+    total_marks: 0,
     obtained_marks: 0,
     weightage: 100,
-    semester_id: semesterId || ''
+    semester_id: semesterId || '',
+    exam_date: '',
+    exam_time: ''
   });
   const [touched, setTouched] = useState({
     subject_name: false,
@@ -44,7 +46,9 @@ export function MarksDialog({
     total_marks: false,
     obtained_marks: false,
     weightage: false,
-    semester_id: false
+    semester_id: false,
+    exam_date: false,
+    exam_time: false
   });
   const [errors, setErrors] = useState<Partial<Record<keyof typeof formData, string>>>({});
 
@@ -61,16 +65,20 @@ export function MarksDialog({
     ? semesterSubjects 
     : allSubjects;
   
-  // Get existing marks subject names to exclude from dropdown
-  const existingMarksSubjects = marksRecords
+  // Get existing marks records with subject_name AND exam_type combination to exclude from dropdown
+  // Only exclude if the same subject AND exam_type combination already exists
+  const existingMarksCombinations = marksRecords
     .filter(r => (!editingRecord || r.id !== editingRecord.id))
     .filter(r => (formData.semester_id || semesterId) ? r.semester_id === (formData.semester_id || semesterId) : true)
-    .map(r => r.subject_name.toLowerCase().trim());
+    .map(r => `${r.subject_name.toLowerCase().trim()}_${r.exam_type.toLowerCase().trim()}`);
   
-  // Filter out subjects that already have marks records
-  const selectableSubjects = availableSubjects.filter((subject: { name: string }) => 
-    !existingMarksSubjects.includes(subject.name.toLowerCase().trim())
-  );
+  // Filter out subjects that already have marks records with the SAME exam_type
+  // Allow same subject with different exam types
+  const selectableSubjects = availableSubjects.filter((subject: { name: string }) => {
+    if (!formData.exam_type) return true; // If no exam type selected yet, show all subjects
+    const combination = `${subject.name.toLowerCase().trim()}_${formData.exam_type.toLowerCase().trim()}`;
+    return !existingMarksCombinations.includes(combination);
+  });
   
   // Allow manual entry option
   const [useManualEntry, setUseManualEntry] = useState(false);
@@ -79,10 +87,12 @@ export function MarksDialog({
     setFormData({
       subject_name: '',
       exam_type: '',
-      total_marks: 100,
+      total_marks: 0,
       obtained_marks: 0,
       weightage: 100,
-      semester_id: semesterId || ''
+      semester_id: semesterId || '',
+      exam_date: '',
+      exam_time: ''
     });
     setTouched({
       subject_name: false,
@@ -90,7 +100,9 @@ export function MarksDialog({
       total_marks: false,
       obtained_marks: false,
       weightage: false,
-      semester_id: false
+      semester_id: false,
+      exam_date: false,
+      exam_time: false
     });
     setErrors({});
     setUseManualEntry(false);
@@ -104,7 +116,9 @@ export function MarksDialog({
         total_marks: editingRecord.total_marks,
         obtained_marks: editingRecord.obtained_marks,
         weightage: (editingRecord as any).weightage || 100,
-        semester_id: editingRecord.semester_id
+        semester_id: editingRecord.semester_id,
+        exam_date: editingRecord.exam_date || '',
+        exam_time: editingRecord.exam_time || ''
       });
       setTouched({
         subject_name: false,
@@ -112,7 +126,9 @@ export function MarksDialog({
         total_marks: false,
         obtained_marks: false,
         weightage: false,
-        semester_id: false
+        semester_id: false,
+        exam_date: false,
+        exam_time: false
       });
       setErrors({});
       // Check if the subject exists in the semester's subjects
@@ -139,8 +155,9 @@ export function MarksDialog({
         return null;
       case 'total_marks':
         const total = Number(value) || 0;
-        if (total <= 0) return 'Total marks must be greater than 0';
+        if (total < 0) return 'Total marks cannot be negative';
         if (total > 10000) return 'Total marks seems too high. Please verify.';
+        // Marks are optional - allow 0 for now
         return null;
       case 'obtained_marks':
         const obtained = Number(value) || 0;
@@ -149,6 +166,13 @@ export function MarksDialog({
         if (obtained > totalMarks && totalMarks > 0) {
           return `Obtained marks (${obtained}) cannot exceed total marks (${totalMarks})`;
         }
+        // Marks are optional - allow 0 for now
+        return null;
+      case 'exam_date':
+        // Optional field - no validation needed
+        return null;
+      case 'exam_time':
+        // Optional field - no validation needed
         return null;
       case 'weightage':
         const weight = Number(value) || 0;
@@ -176,6 +200,11 @@ export function MarksDialog({
     if (field === 'total_marks' && touched.obtained_marks) {
       const obtainedError = validateField('obtained_marks', formData.obtained_marks);
       setErrors(prev => ({ ...prev, obtained_marks: obtainedError || undefined }));
+    }
+    
+    // Special case: if exam_type changes, update selectable subjects
+    if (field === 'exam_type') {
+      // This will trigger a re-render and update selectableSubjects
     }
   };
 
@@ -226,10 +255,12 @@ export function MarksDialog({
       const payload = {
         subject_name: formData.subject_name.trim(),
         exam_type: formData.exam_type.trim(),
-        total_marks: Number(formData.total_marks),
-        obtained_marks: Number(formData.obtained_marks),
+        total_marks: Number(formData.total_marks) || 0,
+        obtained_marks: Number(formData.obtained_marks) || 0,
         weightage: Number(formData.weightage),
         semester_id: formData.semester_id,
+        exam_date: formData.exam_date || undefined,
+        exam_time: formData.exam_time || undefined,
         source_json_import: false
       };
 
@@ -289,6 +320,32 @@ export function MarksDialog({
           </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+          {!semesterId && (
+            <div>
+              <Label htmlFor="semester">Semester *</Label>
+              <Select
+                value={formData.semester_id}
+                onValueChange={(value) => {
+                  handleFieldChange('semester_id', value);
+                  handleFieldBlur('semester_id');
+                }}
+                required
+              >
+                <SelectTrigger className={cn(errors.semester_id && "border-destructive")}>
+                  <SelectValue placeholder="Select semester" />
+                </SelectTrigger>
+                <SelectContent>
+                  {semesters.map((semester) => (
+                    <SelectItem key={semester.id} value={semester.id}>
+                      Semester {semester.number}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormFieldError error={errors.semester_id} />
+            </div>
+          )}
+
           <div>
             <div className="flex items-center justify-between mb-2">
               <Label htmlFor="subject_name">Subject Name *</Label>
@@ -353,32 +410,6 @@ export function MarksDialog({
             )}
           </div>
 
-          {!semesterId && (
-            <div>
-              <Label htmlFor="semester">Semester *</Label>
-              <Select
-                value={formData.semester_id}
-                onValueChange={(value) => {
-                  handleFieldChange('semester_id', value);
-                  handleFieldBlur('semester_id');
-                }}
-                required
-              >
-                <SelectTrigger className={cn(errors.semester_id && "border-destructive")}>
-                  <SelectValue placeholder="Select semester" />
-                </SelectTrigger>
-                <SelectContent>
-                  {semesters.map((semester) => (
-                    <SelectItem key={semester.id} value={semester.id}>
-                      Semester {semester.number}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormFieldError error={errors.semester_id} />
-            </div>
-          )}
-
           <div>
             <Label htmlFor="exam_type">Exam Type *</Label>
             <Select
@@ -401,94 +432,6 @@ export function MarksDialog({
               </SelectContent>
             </Select>
             <FormFieldError error={errors.exam_type} />
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="total_marks">Total Marks *</Label>
-              <Input
-                id="total_marks"
-                type="text"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                value={formData.total_marks === 0 ? '' : String(formData.total_marks)}
-                onChange={(e) => {
-                  const value = e.target.value.trim();
-                  if (value === '') {
-                    handleFieldChange('total_marks', 0);
-                    return;
-                  }
-                  if (/^\d+$/.test(value)) {
-                    const numValue = parseInt(value, 10);
-                    if (!isNaN(numValue)) {
-                      handleFieldChange('total_marks', numValue);
-                      // Auto-adjust obtained marks if it exceeds new total
-                      if (numValue > 0 && formData.obtained_marks > numValue) {
-                        handleFieldChange('obtained_marks', numValue);
-                      }
-                    }
-                  }
-                }}
-                onBlur={(e) => {
-                  if (e.target.value === '') {
-                    handleFieldChange('total_marks', 0);
-                  }
-                  handleFieldBlur('total_marks');
-                }}
-                required
-                className={cn(
-                  "h-11 text-center",
-                  errors.total_marks && "border-destructive focus-visible:ring-destructive"
-                )}
-                aria-invalid={!!errors.total_marks}
-                aria-describedby={errors.total_marks ? "total_marks-error" : undefined}
-              />
-              <FormFieldError error={errors.total_marks} id="total_marks-error" />
-            </div>
-            <div>
-              <Label htmlFor="obtained_marks">Obtained Marks *</Label>
-              <Input
-                id="obtained_marks"
-                type="text"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                value={formData.obtained_marks === 0 ? '' : String(formData.obtained_marks)}
-                onChange={(e) => {
-                  const value = e.target.value.trim();
-                  if (value === '') {
-                    handleFieldChange('obtained_marks', 0);
-                    return;
-                  }
-                  if (/^\d+$/.test(value)) {
-                    const numValue = parseInt(value, 10);
-                    if (!isNaN(numValue)) {
-                      const maxValue = formData.total_marks || undefined;
-                      const finalValue = maxValue ? Math.min(numValue, maxValue) : numValue;
-                      handleFieldChange('obtained_marks', finalValue);
-                    }
-                  }
-                }}
-                onBlur={(e) => {
-                  if (e.target.value === '') {
-                    handleFieldChange('obtained_marks', 0);
-                  }
-                  handleFieldBlur('obtained_marks');
-                }}
-                required
-                className={cn(
-                  "h-11 text-center",
-                  errors.obtained_marks && "border-destructive focus-visible:ring-destructive"
-                )}
-                aria-invalid={!!errors.obtained_marks}
-                aria-describedby={errors.obtained_marks ? "obtained_marks-error" : undefined}
-              />
-              <FormFieldError error={errors.obtained_marks} id="obtained_marks-error" />
-              {!errors.obtained_marks && formData.total_marks > 0 && (
-                <p className="text-xs text-muted-foreground mt-1">
-                  {formData.obtained_marks} of {formData.total_marks} marks
-                </p>
-              )}
-            </div>
           </div>
 
           <div>

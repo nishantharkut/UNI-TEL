@@ -50,6 +50,8 @@ export interface MarksRecord {
   percentage?: number;
   weightage?: number;
   weighted_percentage?: number;
+  exam_date?: string; // ISO date string (YYYY-MM-DD)
+  exam_time?: string; // Time string (HH:MM)
   source_json_import: boolean;
   created_at: string;
   updated_at: string;
