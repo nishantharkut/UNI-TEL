@@ -28,7 +28,7 @@ import {
 
 export default function Semesters() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [semesterNumber, setSemesterNumber] = useState(1);
+  const [semesterNumber, setSemesterNumber] = useState<number | ''>('');
   const [touched, setTouched] = useState(false);
   
   const { data: semesters = [], isLoading } = useSemesters();
@@ -37,20 +37,53 @@ export default function Semesters() {
   const { toast } = useToast();
 
   const existingNumbers = semesters.map(s => s.number);
-  const error = touched && (existingNumbers.includes(semesterNumber) 
-    ? `Semester ${semesterNumber} already exists`
-    : semesterNumber < 1 || semesterNumber > 12
-    ? 'Semester number must be between 1 and 12'
-    : null);
+  
+  // Only validate if field has been touched and has a value
+  const error = touched && semesterNumber !== '' ? (
+    existingNumbers.includes(Number(semesterNumber))
+      ? `Semester ${semesterNumber} already exists`
+      : Number(semesterNumber) < 1 || Number(semesterNumber) > 12
+      ? 'Semester number must be between 1 and 12'
+      : null
+  ) : null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setTouched(true);
 
-    if (error) {
+    // Validate
+    if (semesterNumber === '' || semesterNumber === null || semesterNumber === undefined) {
       toast({
         title: 'Validation Error',
-        description: error,
+        description: 'Please enter a semester number.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    const numValue = Number(semesterNumber);
+    if (isNaN(numValue)) {
+      toast({
+        title: 'Validation Error',
+        description: 'Please enter a valid number.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (existingNumbers.includes(numValue)) {
+      toast({
+        title: 'Validation Error',
+        description: `Semester ${numValue} already exists. Please choose a different number.`,
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (numValue < 1 || numValue > 12) {
+      toast({
+        title: 'Validation Error',
+        description: 'Semester number must be between 1 and 12.',
         variant: 'destructive',
       });
       return;
@@ -58,16 +91,16 @@ export default function Semesters() {
 
     try {
       await createSemester.mutateAsync({
-        number: semesterNumber,
+        number: numValue,
         total_credits: 0,
         source_json_import: false
       });
       toast({
         title: 'Semester Created',
-        description: `Semester ${semesterNumber} has been created successfully.`,
+        description: `Semester ${numValue} has been created successfully.`,
       });
       setIsDialogOpen(false);
-      setSemesterNumber(1);
+      setSemesterNumber('');
       setTouched(false);
     } catch (error: any) {
       toast({
@@ -144,7 +177,17 @@ export default function Semesters() {
           <div className="flex-1">
             <LazyImportExport />
           </div>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <Dialog 
+            open={isDialogOpen} 
+            onOpenChange={(open) => {
+              setIsDialogOpen(open);
+              if (!open) {
+                // Reset form when dialog closes
+                setSemesterNumber('');
+                setTouched(false);
+              }
+            }}
+          >
             <DialogTrigger asChild>
               <Button className="w-full sm:w-auto color-primary text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-200 h-12 px-6">
                 <Plus className="w-5 h-5 mr-2" />
@@ -168,17 +211,35 @@ export default function Semesters() {
                   </Label>
                   <Input
                     id="number"
-                    type="number"
-                    min="1"
-                    max="12"
-                    value={semesterNumber}
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    value={semesterNumber === '' ? '' : String(semesterNumber)}
                     onChange={(e) => {
-                      setSemesterNumber(parseInt(e.target.value) || 1);
-                      if (touched) {
-                        // Revalidate on change after first touch
+                      const value = e.target.value.trim();
+                      // Allow empty string for clearing
+                      if (value === '') {
+                        setSemesterNumber('');
+                        setTouched(false); // Reset touched when cleared
+                        return;
+                      }
+                      // Only allow digits
+                      if (/^\d+$/.test(value)) {
+                        const numValue = parseInt(value, 10);
+                        if (!isNaN(numValue)) {
+                          setSemesterNumber(numValue);
+                          // Revalidate if already touched
+                          if (touched) {
+                            // Validation will happen automatically via error calculation
+                          }
+                        }
                       }
                     }}
-                    onBlur={() => setTouched(true)}
+                    onBlur={() => {
+                      if (semesterNumber !== '') {
+                        setTouched(true);
+                      }
+                    }}
                     required
                     className={cn(
                       "h-12 text-base rounded-xl border-2 focus:border-academic-primary transition-colors",
@@ -189,7 +250,7 @@ export default function Semesters() {
                     aria-describedby={error ? "semester-number-error" : undefined}
                   />
                   <FormFieldError error={error || undefined} id="semester-number-error" />
-                  {!error && touched && (
+                  {!error && touched && semesterNumber !== '' && Number(semesterNumber) >= 1 && Number(semesterNumber) <= 12 && (
                     <p className="text-xs text-muted-foreground mt-1">
                       ✓ Semester number is available
                     </p>
@@ -207,7 +268,7 @@ export default function Semesters() {
                   <Button 
                     type="submit" 
                     className="color-primary text-white font-semibold h-12 px-6 rounded-xl shadow-lg"
-                    disabled={createSemester.isPending || !!error}
+                    disabled={createSemester.isPending || !!error || semesterNumber === '' || semesterNumber === null}
                   >
                     {createSemester.isPending ? (
                       <>

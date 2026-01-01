@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { UserCheck, UserX, Calculator } from 'lucide-react';
 import { useCreateAttendance, useUpdateAttendance, useSemesters } from '@/hooks/useAcademic';
 import type { AttendanceRecord } from '@/services/academicService';
+import { useToast } from '@/hooks/use-toast';
 
 interface AttendanceDialogProps {
   open: boolean;
@@ -35,6 +36,7 @@ export function AttendanceDialog({
   const { data: semesters = [] } = useSemesters();
   const createAttendance = useCreateAttendance();
   const updateAttendance = useUpdateAttendance();
+  const { toast } = useToast();
 
   useEffect(() => {
     if (editingRecord) {
@@ -85,8 +87,16 @@ export function AttendanceDialog({
       
       onOpenChange(false);
       resetForm();
-    } catch (error) {
-      console.error('Error saving attendance record:', error);
+      toast({
+        title: editingRecord ? 'Attendance Updated' : 'Attendance Added',
+        description: `Attendance record for ${submitData.subject_name} has been ${editingRecord ? 'updated' : 'added'} successfully.`,
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Error Saving Attendance',
+        description: error?.message || 'An unexpected error occurred. Please try again.',
+        variant: 'destructive',
+      });
     }
   };
 

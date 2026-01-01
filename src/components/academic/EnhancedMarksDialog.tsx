@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Calculator, Plus, Target, Edit, Trash2 } from 'lucide-react';
 import { useCreateMarks, useUpdateMarks, useSemesters } from '@/hooks/useAcademic';
 import type { MarksRecord } from '@/services/academicService';
+import { useToast } from '@/hooks/use-toast';
 
 interface EnhancedMarksDialogProps {
   open: boolean;
@@ -40,6 +41,7 @@ export function EnhancedMarksDialog({
   const { data: semesters = [] } = useSemesters();
   const createMarks = useCreateMarks();
   const updateMarks = useUpdateMarks();
+  const { toast } = useToast();
 
   // Load custom exam types from localStorage
   useEffect(() => {
@@ -106,33 +108,32 @@ export function EnhancedMarksDialog({
     e.preventDefault();
     
     // Validate form data
+    const errors: string[] = [];
     if (!formData.subject_name.trim()) {
-      console.error('Subject name is required');
-      return;
+      errors.push('Subject name is required');
     }
-    
     if (!formData.exam_type.trim()) {
-      console.error('Exam type is required');
-      return;
+      errors.push('Exam type is required');
     }
-
     if (!formData.semester_id) {
-      console.error('Semester is required');
-      return;
+      errors.push('Semester is required');
     }
-
     if (formData.total_marks <= 0) {
-      console.error('Total marks must be greater than 0');
-      return;
+      errors.push('Total marks must be greater than 0');
     }
-
     if (formData.obtained_marks < 0 || formData.obtained_marks > formData.total_marks) {
-      console.error('Obtained marks must be between 0 and total marks');
-      return;
+      errors.push('Obtained marks must be between 0 and total marks');
+    }
+    if (formData.weightage < 0 || formData.weightage > 100) {
+      errors.push('Weightage must be between 0 and 100');
     }
 
-    if (formData.weightage < 0 || formData.weightage > 100) {
-      console.error('Weightage must be between 0 and 100');
+    if (errors.length > 0) {
+      toast({
+        title: 'Validation Error',
+        description: errors.join('. '),
+        variant: 'destructive',
+      });
       return;
     }
     
@@ -152,14 +153,26 @@ export function EnhancedMarksDialog({
           id: editingRecord.id,
           updates: payload
         });
+        toast({
+          title: 'Marks Updated',
+          description: `Marks record for ${payload.subject_name} has been updated successfully.`,
+        });
       } else {
         await createMarks.mutateAsync(payload);
+        toast({
+          title: 'Marks Added',
+          description: `Marks record for ${payload.subject_name} has been added successfully.`,
+        });
       }
       
       onOpenChange(false);
       resetForm();
-    } catch (error) {
-      console.error('Error saving marks record:', error);
+    } catch (error: any) {
+      toast({
+        title: 'Error Saving Marks',
+        description: error?.message || 'An unexpected error occurred. Please try again.',
+        variant: 'destructive',
+      });
     }
   };
 

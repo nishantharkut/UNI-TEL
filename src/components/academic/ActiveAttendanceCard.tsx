@@ -69,7 +69,7 @@ export function ActiveAttendanceCard({ records }: ActiveAttendanceCardProps) {
       try {
         await deleteAttendance.mutateAsync(recordId);
       } catch (error) {
-        console.error('Error deleting attendance record:', error);
+        // Error is handled by the mutation's onError callback which shows a toast
       }
     }
   };

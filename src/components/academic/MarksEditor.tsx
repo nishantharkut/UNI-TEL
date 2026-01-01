@@ -104,7 +104,7 @@ export function MarksEditor({ semesterId }: MarksEditorProps) {
       setIsDialogOpen(false);
       resetForm();
     } catch (error) {
-      console.error('Error saving marks record:', error);
+      // Error is handled by the mutation's onError callback which shows a toast
     }
   };
 

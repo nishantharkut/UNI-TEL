@@ -53,7 +53,7 @@ export function GradeEditor({ semesterId }: GradeEditorProps) {
       setIsDialogOpen(false);
       resetForm();
     } catch (error) {
-      console.error('Error saving subject:', error);
+      // Error is handled by the mutation's onError callback which shows a toast
     }
   };
 

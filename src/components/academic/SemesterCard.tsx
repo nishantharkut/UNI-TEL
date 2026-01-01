@@ -29,13 +29,11 @@ export function SemesterCard({ semester }: SemesterCardProps) {
   const handleEditSubject = (e: React.MouseEvent, subject: { id: string; name: string; credits: number; grade?: string; semester_id: string }) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log('Editing subject:', subject);
     setEditingSubject(subject);
     setShowSubjectDialog(true);
   };
 
   const handleAddSubject = () => {
-    console.log('Adding new subject for semester:', semester.id);
     setEditingSubject(null);
     setShowSubjectDialog(true);
   };
