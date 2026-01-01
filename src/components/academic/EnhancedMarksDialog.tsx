@@ -39,9 +39,31 @@ export function EnhancedMarksDialog({
   const [showAddExamType, setShowAddExamType] = useState(false);
 
   const { data: semesters = [] } = useSemesters();
+  const { data: allSubjects = [] } = useSubjects();
+  const { data: semesterSubjects = [] } = useSubjectsBySemester(formData.semester_id || semesterId || '');
+  const { data: marksRecords = [] } = useMarks();
   const createMarks = useCreateMarks();
   const updateMarks = useUpdateMarks();
   const { toast } = useToast();
+  
+  // Determine which subjects to show based on whether semester is selected
+  const availableSubjects = (formData.semester_id || semesterId) 
+    ? semesterSubjects 
+    : allSubjects;
+  
+  // Get existing marks subject names to exclude from dropdown
+  const existingMarksSubjects = marksRecords
+    .filter(r => (!editingRecord || r.id !== editingRecord.id))
+    .filter(r => (formData.semester_id || semesterId) ? r.semester_id === (formData.semester_id || semesterId) : true)
+    .map(r => r.subject_name.toLowerCase().trim());
+  
+  // Filter out subjects that already have marks records
+  const selectableSubjects = availableSubjects.filter((subject: { name: string }) => 
+    !existingMarksSubjects.includes(subject.name.toLowerCase().trim())
+  );
+  
+  // Allow manual entry option
+  const [useManualEntry, setUseManualEntry] = useState(false);
 
   // Load custom exam types from localStorage
   useEffect(() => {
@@ -85,6 +107,7 @@ export function EnhancedMarksDialog({
       semester_id: semesterId || '',
       source_json_import: false
     });
+    setUseManualEntry(false);
   }, [semesterId]);
 
   // Load editing record
@@ -99,10 +122,15 @@ export function EnhancedMarksDialog({
         semester_id: editingRecord.semester_id,
         source_json_import: editingRecord.source_json_import
       });
+      // Check if the subject exists in the semester's subjects
+      const subjectExists = availableSubjects.some((s: { name: string }) => 
+        s.name.toLowerCase().trim() === editingRecord.subject_name.toLowerCase().trim()
+      );
+      setUseManualEntry(!subjectExists);
     } else {
       resetForm();
     }
-  }, [editingRecord, resetForm]);
+  }, [editingRecord, resetForm, availableSubjects]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -222,14 +250,55 @@ export function EnhancedMarksDialog({
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="subject_name">Subject Name *</Label>
-              <Input
-                id="subject_name"
-                value={formData.subject_name}
-                onChange={(e) => setFormData({ ...formData, subject_name: e.target.value })}
-                placeholder="Enter subject name"
-                required
-              />
+              <div className="flex items-center justify-between mb-2">
+                <Label htmlFor="subject_name">Subject Name *</Label>
+                {selectableSubjects.length > 0 && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 text-xs"
+                    onClick={() => {
+                      setUseManualEntry(!useManualEntry);
+                      if (!useManualEntry) {
+                        setFormData({ ...formData, subject_name: '' });
+                      }
+                    }}
+                  >
+                    {useManualEntry ? 'Select from list' : 'Enter manually'}
+                  </Button>
+                )}
+              </div>
+              {!useManualEntry && selectableSubjects.length > 0 ? (
+                <Select
+                  value={formData.subject_name}
+                  onValueChange={(value) => setFormData({ ...formData, subject_name: value })}
+                >
+                  <SelectTrigger className={cn(errors?.subject_name && "border-destructive")}>
+                    <SelectValue placeholder="Select a subject" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {selectableSubjects.map((subject: { id: string; name: string; credits: number }) => (
+                      <SelectItem key={subject.id} value={subject.name}>
+                        {subject.name} ({subject.credits} credits)
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Input
+                  id="subject_name"
+                  value={formData.subject_name}
+                  onChange={(e) => setFormData({ ...formData, subject_name: e.target.value })}
+                  placeholder="Enter subject name"
+                  required
+                />
+              )}
+              {!useManualEntry && selectableSubjects.length === 0 && (formData.semester_id || semesterId) && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  No subjects available for this semester. Please add subjects first or enter manually.
+                </p>
+              )}
             </div>
 
             {!semesterId && (

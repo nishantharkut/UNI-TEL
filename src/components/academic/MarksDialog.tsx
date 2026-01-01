@@ -7,7 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Calculator } from 'lucide-react';
-import { useCreateMarks, useUpdateMarks, useSemesters } from '@/hooks/useAcademic';
+import { useCreateMarks, useUpdateMarks, useSemesters, useSubjectsBySemester, useSubjects } from '@/hooks/useAcademic';
+import { useMarks } from '@/hooks/useMarks';
 import type { MarksRecord } from '@/services/academicService';
 import { useToast } from '@/hooks/use-toast';
 import { FormFieldError } from '@/components/ui/form-field-error';
@@ -48,9 +49,31 @@ export function MarksDialog({
   const [errors, setErrors] = useState<Partial<Record<keyof typeof formData, string>>>({});
 
   const { data: semesters = [] } = useSemesters();
+  const { data: allSubjects = [] } = useSubjects();
+  const { data: semesterSubjects = [] } = useSubjectsBySemester(formData.semester_id || semesterId || '');
+  const { data: marksRecords = [] } = useMarks();
   const createMarks = useCreateMarks();
   const updateMarks = useUpdateMarks();
   const { toast } = useToast();
+  
+  // Determine which subjects to show based on whether semester is selected
+  const availableSubjects = (formData.semester_id || semesterId) 
+    ? semesterSubjects 
+    : allSubjects;
+  
+  // Get existing marks subject names to exclude from dropdown
+  const existingMarksSubjects = marksRecords
+    .filter(r => (!editingRecord || r.id !== editingRecord.id))
+    .filter(r => (formData.semester_id || semesterId) ? r.semester_id === (formData.semester_id || semesterId) : true)
+    .map(r => r.subject_name.toLowerCase().trim());
+  
+  // Filter out subjects that already have marks records
+  const selectableSubjects = availableSubjects.filter((subject: { name: string }) => 
+    !existingMarksSubjects.includes(subject.name.toLowerCase().trim())
+  );
+  
+  // Allow manual entry option
+  const [useManualEntry, setUseManualEntry] = useState(false);
 
   const resetForm = useCallback(() => {
     setFormData({
@@ -70,6 +93,7 @@ export function MarksDialog({
       semester_id: false
     });
     setErrors({});
+    setUseManualEntry(false);
   }, [semesterId]);
 
   useEffect(() => {
@@ -91,10 +115,15 @@ export function MarksDialog({
         semester_id: false
       });
       setErrors({});
+      // Check if the subject exists in the semester's subjects
+      const subjectExists = availableSubjects.some((s: { name: string }) => 
+        s.name.toLowerCase().trim() === editingRecord.subject_name.toLowerCase().trim()
+      );
+      setUseManualEntry(!subjectExists);
     } else {
       resetForm();
     }
-  }, [editingRecord, semesterId, resetForm]);
+  }, [editingRecord, semesterId, resetForm, availableSubjects]);
 
   // Validation functions
   const validateField = (field: keyof typeof formData, value: any): string | null => {
@@ -261,22 +290,67 @@ export function MarksDialog({
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
           <div>
-            <Label htmlFor="subject_name">Subject Name *</Label>
-            <Input
-              id="subject_name"
-              value={formData.subject_name}
-              onChange={(e) => handleFieldChange('subject_name', e.target.value)}
-              onBlur={() => handleFieldBlur('subject_name')}
-              placeholder="e.g., Engineering Mathematics"
-              required
-              className={cn(
-                "h-11 text-base",
-                errors.subject_name && "border-destructive focus-visible:ring-destructive"
+            <div className="flex items-center justify-between mb-2">
+              <Label htmlFor="subject_name">Subject Name *</Label>
+              {selectableSubjects.length > 0 && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 text-xs"
+                  onClick={() => {
+                    setUseManualEntry(!useManualEntry);
+                    if (!useManualEntry) {
+                      // Clear subject name when switching to manual
+                      handleFieldChange('subject_name', '');
+                    }
+                  }}
+                >
+                  {useManualEntry ? 'Select from list' : 'Enter manually'}
+                </Button>
               )}
-              aria-invalid={!!errors.subject_name}
-              aria-describedby={errors.subject_name ? "subject_name-error" : undefined}
-            />
+            </div>
+            {!useManualEntry && selectableSubjects.length > 0 ? (
+              <Select
+                value={formData.subject_name}
+                onValueChange={(value) => handleFieldChange('subject_name', value)}
+              >
+                <SelectTrigger className={cn(
+                  "h-11",
+                  errors.subject_name && "border-destructive"
+                )}>
+                  <SelectValue placeholder="Select a subject" />
+                </SelectTrigger>
+                <SelectContent>
+                  {selectableSubjects.map((subject: { id: string; name: string; credits: number }) => (
+                    <SelectItem key={subject.id} value={subject.name}>
+                      {subject.name} ({subject.credits} credits)
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : (
+              <Input
+                id="subject_name"
+                value={formData.subject_name}
+                onChange={(e) => handleFieldChange('subject_name', e.target.value)}
+                onBlur={() => handleFieldBlur('subject_name')}
+                placeholder="e.g., Engineering Mathematics"
+                required
+                className={cn(
+                  "h-11 text-base",
+                  errors.subject_name && "border-destructive focus-visible:ring-destructive"
+                )}
+                aria-invalid={!!errors.subject_name}
+                aria-describedby={errors.subject_name ? "subject_name-error" : undefined}
+              />
+            )}
             <FormFieldError error={errors.subject_name} id="subject_name-error" />
+            {!useManualEntry && selectableSubjects.length === 0 && (formData.semester_id || semesterId) && (
+              <p className="text-xs text-muted-foreground mt-1">
+                No subjects available for this semester. Please add subjects first or enter manually.
+              </p>
+            )}
           </div>
 
           {!semesterId && (
