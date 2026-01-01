@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Badge } from '@/components/ui/badge';
 import { Edit, Plus, Trash2, Calendar, Minus, Plus as PlusIcon } from 'lucide-react';
 import { useAttendance, useCreateAttendance, useUpdateAttendance, useDeleteAttendance, useSemesters } from '@/hooks/useAcademic';
+import { useSubjects, useSubjectsBySemester } from '@/hooks/useSubjects';
 import { getAttendanceStatus } from '@/utils/gradeCalculations';
 import type { AttendanceRecord } from '@/services/academicService';
 import { useToast } from '@/hooks/use-toast';
@@ -39,10 +40,30 @@ export function AttendanceEditor({ semesterId }: AttendanceEditorProps) {
 
   const { data: attendanceRecords = [], isLoading } = useAttendance();
   const { data: semesters = [] } = useSemesters();
+  const { data: allSubjects = [] } = useSubjects();
+  const { data: semesterSubjects = [] } = useSubjectsBySemester(formData.semester_id || semesterId || '');
   const createAttendance = useCreateAttendance();
   const updateAttendance = useUpdateAttendance();
   const deleteAttendance = useDeleteAttendance();
   const { toast } = useToast();
+  
+  // Determine which subjects to show based on whether semester is selected
+  const availableSubjects = (formData.semester_id || semesterId) 
+    ? semesterSubjects 
+    : allSubjects;
+  
+  // Get existing attendance subject names to exclude from dropdown
+  const existingAttendanceSubjects = filteredRecords
+    .filter(r => (!editingRecord || r.id !== editingRecord.id))
+    .map(r => r.subject_name.toLowerCase().trim());
+  
+  // Filter out subjects that already have attendance records
+  const selectableSubjects = availableSubjects.filter((subject: { name: string }) => 
+    !existingAttendanceSubjects.includes(subject.name.toLowerCase().trim())
+  );
+  
+  // Allow manual entry option
+  const [useManualEntry, setUseManualEntry] = useState(false);
 
   const filteredRecords = semesterId 
     ? attendanceRecords.filter((record: { semester_id: string }) => record.semester_id === semesterId)
@@ -188,6 +209,11 @@ export function AttendanceEditor({ semesterId }: AttendanceEditorProps) {
       semester_id: record.semester_id,
       source_json_import: record.source_json_import
     });
+    // Check if the subject exists in the semester's subjects
+    const subjectExists = availableSubjects.some((s: { name: string }) => 
+      s.name.toLowerCase().trim() === record.subject_name.toLowerCase().trim()
+    );
+    setUseManualEntry(!subjectExists);
     setIsDialogOpen(true);
   };
 
@@ -229,6 +255,7 @@ export function AttendanceEditor({ semesterId }: AttendanceEditorProps) {
       semester_id: false
     });
     setErrors({});
+    setUseManualEntry(false);
   };
 
 
@@ -268,22 +295,67 @@ export function AttendanceEditor({ semesterId }: AttendanceEditorProps) {
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
               <div>
-                <Label htmlFor="subject_name">Subject Name *</Label>
-                <Input
-                  id="subject_name"
-                  value={formData.subject_name}
-                  onChange={(e) => handleFieldChange('subject_name', e.target.value)}
-                  onBlur={() => handleFieldBlur('subject_name')}
-                  placeholder="e.g., Engineering Mathematics"
-                  required
-                  className={cn(
-                    "h-11 text-base",
-                    errors.subject_name && "border-destructive focus-visible:ring-destructive"
+                <div className="flex items-center justify-between mb-2">
+                  <Label htmlFor="subject_name">Subject Name *</Label>
+                  {selectableSubjects.length > 0 && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 text-xs"
+                      onClick={() => {
+                        setUseManualEntry(!useManualEntry);
+                        if (!useManualEntry) {
+                          // Clear subject name when switching to manual
+                          handleFieldChange('subject_name', '');
+                        }
+                      }}
+                    >
+                      {useManualEntry ? 'Select from list' : 'Enter manually'}
+                    </Button>
                   )}
-                  aria-invalid={!!errors.subject_name}
-                  aria-describedby={errors.subject_name ? "subject_name-error" : undefined}
-                />
+                </div>
+                {!useManualEntry && selectableSubjects.length > 0 ? (
+                  <Select
+                    value={formData.subject_name}
+                    onValueChange={(value) => handleFieldChange('subject_name', value)}
+                  >
+                    <SelectTrigger className={cn(
+                      "h-11",
+                      errors.subject_name && "border-destructive"
+                    )}>
+                      <SelectValue placeholder="Select a subject" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {selectableSubjects.map((subject: { id: string; name: string; credits: number }) => (
+                        <SelectItem key={subject.id} value={subject.name}>
+                          {subject.name} ({subject.credits} credits)
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <Input
+                    id="subject_name"
+                    value={formData.subject_name}
+                    onChange={(e) => handleFieldChange('subject_name', e.target.value)}
+                    onBlur={() => handleFieldBlur('subject_name')}
+                    placeholder="e.g., Engineering Mathematics"
+                    required
+                    className={cn(
+                      "h-11 text-base",
+                      errors.subject_name && "border-destructive focus-visible:ring-destructive"
+                    )}
+                    aria-invalid={!!errors.subject_name}
+                    aria-describedby={errors.subject_name ? "subject_name-error" : undefined}
+                  />
+                )}
                 <FormFieldError error={errors.subject_name} id="subject_name-error" />
+                {!useManualEntry && selectableSubjects.length === 0 && (formData.semester_id || semesterId) && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    No subjects available for this semester. Please add subjects first or enter manually.
+                  </p>
+                )}
               </div>
 
               {!semesterId && (
@@ -294,6 +366,9 @@ export function AttendanceEditor({ semesterId }: AttendanceEditorProps) {
                     onValueChange={(value) => {
                       handleFieldChange('semester_id', value);
                       handleFieldBlur('semester_id');
+                      // Reset subject name when semester changes
+                      handleFieldChange('subject_name', '');
+                      setUseManualEntry(false);
                     }}
                   >
                     <SelectTrigger className={cn(

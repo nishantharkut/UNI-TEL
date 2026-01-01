@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { UserCheck, UserX, Edit, Trash2, Plus, Calendar } from 'lucide-react';
 import { useCreateAttendance, useUpdateAttendance, useDeleteAttendance, useSemesters } from '@/hooks/useAcademic';
+import { useSubjectsBySemester } from '@/hooks/useSubjects';
 import { getAttendanceStatus } from '@/utils/gradeCalculations';
 import type { AttendanceRecord } from '@/services/academicService';
 
@@ -23,11 +24,21 @@ export function ActiveAttendanceCard({ records }: ActiveAttendanceCardProps) {
     subject_name: '',
     semester_id: ''
   });
+  const [useManualEntry, setUseManualEntry] = useState(false);
 
   const { data: semesters = [] } = useSemesters();
+  const { data: semesterSubjects = [] } = useSubjectsBySemester(newSubject.semester_id);
   const createAttendance = useCreateAttendance();
   const updateAttendance = useUpdateAttendance();
   const deleteAttendance = useDeleteAttendance();
+  
+  // Get existing attendance subject names to exclude from dropdown
+  const existingAttendanceSubjects = records.map(r => r.subject_name.toLowerCase().trim());
+  
+  // Filter out subjects that already have attendance records
+  const selectableSubjects = semesterSubjects.filter((subject: { name: string }) => 
+    !existingAttendanceSubjects.includes(subject.name.toLowerCase().trim())
+  );
 
   const handleMarkAttendance = async (recordId: string, isPresent: boolean) => {
     const record = records.find(r => r.id === recordId);
@@ -96,17 +107,14 @@ export function ActiveAttendanceCard({ records }: ActiveAttendanceCardProps) {
             </DialogHeader>
             <div className="space-y-4">
               <div>
-                <Label htmlFor="subject_name">Subject Name</Label>
-                <Input
-                  id="subject_name"
-                  value={newSubject.subject_name}
-                  onChange={(e) => setNewSubject({ ...newSubject, subject_name: e.target.value })}
-                  placeholder="e.g., Mathematics"
-                />
-              </div>
-              <div>
                 <Label htmlFor="semester">Semester</Label>
-                <Select value={newSubject.semester_id} onValueChange={(value) => setNewSubject({ ...newSubject, semester_id: value })}>
+                <Select 
+                  value={newSubject.semester_id} 
+                  onValueChange={(value) => {
+                    setNewSubject({ ...newSubject, semester_id: value, subject_name: '' });
+                    setUseManualEntry(false);
+                  }}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select semester" />
                   </SelectTrigger>
@@ -119,9 +127,63 @@ export function ActiveAttendanceCard({ records }: ActiveAttendanceCardProps) {
                   </SelectContent>
                 </Select>
               </div>
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <Label htmlFor="subject_name">Subject Name</Label>
+                  {selectableSubjects.length > 0 && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 text-xs"
+                      onClick={() => {
+                        setUseManualEntry(!useManualEntry);
+                        if (!useManualEntry) {
+                          setNewSubject({ ...newSubject, subject_name: '' });
+                        }
+                      }}
+                    >
+                      {useManualEntry ? 'Select from list' : 'Enter manually'}
+                    </Button>
+                  )}
+                </div>
+                {!useManualEntry && selectableSubjects.length > 0 ? (
+                  <Select
+                    value={newSubject.subject_name}
+                    onValueChange={(value) => setNewSubject({ ...newSubject, subject_name: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a subject" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {selectableSubjects.map((subject: { id: string; name: string; credits: number }) => (
+                        <SelectItem key={subject.id} value={subject.name}>
+                          {subject.name} ({subject.credits} credits)
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <Input
+                    id="subject_name"
+                    value={newSubject.subject_name}
+                    onChange={(e) => setNewSubject({ ...newSubject, subject_name: e.target.value })}
+                    placeholder="e.g., Mathematics"
+                  />
+                )}
+                {!useManualEntry && selectableSubjects.length === 0 && newSubject.semester_id && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    No subjects available for this semester. Please add subjects first or enter manually.
+                  </p>
+                )}
+              </div>
               <div className="flex gap-2">
                 <Button onClick={handleAddSubject} className="flex-1">Add</Button>
-                <Button variant="outline" onClick={() => setIsAddDialogOpen(false)} className="flex-1">Cancel</Button>
+                <Button variant="outline" onClick={() => {
+                  setIsAddDialogOpen(false);
+                  setNewSubject({ subject_name: '', semester_id: '' });
+                  setUseManualEntry(false);
+                }} className="flex-1">Cancel</Button>
               </div>
             </div>
           </DialogContent>

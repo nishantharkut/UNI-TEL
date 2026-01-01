@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { UserCheck, UserX, Calculator } from 'lucide-react';
 import { useCreateAttendance, useUpdateAttendance, useSemesters } from '@/hooks/useAcademic';
+import { useSubjectsBySemester } from '@/hooks/useSubjects';
 import type { AttendanceRecord } from '@/services/academicService';
 import { useToast } from '@/hooks/use-toast';
 
@@ -34,9 +35,16 @@ export function AttendanceDialog({
   });
 
   const { data: semesters = [] } = useSemesters();
+  const { data: semesterSubjects = [] } = useSubjectsBySemester(formData.semester_id || semesterId || '');
   const createAttendance = useCreateAttendance();
   const updateAttendance = useUpdateAttendance();
   const { toast } = useToast();
+  
+  // Get existing attendance subject names to exclude from dropdown (if needed)
+  const [useManualEntry, setUseManualEntry] = useState(false);
+  
+  // Filter out subjects that already have attendance records (if we have access to records)
+  const selectableSubjects = semesterSubjects;
 
   useEffect(() => {
     if (editingRecord) {
@@ -60,6 +68,7 @@ export function AttendanceDialog({
       note: '',
       semester_id: semesterId || ''
     });
+    setUseManualEntry(false);
   }, [semesterId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -138,23 +147,15 @@ export function AttendanceDialog({
           </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <Label htmlFor="subject_name">Subject Name</Label>
-            <Input
-              id="subject_name"
-              value={formData.subject_name}
-              onChange={(e) => setFormData({ ...formData, subject_name: e.target.value })}
-              placeholder="e.g., Engineering Mathematics"
-              required
-            />
-          </div>
-
           {!semesterId && (
             <div>
               <Label htmlFor="semester">Semester</Label>
               <Select
                 value={formData.semester_id}
-                onValueChange={(value) => setFormData({ ...formData, semester_id: value })}
+                onValueChange={(value) => {
+                  setFormData({ ...formData, semester_id: value, subject_name: '' });
+                  setUseManualEntry(false);
+                }}
                 required
               >
                 <SelectTrigger>
@@ -170,6 +171,59 @@ export function AttendanceDialog({
               </Select>
             </div>
           )}
+          
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <Label htmlFor="subject_name">Subject Name</Label>
+              {selectableSubjects.length > 0 && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 text-xs"
+                  onClick={() => {
+                    setUseManualEntry(!useManualEntry);
+                    if (!useManualEntry) {
+                      setFormData({ ...formData, subject_name: '' });
+                    }
+                  }}
+                >
+                  {useManualEntry ? 'Select from list' : 'Enter manually'}
+                </Button>
+              )}
+            </div>
+            {!useManualEntry && selectableSubjects.length > 0 ? (
+              <Select
+                value={formData.subject_name}
+                onValueChange={(value) => setFormData({ ...formData, subject_name: value })}
+                required
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a subject" />
+                </SelectTrigger>
+                <SelectContent>
+                  {selectableSubjects.map((subject: { id: string; name: string; credits: number }) => (
+                    <SelectItem key={subject.id} value={subject.name}>
+                      {subject.name} ({subject.credits} credits)
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : (
+              <Input
+                id="subject_name"
+                value={formData.subject_name}
+                onChange={(e) => setFormData({ ...formData, subject_name: e.target.value })}
+                placeholder="e.g., Engineering Mathematics"
+                required
+              />
+            )}
+            {!useManualEntry && selectableSubjects.length === 0 && (formData.semester_id || semesterId) && (
+              <p className="text-xs text-muted-foreground mt-1">
+                No subjects available for this semester. Please add subjects first or enter manually.
+              </p>
+            )}
+          </div>
 
           {/* Quick Action Buttons */}
           <div className="space-y-3">
