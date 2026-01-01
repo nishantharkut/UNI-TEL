@@ -65,8 +65,8 @@ export default function Index() {
   const performanceStatus = summary?.cgpa ? getPerformanceStatus(summary.cgpa) : null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/10">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 max-w-7xl space-y-6 sm:space-y-8">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/10 overflow-x-hidden w-full max-w-full">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 max-w-7xl space-y-6 sm:space-y-8 w-full max-w-full overflow-x-hidden">
         
         {/* Hero Section - Mobile First */}
         <div className="relative overflow-hidden rounded-3xl color-primary p-6 sm:p-8 lg:p-12 shadow-2xl">
@@ -80,10 +80,10 @@ export default function Index() {
                     <GraduationCap className="w-6 h-6 sm:w-8 sm:h-8" />
                   </div>
                   <div>
-                    <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight">
+                    <h1 className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-bold tracking-tight">
                       {getGreeting()}!
                     </h1>
-                     <p className="text-white/80 text-sm sm:text-base">
+                     <p className="text-white/80 text-xs sm:text-sm lg:text-base">
                        Welcome to your academic dashboard
                      </p>
                   </div>
@@ -97,7 +97,7 @@ export default function Index() {
                       </div>
                        <div>
                          <p className="text-sm text-white/80">Current CGPA</p>
-                         <p className="text-2xl sm:text-3xl font-bold">{summary.cgpa.toFixed(2)}</p>
+                         <p className="text-xl sm:text-2xl lg:text-3xl font-bold">{summary.cgpa.toFixed(2)}</p>
                        </div>
                     </div>
                     {performanceStatus && (
@@ -141,7 +141,7 @@ export default function Index() {
                   <Calendar className="h-6 w-6 text-academic-primary" />
                 </div>
                 <div className="text-right">
-                  <div className="text-3xl sm:text-4xl font-bold text-academic-primary">
+                  <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-academic-primary">
                     {summary?.total_semesters || 0}
                   </div>
                   <p className="text-sm font-medium text-academic-primary/80">Semesters</p>
@@ -171,7 +171,7 @@ export default function Index() {
                   <BookOpen className="h-6 w-6 text-academic-secondary" />
                 </div>
                 <div className="text-right">
-                  <div className="text-3xl sm:text-4xl font-bold text-academic-secondary">
+                  <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-academic-secondary">
                     {summary?.total_subjects || 0}
                   </div>
                   <p className="text-sm font-medium text-academic-secondary/80">Subjects</p>
@@ -201,7 +201,7 @@ export default function Index() {
                   <TrendingUp className="h-6 w-6 text-academic-secondary" />
                 </div>
                 <div className="text-right">
-                  <div className="text-3xl sm:text-4xl font-bold text-academic-secondary">
+                  <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-academic-secondary">
                     {summary?.cgpa ? summary.cgpa.toFixed(2) : 'N/A'}
                   </div>
                   <p className="text-sm font-medium text-academic-secondary/80">CGPA</p>
@@ -231,7 +231,7 @@ export default function Index() {
                   <Award className="h-6 w-6 text-academic-secondary" />
                 </div>
                 <div className="text-right">
-                  <div className="text-3xl sm:text-4xl font-bold text-academic-secondary">
+                  <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-academic-secondary">
                     {summary?.total_credits || 0}
                   </div>
                   <p className="text-sm font-medium text-academic-secondary/80">Credits</p>
@@ -392,7 +392,7 @@ export default function Index() {
                         <Sparkles className="w-4 h-4 text-primary/60" />
                       </div>
                     </div>
-                    <h3 className="text-xl lg:text-2xl font-bold text-foreground mb-3">Start Your Academic Journey</h3>
+                    <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-foreground mb-3">Start Your Academic Journey</h3>
                     <p className="text-muted-foreground mb-8 text-sm lg:text-base leading-relaxed max-w-md mx-auto">
                       Add your first semester and subjects to unlock powerful analytics and track your academic progress.
                     </p>

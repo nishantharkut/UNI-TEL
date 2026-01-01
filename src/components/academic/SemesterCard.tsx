@@ -122,7 +122,7 @@ export function SemesterCard({ semester }: SemesterCardProps) {
                 {subjects.map((subject) => (
                   <div
                     key={subject.id}
-                    className="group relative bg-gradient-to-br from-card to-card/50 border border-border/50 rounded-2xl p-4 lg:p-6 hover:shadow-lg hover:border-primary/30 transition-all duration-300"
+                    className="group relative bg-gradient-to-br from-card to-card/50 border border-border/50 rounded-2xl p-4 sm:p-5 lg:p-6 hover:shadow-lg hover:border-primary/30 transition-all duration-300"
                   >
                     <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                       <div className="flex-1 min-w-0 space-y-4">

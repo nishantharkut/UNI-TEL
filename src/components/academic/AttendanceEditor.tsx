@@ -266,7 +266,7 @@ export function AttendanceEditor({ semesterId }: AttendanceEditorProps) {
                 {editingRecord ? 'Edit Attendance' : 'Add Attendance Record'}
               </DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
               <div>
                 <Label htmlFor="subject_name">Subject Name *</Label>
                 <Input
@@ -276,7 +276,10 @@ export function AttendanceEditor({ semesterId }: AttendanceEditorProps) {
                   onBlur={() => handleFieldBlur('subject_name')}
                   placeholder="e.g., Engineering Mathematics"
                   required
-                  className={cn(errors.subject_name && "border-destructive focus-visible:ring-destructive")}
+                  className={cn(
+                    "h-12 sm:h-11 text-base touch-target",
+                    errors.subject_name && "border-destructive focus-visible:ring-destructive"
+                  )}
                   aria-invalid={!!errors.subject_name}
                   aria-describedby={errors.subject_name ? "subject_name-error" : undefined}
                 />
@@ -293,7 +296,10 @@ export function AttendanceEditor({ semesterId }: AttendanceEditorProps) {
                       handleFieldBlur('semester_id');
                     }}
                   >
-                    <SelectTrigger className={cn(errors.semester_id && "border-destructive")}>
+                    <SelectTrigger className={cn(
+                      "h-12 sm:h-11 touch-target",
+                      errors.semester_id && "border-destructive"
+                    )}>
                       <SelectValue placeholder="Select semester" />
                     </SelectTrigger>
                     <SelectContent>
@@ -315,12 +321,13 @@ export function AttendanceEditor({ semesterId }: AttendanceEditorProps) {
                     type="button" 
                     variant="outline" 
                     size="sm"
+                    className="h-12 w-12 sm:h-10 sm:w-10 touch-target"
                     onClick={() => {
                       const newValue = Math.max(0, formData.total_classes - 1);
                       handleFieldChange('total_classes', newValue);
                     }}
                   >
-                    <Minus className="w-4 h-4" />
+                    <Minus className="w-5 h-5 sm:w-4 sm:h-4" />
                   </Button>
                   <Input
                     id="total_classes"
@@ -329,7 +336,10 @@ export function AttendanceEditor({ semesterId }: AttendanceEditorProps) {
                     value={formData.total_classes}
                     onChange={(e) => handleFieldChange('total_classes', parseInt(e.target.value) || 0)}
                     onBlur={() => handleFieldBlur('total_classes')}
-                    className={cn("text-center", errors.total_classes && "border-destructive focus-visible:ring-destructive")}
+                    className={cn(
+                      "h-12 sm:h-11 text-center touch-target",
+                      errors.total_classes && "border-destructive focus-visible:ring-destructive"
+                    )}
                     aria-invalid={!!errors.total_classes}
                     aria-describedby={errors.total_classes ? "total_classes-error" : undefined}
                   />
@@ -337,12 +347,13 @@ export function AttendanceEditor({ semesterId }: AttendanceEditorProps) {
                     type="button" 
                     variant="outline" 
                     size="sm"
+                    className="h-12 w-12 sm:h-10 sm:w-10 touch-target"
                     onClick={() => {
                       const newValue = formData.total_classes + 1;
                       handleFieldChange('total_classes', newValue);
                     }}
                   >
-                    <PlusIcon className="w-4 h-4" />
+                    <PlusIcon className="w-5 h-5 sm:w-4 sm:h-4" />
                   </Button>
                 </div>
                 <FormFieldError error={errors.total_classes} id="total_classes-error" />
@@ -378,7 +389,10 @@ export function AttendanceEditor({ semesterId }: AttendanceEditorProps) {
                       }
                       handleFieldBlur('attended_classes');
                     }}
-                    className={cn("text-center", errors.attended_classes && "border-destructive focus-visible:ring-destructive")}
+                    className={cn(
+                      "h-12 sm:h-11 text-center touch-target",
+                      errors.attended_classes && "border-destructive focus-visible:ring-destructive"
+                    )}
                     aria-invalid={!!errors.attended_classes}
                     aria-describedby={errors.attended_classes ? "attended_classes-error" : undefined}
                   />
@@ -386,12 +400,13 @@ export function AttendanceEditor({ semesterId }: AttendanceEditorProps) {
                     type="button" 
                     variant="outline" 
                     size="sm"
+                    className="h-12 w-12 sm:h-10 sm:w-10 touch-target"
                     onClick={() => {
                       const newValue = formData.attended_classes + 1;
                       handleFieldChange('attended_classes', newValue);
                     }}
                   >
-                    <PlusIcon className="w-4 h-4" />
+                    <PlusIcon className="w-5 h-5 sm:w-4 sm:h-4" />
                   </Button>
                 </div>
                 <FormFieldError error={errors.attended_classes} id="attended_classes-error" />

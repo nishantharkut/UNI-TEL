@@ -259,7 +259,7 @@ export function MarksDialog({
             {editingRecord ? 'Edit Marks' : 'Add Marks Record'}
           </DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
           <div>
             <Label htmlFor="subject_name">Subject Name *</Label>
             <Input
@@ -269,7 +269,10 @@ export function MarksDialog({
               onBlur={() => handleFieldBlur('subject_name')}
               placeholder="e.g., Engineering Mathematics"
               required
-              className={cn(errors.subject_name && "border-destructive focus-visible:ring-destructive")}
+              className={cn(
+                "h-12 sm:h-11 text-base touch-target",
+                errors.subject_name && "border-destructive focus-visible:ring-destructive"
+              )}
               aria-invalid={!!errors.subject_name}
               aria-describedby={errors.subject_name ? "subject_name-error" : undefined}
             />
@@ -326,7 +329,7 @@ export function MarksDialog({
             <FormFieldError error={errors.exam_type} />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="total_marks">Total Marks *</Label>
               <Input
@@ -350,7 +353,10 @@ export function MarksDialog({
                   handleFieldBlur('total_marks');
                 }}
                 required
-                className={cn(errors.total_marks && "border-destructive focus-visible:ring-destructive")}
+                className={cn(
+                  "h-12 sm:h-11 text-center touch-target",
+                  errors.total_marks && "border-destructive focus-visible:ring-destructive"
+                )}
                 aria-invalid={!!errors.total_marks}
                 aria-describedby={errors.total_marks ? "total_marks-error" : undefined}
               />
@@ -376,7 +382,10 @@ export function MarksDialog({
                   handleFieldBlur('obtained_marks');
                 }}
                 required
-                className={cn(errors.obtained_marks && "border-destructive focus-visible:ring-destructive")}
+                className={cn(
+                  "h-12 sm:h-11 text-center touch-target",
+                  errors.obtained_marks && "border-destructive focus-visible:ring-destructive"
+                )}
                 aria-invalid={!!errors.obtained_marks}
                 aria-describedby={errors.obtained_marks ? "obtained_marks-error" : undefined}
               />
@@ -410,7 +419,10 @@ export function MarksDialog({
                   handleFieldBlur('weightage');
                 }}
                 required
-                className={cn(errors.weightage && "border-destructive focus-visible:ring-destructive")}
+                    className={cn(
+                      "h-12 sm:h-11 touch-target",
+                      errors.weightage && "border-destructive focus-visible:ring-destructive"
+                    )}
                 aria-invalid={!!errors.weightage}
                 aria-describedby={errors.weightage ? "weightage-error" : undefined}
               />

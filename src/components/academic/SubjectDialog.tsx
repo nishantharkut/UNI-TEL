@@ -189,10 +189,10 @@ export function SubjectDialog({ open, onOpenChange, semesterId, editingSubject }
               }}
               onBlur={() => setNameTouched(true)}
               required
-              className={cn(
-                "h-12 text-base",
-                nameError && "border-destructive focus-visible:ring-destructive"
-              )}
+                className={cn(
+                  "h-12 sm:h-11 text-base touch-target",
+                  nameError && "border-destructive focus-visible:ring-destructive"
+                )}
               placeholder="e.g., Engineering Mathematics"
               disabled={isLoading}
               aria-invalid={!!nameError}
@@ -206,7 +206,7 @@ export function SubjectDialog({ open, onOpenChange, semesterId, editingSubject }
             )}
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="credits" className="text-sm font-semibold text-foreground">
                 Credits *
@@ -227,7 +227,7 @@ export function SubjectDialog({ open, onOpenChange, semesterId, editingSubject }
                 onBlur={() => setCreditsTouched(true)}
                 required
                 className={cn(
-                  "h-12 text-base",
+                  "h-12 sm:h-11 text-base touch-target",
                   creditsError && "border-destructive focus-visible:ring-destructive"
                 )}
                 disabled={isLoading}
@@ -246,7 +246,7 @@ export function SubjectDialog({ open, onOpenChange, semesterId, editingSubject }
                 onValueChange={setGrade}
                 disabled={isLoading}
               >
-                <SelectTrigger className="h-12">
+                <SelectTrigger className="h-12 sm:h-11 touch-target">
                   <SelectValue placeholder="Select grade" />
                 </SelectTrigger>
                 <SelectContent className="bg-background border shadow-lg max-h-60">

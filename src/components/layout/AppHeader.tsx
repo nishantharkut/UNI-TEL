@@ -40,8 +40,8 @@ export function AppHeader({ user, onSignOut, onMobileMenuToggle, mobileMenuOpen 
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/30 bg-background/98 backdrop-blur-xl supports-[backdrop-filter]:bg-background/95 shadow-lg shadow-black/5">
-      <div className="flex h-16 items-center justify-between px-4 lg:px-6">
+    <header className="sticky top-0 z-50 w-full max-w-full border-b border-border/30 bg-background/98 backdrop-blur-xl supports-[backdrop-filter]:bg-background/95 shadow-lg shadow-black/5 overflow-x-hidden">
+      <div className="flex h-16 items-center justify-between px-4 lg:px-6 w-full max-w-full overflow-x-hidden">
         {/* Left side - Mobile menu + Branding */}
         <div className="flex items-center gap-3">
           {/* Mobile Menu Button */}
@@ -59,11 +59,11 @@ export function AppHeader({ user, onSignOut, onMobileMenuToggle, mobileMenuOpen 
               <img src="/logo.png" alt="UNI-TEL Logo" className="h-8 w-8 sm:h-9 sm:w-9 object-contain drop-shadow-sm" />
               <div className="absolute inset-0 bg-gradient-to-br from-academic-primary/20 to-transparent rounded-lg blur-sm"></div>
             </div>
-            <div>
-              <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-academic-primary to-academic-secondary bg-clip-text text-transparent">
+            <div className="min-w-0">
+              <span className="text-base sm:text-lg lg:text-xl font-bold bg-gradient-to-r from-academic-primary to-academic-secondary bg-clip-text text-transparent block truncate">
                 UNI-TEL
               </span>
-              <p className="text-xs text-muted-foreground font-medium -mt-1">Academic Hub</p>
+              <p className="text-xs text-muted-foreground font-medium -mt-1 hidden sm:block">Academic Hub</p>
             </div>
           </div>
         </div>
