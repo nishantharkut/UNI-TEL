@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { ComponentLoader } from '@/components/ui/PageLoader';
+import { Skeleton } from '@/components/ui/skeleton';
 
 // Lazy load the AppHeader component
 const AppHeader = lazy(() => import('./AppHeader').then(module => ({ default: module.AppHeader })));
@@ -17,7 +17,12 @@ interface LazyAppHeaderProps {
 
 export function LazyAppHeader({ user, onSignOut, onMobileMenuToggle, mobileMenuOpen }: LazyAppHeaderProps) {
   return (
-    <Suspense fallback={<ComponentLoader message="Loading header..." size="sm" variant="minimal" />}>
+    <Suspense fallback={
+      <div className="h-16 w-full border-b border-border/30 bg-background/98 flex items-center justify-between px-4 lg:px-6">
+        <Skeleton className="h-8 w-32" />
+        <Skeleton className="h-8 w-24 rounded-full" />
+      </div>
+    }>
       <AppHeader 
         user={user} 
         onSignOut={onSignOut} 
