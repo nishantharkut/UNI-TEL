@@ -78,7 +78,7 @@ export default function Layout({ children }: LayoutProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/10 overflow-x-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/10">
       {/* Mobile Overlay */}
       {mobileMenuOpen && (
         <div 
@@ -100,9 +100,9 @@ export default function Layout({ children }: LayoutProps) {
       </div>
       
       {/* Main Content Area */}
-      <div className={`flex-1 flex flex-col min-h-screen transition-all duration-300 overflow-x-hidden ${
+      <div className={`flex-1 flex flex-col min-h-screen transition-all duration-300 ${
         !sidebarCollapsed ? 'lg:ml-72' : 'lg:ml-24'
-      } ml-0 w-full max-w-full`}>
+      } ml-0`}>
         <LazyAppHeader 
           user={{
             full_name: user.user_metadata?.full_name || user.email || '',
@@ -113,8 +113,8 @@ export default function Layout({ children }: LayoutProps) {
           onMobileMenuToggle={handleMobileMenuToggle}
           mobileMenuOpen={mobileMenuOpen}
         />
-        <main className="flex-1 overflow-y-auto overflow-x-hidden bg-background/50 w-full -mt-0">
-          <div className="min-h-full p-3 sm:p-4 lg:p-6 w-full max-w-full">
+        <main className="flex-1 overflow-auto bg-background/50">
+          <div className="min-h-full p-3 sm:p-4 lg:p-6">
             {children}
           </div>
         </main>

@@ -190,7 +190,7 @@ export function SubjectDialog({ open, onOpenChange, semesterId, editingSubject }
               onBlur={() => setNameTouched(true)}
               required
                 className={cn(
-                  "h-12 sm:h-11 text-base touch-target",
+                  "h-11 text-base",
                   nameError && "border-destructive focus-visible:ring-destructive"
                 )}
               placeholder="e.g., Engineering Mathematics"
@@ -227,7 +227,7 @@ export function SubjectDialog({ open, onOpenChange, semesterId, editingSubject }
                 onBlur={() => setCreditsTouched(true)}
                 required
                 className={cn(
-                  "h-12 sm:h-11 text-base touch-target",
+                  "h-11 text-base",
                   creditsError && "border-destructive focus-visible:ring-destructive"
                 )}
                 disabled={isLoading}
@@ -246,7 +246,7 @@ export function SubjectDialog({ open, onOpenChange, semesterId, editingSubject }
                 onValueChange={setGrade}
                 disabled={isLoading}
               >
-                <SelectTrigger className="h-12 sm:h-11 touch-target">
+                <SelectTrigger className="h-11">
                   <SelectValue placeholder="Select grade" />
                 </SelectTrigger>
                 <SelectContent className="bg-background border shadow-lg max-h-60">

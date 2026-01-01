@@ -277,7 +277,7 @@ export function AttendanceEditor({ semesterId }: AttendanceEditorProps) {
                   placeholder="e.g., Engineering Mathematics"
                   required
                   className={cn(
-                    "h-12 sm:h-11 text-base touch-target",
+                    "h-11 text-base",
                     errors.subject_name && "border-destructive focus-visible:ring-destructive"
                   )}
                   aria-invalid={!!errors.subject_name}
@@ -297,7 +297,7 @@ export function AttendanceEditor({ semesterId }: AttendanceEditorProps) {
                     }}
                   >
                     <SelectTrigger className={cn(
-                      "h-12 sm:h-11 touch-target",
+                      "h-11",
                       errors.semester_id && "border-destructive"
                     )}>
                       <SelectValue placeholder="Select semester" />
@@ -321,7 +321,7 @@ export function AttendanceEditor({ semesterId }: AttendanceEditorProps) {
                     type="button" 
                     variant="outline" 
                     size="sm"
-                    className="h-12 w-12 sm:h-10 sm:w-10 touch-target"
+                    className="h-10 w-10"
                     onClick={() => {
                       const newValue = Math.max(0, formData.total_classes - 1);
                       handleFieldChange('total_classes', newValue);
@@ -337,7 +337,7 @@ export function AttendanceEditor({ semesterId }: AttendanceEditorProps) {
                     onChange={(e) => handleFieldChange('total_classes', parseInt(e.target.value) || 0)}
                     onBlur={() => handleFieldBlur('total_classes')}
                     className={cn(
-                      "h-12 sm:h-11 text-center touch-target",
+                      "h-11 text-center",
                       errors.total_classes && "border-destructive focus-visible:ring-destructive"
                     )}
                     aria-invalid={!!errors.total_classes}
@@ -347,7 +347,7 @@ export function AttendanceEditor({ semesterId }: AttendanceEditorProps) {
                     type="button" 
                     variant="outline" 
                     size="sm"
-                    className="h-12 w-12 sm:h-10 sm:w-10 touch-target"
+                    className="h-10 w-10"
                     onClick={() => {
                       const newValue = formData.total_classes + 1;
                       handleFieldChange('total_classes', newValue);
@@ -390,7 +390,7 @@ export function AttendanceEditor({ semesterId }: AttendanceEditorProps) {
                       handleFieldBlur('attended_classes');
                     }}
                     className={cn(
-                      "h-12 sm:h-11 text-center touch-target",
+                      "h-11 text-center",
                       errors.attended_classes && "border-destructive focus-visible:ring-destructive"
                     )}
                     aria-invalid={!!errors.attended_classes}
@@ -400,7 +400,7 @@ export function AttendanceEditor({ semesterId }: AttendanceEditorProps) {
                     type="button" 
                     variant="outline" 
                     size="sm"
-                    className="h-12 w-12 sm:h-10 sm:w-10 touch-target"
+                    className="h-10 w-10"
                     onClick={() => {
                       const newValue = formData.attended_classes + 1;
                       handleFieldChange('attended_classes', newValue);

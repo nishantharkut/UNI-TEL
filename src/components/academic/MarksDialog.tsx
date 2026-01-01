@@ -270,7 +270,7 @@ export function MarksDialog({
               placeholder="e.g., Engineering Mathematics"
               required
               className={cn(
-                "h-12 sm:h-11 text-base touch-target",
+                "h-11 text-base",
                 errors.subject_name && "border-destructive focus-visible:ring-destructive"
               )}
               aria-invalid={!!errors.subject_name}
@@ -354,7 +354,7 @@ export function MarksDialog({
                 }}
                 required
                 className={cn(
-                  "h-12 sm:h-11 text-center touch-target",
+                  "h-11 text-center",
                   errors.total_marks && "border-destructive focus-visible:ring-destructive"
                 )}
                 aria-invalid={!!errors.total_marks}
@@ -383,7 +383,7 @@ export function MarksDialog({
                 }}
                 required
                 className={cn(
-                  "h-12 sm:h-11 text-center touch-target",
+                  "h-11 text-center",
                   errors.obtained_marks && "border-destructive focus-visible:ring-destructive"
                 )}
                 aria-invalid={!!errors.obtained_marks}
@@ -420,7 +420,7 @@ export function MarksDialog({
                 }}
                 required
                     className={cn(
-                      "h-12 sm:h-11 touch-target",
+                      "h-11",
                       errors.weightage && "border-destructive focus-visible:ring-destructive"
                     )}
                 aria-invalid={!!errors.weightage}

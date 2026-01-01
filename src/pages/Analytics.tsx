@@ -30,14 +30,21 @@ export default function Analytics() {
   const { data: marks = [] } = useMarks();
   const { data: summary } = useAcademicSummary();
 
-  // CGPA Trend Data
+  // CGPA Trend Data - Calculate CGPA from all subjects up to each semester
   const cgpaTrendData = semesters
     .filter(sem => sem.sgpa !== null)
-    .map(semester => ({
-      semester: `Sem ${semester.number}`,
-      sgpa: semester.sgpa || 0,
-      cgpa: computeCGPA(semesters.slice(0, semesters.findIndex(s => s.id === semester.id) + 1))
-    }))
+    .map(semester => {
+      // Get all subjects from semesters up to and including current semester
+      const semestersUpToNow = semesters.slice(0, semesters.findIndex(s => s.id === semester.id) + 1);
+      const semesterIds = semestersUpToNow.map(s => s.id);
+      const subjectsUpToNow = subjects.filter(sub => semesterIds.includes(sub.semester_id));
+      
+      return {
+        semester: `Sem ${semester.number}`,
+        sgpa: semester.sgpa || 0,
+        cgpa: computeCGPA(subjectsUpToNow)
+      };
+    })
     .sort((a, b) => parseInt(a.semester.split(' ')[1]) - parseInt(b.semester.split(' ')[1]));
 
   // Grade Distribution
