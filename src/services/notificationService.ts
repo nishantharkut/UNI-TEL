@@ -31,6 +31,19 @@ export class NotificationService {
       const existingNotifications = JSON.parse(
         localStorage.getItem('notifications') || '[]'
       );
+
+      // Prevent duplicate notifications (same title and message within last 24 hours)
+      const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+      const isDuplicate = existingNotifications.some((n: any) => {
+        const createdAt = new Date(n.created_at);
+        return n.title === notification.title && 
+               n.message === notification.message &&
+               createdAt > oneDayAgo;
+      });
+
+      if (isDuplicate) {
+        return { success: false, error: 'Duplicate notification prevented' };
+      }
       
       const newNotification = {
         id: Date.now().toString(),
@@ -38,7 +51,10 @@ export class NotificationService {
       };
       
       existingNotifications.unshift(newNotification);
-      localStorage.setItem('notifications', JSON.stringify(existingNotifications));
+      
+      // Keep only the most recent 50 notifications to prevent localStorage bloat
+      const trimmedNotifications = existingNotifications.slice(0, 50);
+      localStorage.setItem('notifications', JSON.stringify(trimmedNotifications));
 
       return { success: true, notification: newNotification };
     } catch (error) {
@@ -60,7 +76,22 @@ export class NotificationService {
         localStorage.getItem('notifications') || '[]'
       );
 
-      return { success: true, notifications };
+      // Filter out expired notifications and only return relevant ones
+      const now = new Date();
+      const validNotifications = notifications.filter((n: any) => {
+        // Remove expired notifications
+        if (n.expires_at && new Date(n.expires_at) < now) {
+          return false;
+        }
+        return true;
+      });
+
+      // Update localStorage to remove expired notifications
+      if (validNotifications.length !== notifications.length) {
+        localStorage.setItem('notifications', JSON.stringify(validNotifications));
+      }
+
+      return { success: true, notifications: validNotifications };
     } catch (error) {
       console.error('Error fetching notifications:', error);
       return { success: false, error };

@@ -42,7 +42,7 @@ import { NavLink, useLocation } from "react-router-dom"
 import { useUserProfile } from "@/hooks/useUserProfile"
 
 const academicItems = [
-  { title: "Dashboard", url: "/", icon: Home, description: "Overview & stats" },
+  { title: "Dashboard", url: "/dashboard", icon: Home, description: "Overview & stats" },
   { title: "Semesters", url: "/semesters", icon: GraduationCap, description: "Academic periods" },
   { title: "Attendance", url: "/attendance", icon: Calendar, description: "Track presence" },
   { title: "Marks", url: "/marks", icon: ClipboardList, description: "Exam scores" },
@@ -83,6 +83,7 @@ export function AppSidebar({ onToggle, mobileMenuOpen }: AppSidebarProps) {
   }
 
   const isActive = (path: string) => {
+    if (path === "/dashboard") return currentPath === "/dashboard"
     if (path === "/") return currentPath === "/"
     return currentPath.startsWith(path)
   }
@@ -169,7 +170,7 @@ export function AppSidebar({ onToggle, mobileMenuOpen }: AppSidebarProps) {
             <NavLink
               key={item.title}
               to={item.url}
-              end={item.url === "/"}
+              end={item.url === "/dashboard" || item.url === "/"}
               className={({ isActive }) => 
                 `relative ml-3 h-[40px] flex items-center cursor-pointer z-10 transition-all duration-200 rounded-lg mx-2 my-1 group ${
                   isActive 

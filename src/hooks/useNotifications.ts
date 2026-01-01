@@ -45,33 +45,9 @@ export function useNotifications() {
 
   const setupRealtimeSubscription = () => {
     // In production, you'd set up real-time subscriptions for notifications
-    // For now, we'll simulate periodic updates
-    const interval = setInterval(() => {
-      // Simulate new notifications
-      if (Math.random() > 0.8) {
-        const newNotification: Notification = {
-          id: Date.now().toString(),
-          title: 'New Feature Available',
-          message: 'Custom exam types and weightages are now available in the Marks section.',
-          type: 'info',
-          read: false,
-          created_at: new Date().toISOString(),
-          action_url: '/marks',
-          action_text: 'Try It Out'
-        };
-
-        setNotifications(prev => [newNotification, ...prev]);
-        setUnreadCount(prev => prev + 1);
-        
-        // Show toast notification
-        toast({
-          title: newNotification.title,
-          description: newNotification.message
-        });
-      }
-    }, 30000); // Check every 30 seconds
-
-    return () => clearInterval(interval);
+    // For now, we'll only load notifications on mount and when explicitly created
+    // No automatic random notifications - they should be contextually relevant
+    return () => {};
   };
 
   const markAsRead = async (notificationId: string) => {

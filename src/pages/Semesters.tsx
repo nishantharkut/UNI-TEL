@@ -10,6 +10,9 @@ import { useSemesters, useCreateSemester } from '@/hooks/useAcademic';
 import { useAcademicSummary } from '@/hooks/useAcademicSummary';
 import { LazySemesterCard } from '@/components/academic/LazySemesterCard';
 import { LazyImportExport } from '@/components/academic/LazyImportExport';
+import { useToast } from '@/hooks/use-toast';
+import { FormFieldError } from '@/components/ui/form-field-error';
+import { cn } from '@/lib/utils';
 import { 
   Plus, 
   BookOpen, 
@@ -26,23 +29,52 @@ import {
 export default function Semesters() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [semesterNumber, setSemesterNumber] = useState(1);
+  const [touched, setTouched] = useState(false);
   
   const { data: semesters = [], isLoading } = useSemesters();
   const { data: academicSummary } = useAcademicSummary();
   const createSemester = useCreateSemester();
+  const { toast } = useToast();
+
+  const existingNumbers = semesters.map(s => s.number);
+  const error = touched && (existingNumbers.includes(semesterNumber) 
+    ? `Semester ${semesterNumber} already exists`
+    : semesterNumber < 1 || semesterNumber > 12
+    ? 'Semester number must be between 1 and 12'
+    : null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setTouched(true);
+
+    if (error) {
+      toast({
+        title: 'Validation Error',
+        description: error,
+        variant: 'destructive',
+      });
+      return;
+    }
+
     try {
       await createSemester.mutateAsync({
         number: semesterNumber,
         total_credits: 0,
         source_json_import: false
       });
+      toast({
+        title: 'Semester Created',
+        description: `Semester ${semesterNumber} has been created successfully.`,
+      });
       setIsDialogOpen(false);
       setSemesterNumber(1);
-    } catch (error) {
-      console.error('Error creating semester:', error);
+      setTouched(false);
+    } catch (error: any) {
+      toast({
+        title: 'Error Creating Semester',
+        description: error?.message || 'An unexpected error occurred. Please try again.',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -140,11 +172,28 @@ export default function Semesters() {
                     min="1"
                     max="12"
                     value={semesterNumber}
-                    onChange={(e) => setSemesterNumber(parseInt(e.target.value))}
+                    onChange={(e) => {
+                      setSemesterNumber(parseInt(e.target.value) || 1);
+                      if (touched) {
+                        // Revalidate on change after first touch
+                      }
+                    }}
+                    onBlur={() => setTouched(true)}
                     required
-                    className="h-12 text-base rounded-xl border-2 focus:border-academic-primary transition-colors"
-                    placeholder="Enter semester number"
+                    className={cn(
+                      "h-12 text-base rounded-xl border-2 focus:border-academic-primary transition-colors",
+                      error && "border-destructive focus:border-destructive"
+                    )}
+                    placeholder="Enter semester number (1-12)"
+                    aria-invalid={!!error}
+                    aria-describedby={error ? "semester-number-error" : undefined}
                   />
+                  <FormFieldError error={error || undefined} id="semester-number-error" />
+                  {!error && touched && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      ✓ Semester number is available
+                    </p>
+                  )}
                 </div>
                 <div className="flex justify-end space-x-3 pt-4 border-t">
                   <Button 
@@ -158,7 +207,7 @@ export default function Semesters() {
                   <Button 
                     type="submit" 
                     className="color-primary text-white font-semibold h-12 px-6 rounded-xl shadow-lg"
-                    disabled={createSemester.isPending}
+                    disabled={createSemester.isPending || !!error}
                   >
                     {createSemester.isPending ? (
                       <>

@@ -5,9 +5,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useCreateSubject, useUpdateSubject } from '@/hooks/useAcademic';
+import { useCreateSubject, useUpdateSubject, useSubjects } from '@/hooks/useAcademic';
 import { BookOpen, GraduationCap, Save, Plus } from 'lucide-react';
 import { gradeToPoints } from '@/utils/gradeCalculations';
+import { useToast } from '@/hooks/use-toast';
+import { FormFieldError } from '@/components/ui/form-field-error';
+import { cn } from '@/lib/utils';
 
 interface SubjectDialogProps {
   open: boolean;
@@ -22,23 +25,65 @@ export function SubjectDialog({ open, onOpenChange, semesterId, editingSubject }
   const [name, setName] = useState('');
   const [credits, setCredits] = useState(3);
   const [grade, setGrade] = useState('');
+  const [nameTouched, setNameTouched] = useState(false);
+  const [creditsTouched, setCreditsTouched] = useState(false);
   
   const createSubject = useCreateSubject();
   const updateSubject = useUpdateSubject();
+  const { data: existingSubjects = [] } = useSubjects();
+  const { toast } = useToast();
+
+  // Get existing subject names for this semester
+  const existingNames = existingSubjects
+    .filter(s => s.semester_id === semesterId && (!editingSubject || s.id !== editingSubject.id))
+    .map(s => s.name.toLowerCase().trim());
+
+  // Validation functions
+  const validateName = (value: string): string | null => {
+    const trimmed = value.trim();
+    if (!trimmed) {
+      return 'Subject name is required';
+    }
+    if (trimmed.length < 2) {
+      return 'Subject name must be at least 2 characters';
+    }
+    if (trimmed.length > 100) {
+      return 'Subject name must be less than 100 characters';
+    }
+    if (existingNames.includes(trimmed.toLowerCase())) {
+      return 'A subject with this name already exists in this semester';
+    }
+    return null;
+  };
+
+  const validateCredits = (value: number): string | null => {
+    if (!value || value < 1) {
+      return 'Credits must be at least 1';
+    }
+    if (value > 10) {
+      return 'Credits cannot exceed 10';
+    }
+    return null;
+  };
+
+  const nameError = nameTouched ? validateName(name) : null;
+  const creditsError = creditsTouched ? validateCredits(credits) : null;
 
   // Reset form when dialog opens/closes or editing subject changes
   useEffect(() => {
     if (open) {
       if (editingSubject) {
-        console.log('Setting form values for editing:', editingSubject);
         setName(editingSubject.name || '');
         setCredits(editingSubject.credits || 3);
         setGrade(editingSubject.grade || 'no-grade');
+        setNameTouched(false);
+        setCreditsTouched(false);
       } else {
-        console.log('Resetting form for new subject');
         setName('');
         setCredits(3);
         setGrade('no-grade');
+        setNameTouched(false);
+        setCreditsTouched(false);
       }
     }
   }, [editingSubject, open]);
@@ -46,8 +91,20 @@ export function SubjectDialog({ open, onOpenChange, semesterId, editingSubject }
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!name.trim()) {
-      console.error('Subject name is required');
+    // Mark all fields as touched
+    setNameTouched(true);
+    setCreditsTouched(true);
+
+    // Validate
+    const nameErr = validateName(name);
+    const creditsErr = validateCredits(credits);
+
+    if (nameErr || creditsErr) {
+      toast({
+        title: 'Validation Error',
+        description: 'Please fix the errors in the form before submitting.',
+        variant: 'destructive',
+      });
       return;
     }
 
@@ -60,23 +117,31 @@ export function SubjectDialog({ open, onOpenChange, semesterId, editingSubject }
         source_json_import: false
       };
 
-      console.log('Submitting subject data:', subjectData);
-
       if (editingSubject) {
-        console.log('Updating subject with ID:', editingSubject.id);
         await updateSubject.mutateAsync({
           id: editingSubject.id,
           updates: subjectData
         });
+        toast({
+          title: 'Subject Updated',
+          description: `${subjectData.name} has been updated successfully.`,
+        });
       } else {
-        console.log('Creating new subject');
         await createSubject.mutateAsync(subjectData);
+        toast({
+          title: 'Subject Added',
+          description: `${subjectData.name} has been added successfully.`,
+        });
       }
       
       // Close dialog and reset form
       onOpenChange(false);
-    } catch (error) {
-      console.error('Error saving subject:', error);
+    } catch (error: any) {
+      toast({
+        title: 'Error Saving Subject',
+        description: error?.message || 'An unexpected error occurred. Please try again.',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -115,12 +180,30 @@ export function SubjectDialog({ open, onOpenChange, semesterId, editingSubject }
             <Input
               id="name"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => {
+                setName(e.target.value);
+                if (nameTouched) {
+                  // Real-time validation after first touch
+                  validateName(e.target.value);
+                }
+              }}
+              onBlur={() => setNameTouched(true)}
               required
-              className="h-12 text-base"
+              className={cn(
+                "h-12 text-base",
+                nameError && "border-destructive focus-visible:ring-destructive"
+              )}
               placeholder="e.g., Engineering Mathematics"
               disabled={isLoading}
+              aria-invalid={!!nameError}
+              aria-describedby={nameError ? "name-error" : undefined}
             />
+            <FormFieldError error={nameError} id="name-error" />
+            {!nameError && nameTouched && name.trim() && (
+              <p className="text-xs text-muted-foreground mt-1">
+                ✓ Subject name looks good
+              </p>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -134,11 +217,24 @@ export function SubjectDialog({ open, onOpenChange, semesterId, editingSubject }
                 min="1"
                 max="10"
                 value={credits}
-                onChange={(e) => setCredits(parseInt(e.target.value) || 1)}
+                onChange={(e) => {
+                  const value = parseInt(e.target.value) || 1;
+                  setCredits(value);
+                  if (creditsTouched) {
+                    validateCredits(value);
+                  }
+                }}
+                onBlur={() => setCreditsTouched(true)}
                 required
-                className="h-12 text-base"
+                className={cn(
+                  "h-12 text-base",
+                  creditsError && "border-destructive focus-visible:ring-destructive"
+                )}
                 disabled={isLoading}
+                aria-invalid={!!creditsError}
+                aria-describedby={creditsError ? "credits-error" : undefined}
               />
+              <FormFieldError error={creditsError} id="credits-error" />
             </div>
             
             <div className="space-y-2">
@@ -204,7 +300,7 @@ export function SubjectDialog({ open, onOpenChange, semesterId, editingSubject }
             <Button 
               type="submit" 
               className="h-12 px-6 bg-primary hover:bg-primary/90 text-primary-foreground font-medium"
-              disabled={isLoading || !name.trim()}
+              disabled={isLoading || !name.trim() || !!nameError || !!creditsError}
             >
               {isLoading ? (
                 <>

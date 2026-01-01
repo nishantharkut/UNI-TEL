@@ -62,8 +62,15 @@ export function ActiveAttendanceCard({ records }: ActiveAttendanceCardProps) {
   };
 
   const handleDelete = async (recordId: string) => {
-    if (confirm('Are you sure you want to delete this subject?')) {
-      await deleteAttendance.mutateAsync(recordId);
+    const record = records.find(r => r.id === recordId);
+    const subjectName = record?.subject_name || 'this subject';
+    
+    if (confirm(`Are you sure you want to delete the attendance record for "${subjectName}"? This action cannot be undone.`)) {
+      try {
+        await deleteAttendance.mutateAsync(recordId);
+      } catch (error) {
+        console.error('Error deleting attendance record:', error);
+      }
     }
   };
 
@@ -163,7 +170,9 @@ export function ActiveAttendanceCard({ records }: ActiveAttendanceCardProps) {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleDelete(record.id)}
-                        className="text-red-600 hover:text-red-700"
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        title="Delete attendance record"
+                        disabled={deleteAttendance.isPending}
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>

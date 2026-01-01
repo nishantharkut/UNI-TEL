@@ -150,11 +150,11 @@ export default function Analytics() {
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-academic-primary/70">Performance</span>
                   <span className="font-semibold text-academic-primary">
-                    {summary?.cgpa ? Math.min((summary.cgpa / 10) * 100, 100) : 0}%
+                    {summary?.cgpa ? Math.round(Math.min((summary.cgpa / 10) * 100, 100)) : 0}%
                   </span>
                 </div>
                 <Progress 
-                  value={summary?.cgpa ? Math.min((summary.cgpa / 10) * 100, 100) : 0} 
+                  value={summary?.cgpa ? Math.round(Math.min((summary.cgpa / 10) * 100, 100)) : 0} 
                   className="h-2 bg-academic-primary/20"
                 />
               </div>

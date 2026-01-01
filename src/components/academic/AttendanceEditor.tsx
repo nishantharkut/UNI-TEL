@@ -10,6 +10,9 @@ import { Edit, Plus, Trash2, Calendar, Minus, Plus as PlusIcon } from 'lucide-re
 import { useAttendance, useCreateAttendance, useUpdateAttendance, useDeleteAttendance, useSemesters } from '@/hooks/useAcademic';
 import { getAttendanceStatus } from '@/utils/gradeCalculations';
 import type { AttendanceRecord } from '@/services/academicService';
+import { useToast } from '@/hooks/use-toast';
+import { FormFieldError } from '@/components/ui/form-field-error';
+import { cn } from '@/lib/utils';
 
 interface AttendanceEditorProps {
   semesterId?: string;
@@ -26,19 +29,118 @@ export function AttendanceEditor({ semesterId }: AttendanceEditorProps) {
     semester_id: semesterId || '',
     source_json_import: false
   });
+  const [touched, setTouched] = useState({
+    subject_name: false,
+    total_classes: false,
+    attended_classes: false,
+    semester_id: false
+  });
+  const [errors, setErrors] = useState<Partial<Record<keyof typeof formData, string>>>({});
 
   const { data: attendanceRecords = [], isLoading } = useAttendance();
   const { data: semesters = [] } = useSemesters();
   const createAttendance = useCreateAttendance();
   const updateAttendance = useUpdateAttendance();
   const deleteAttendance = useDeleteAttendance();
+  const { toast } = useToast();
 
   const filteredRecords = semesterId 
     ? attendanceRecords.filter((record: { semester_id: string }) => record.semester_id === semesterId)
     : attendanceRecords;
 
+  // Get existing subject names for duplicate detection
+  const existingNames = filteredRecords
+    .filter(r => (!editingRecord || r.id !== editingRecord.id))
+    .map(r => r.subject_name.toLowerCase().trim());
+
+  // Validation functions
+  const validateField = (field: keyof typeof formData, value: any): string | null => {
+    switch (field) {
+      case 'subject_name':
+        const trimmed = String(value || '').trim();
+        if (!trimmed) return 'Subject name is required';
+        if (trimmed.length < 2) return 'Subject name must be at least 2 characters';
+        if (existingNames.includes(trimmed.toLowerCase())) {
+          return 'An attendance record for this subject already exists';
+        }
+        return null;
+      case 'total_classes':
+        const total = Number(value) || 0;
+        if (total < 0) return 'Total classes cannot be negative';
+        if (total > 1000) return 'Total classes seems too high. Please verify.';
+        return null;
+      case 'attended_classes':
+        const attended = Number(value) || 0;
+        const totalClasses = Number(formData.total_classes) || 0;
+        if (attended < 0) return 'Attended classes cannot be negative';
+        if (attended > totalClasses && totalClasses > 0) {
+          return `Attended classes (${attended}) cannot exceed total classes (${totalClasses})`;
+        }
+        return null;
+      case 'semester_id':
+        if (!value) return 'Please select a semester';
+        return null;
+      default:
+        return null;
+    }
+  };
+
+  const handleFieldChange = (field: keyof typeof formData, value: any) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    
+    // If field was touched, validate immediately
+    if (touched[field]) {
+      const error = validateField(field, value);
+      setErrors(prev => ({ ...prev, [field]: error || undefined }));
+    }
+
+    // Special case: if total_classes changes, revalidate attended_classes
+    if (field === 'total_classes' && touched.attended_classes) {
+      const attendedError = validateField('attended_classes', formData.attended_classes);
+      setErrors(prev => ({ ...prev, attended_classes: attendedError || undefined }));
+    }
+  };
+
+  const handleFieldBlur = (field: keyof typeof formData) => {
+    setTouched(prev => ({ ...prev, [field]: true }));
+    const error = validateField(field, formData[field]);
+    setErrors(prev => ({ ...prev, [field]: error || undefined }));
+  };
+
+  const validateAll = (): boolean => {
+    const newErrors: typeof errors = {};
+    let isValid = true;
+
+    (Object.keys(formData) as Array<keyof typeof formData>).forEach(field => {
+      if (field === 'note' || field === 'source_json_import') return;
+      const error = validateField(field, formData[field]);
+      if (error) {
+        newErrors[field] = error;
+        isValid = false;
+      }
+    });
+
+    setErrors(newErrors);
+    setTouched({
+      subject_name: true,
+      total_classes: true,
+      attended_classes: true,
+      semester_id: true
+    });
+    return isValid;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateAll()) {
+      toast({
+        title: 'Validation Error',
+        description: 'Please fix the errors in the form before submitting.',
+        variant: 'destructive',
+      });
+      return;
+    }
     
     // Convert null values to appropriate defaults
     const submitData = {
@@ -53,14 +155,26 @@ export function AttendanceEditor({ semesterId }: AttendanceEditorProps) {
           id: editingRecord.id,
           updates: submitData
         });
+        toast({
+          title: 'Attendance Updated',
+          description: `Attendance record for ${submitData.subject_name} has been updated successfully.`,
+        });
       } else {
         await createAttendance.mutateAsync(submitData);
+        toast({
+          title: 'Attendance Added',
+          description: `Attendance record for ${submitData.subject_name} has been added successfully.`,
+        });
       }
       
       setIsDialogOpen(false);
       resetForm();
-    } catch (error) {
-      console.error('Error saving attendance record:', error);
+    } catch (error: any) {
+      toast({
+        title: 'Error Saving Attendance',
+        description: error?.message || 'An unexpected error occurred. Please try again.',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -78,8 +192,23 @@ export function AttendanceEditor({ semesterId }: AttendanceEditorProps) {
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm('Are you sure you want to delete this attendance record?')) {
-      await deleteAttendance.mutateAsync(id);
+    const record = filteredRecords.find((r: { id: string }) => r.id === id);
+    const subjectName = record?.subject_name || 'this attendance record';
+    
+    if (confirm(`Are you sure you want to delete the attendance record for "${subjectName}"? This action cannot be undone.`)) {
+      try {
+        await deleteAttendance.mutateAsync(id);
+        toast({
+          title: 'Attendance Deleted',
+          description: `Attendance record for ${subjectName} has been deleted successfully.`,
+        });
+      } catch (error: any) {
+        toast({
+          title: 'Error Deleting Attendance',
+          description: error?.message || 'Failed to delete attendance record. Please try again.',
+          variant: 'destructive',
+        });
+      }
     }
   };
 
@@ -93,20 +222,15 @@ export function AttendanceEditor({ semesterId }: AttendanceEditorProps) {
       semester_id: semesterId || '',
       source_json_import: false
     });
+    setTouched({
+      subject_name: false,
+      total_classes: false,
+      attended_classes: false,
+      semester_id: false
+    });
+    setErrors({});
   };
 
-  const adjustClasses = (type: 'total' | 'attended', increment: boolean) => {
-    const field = type === 'total' ? 'total_classes' : 'attended_classes';
-    const currentValue = formData[field];
-    const newValue = increment ? currentValue + 1 : Math.max(0, currentValue - 1);
-    
-    if (type === 'attended' && newValue > formData.total_classes) return;
-    if (type === 'total' && newValue < formData.attended_classes) {
-      setFormData({ ...formData, [field]: newValue, attended_classes: newValue });
-    } else {
-      setFormData({ ...formData, [field]: newValue });
-    }
-  };
 
   const getSemesterNumber = (semesterId: string) => {
     const semester = semesters.find(s => s.id === semesterId);
@@ -144,24 +268,32 @@ export function AttendanceEditor({ semesterId }: AttendanceEditorProps) {
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <Label htmlFor="subject_name">Subject Name</Label>
+                <Label htmlFor="subject_name">Subject Name *</Label>
                 <Input
                   id="subject_name"
                   value={formData.subject_name}
-                  onChange={(e) => setFormData({ ...formData, subject_name: e.target.value })}
+                  onChange={(e) => handleFieldChange('subject_name', e.target.value)}
+                  onBlur={() => handleFieldBlur('subject_name')}
                   placeholder="e.g., Engineering Mathematics"
                   required
+                  className={cn(errors.subject_name && "border-destructive focus-visible:ring-destructive")}
+                  aria-invalid={!!errors.subject_name}
+                  aria-describedby={errors.subject_name ? "subject_name-error" : undefined}
                 />
+                <FormFieldError error={errors.subject_name} id="subject_name-error" />
               </div>
 
               {!semesterId && (
                 <div>
-                  <Label htmlFor="semester">Semester</Label>
+                  <Label htmlFor="semester">Semester *</Label>
                   <Select 
                     value={formData.semester_id} 
-                    onValueChange={(value) => setFormData({ ...formData, semester_id: value })}
+                    onValueChange={(value) => {
+                      handleFieldChange('semester_id', value);
+                      handleFieldBlur('semester_id');
+                    }}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className={cn(errors.semester_id && "border-destructive")}>
                       <SelectValue placeholder="Select semester" />
                     </SelectTrigger>
                     <SelectContent>
@@ -172,17 +304,21 @@ export function AttendanceEditor({ semesterId }: AttendanceEditorProps) {
                       ))}
                     </SelectContent>
                   </Select>
+                  <FormFieldError error={errors.semester_id} />
                 </div>
               )}
               
               <div>
-                <Label htmlFor="total_classes">Total Classes</Label>
+                <Label htmlFor="total_classes">Total Classes *</Label>
                 <div className="flex items-center gap-2">
                   <Button 
                     type="button" 
                     variant="outline" 
                     size="sm"
-                    onClick={() => adjustClasses('total', false)}
+                    onClick={() => {
+                      const newValue = Math.max(0, formData.total_classes - 1);
+                      handleFieldChange('total_classes', newValue);
+                    }}
                   >
                     <Minus className="w-4 h-4" />
                   </Button>
@@ -191,31 +327,38 @@ export function AttendanceEditor({ semesterId }: AttendanceEditorProps) {
                     type="number"
                     min="0"
                     value={formData.total_classes}
-                    onChange={(e) => setFormData({ 
-                      ...formData, 
-                      total_classes: parseInt(e.target.value) || 0 
-                    })}
-                    className="text-center"
+                    onChange={(e) => handleFieldChange('total_classes', parseInt(e.target.value) || 0)}
+                    onBlur={() => handleFieldBlur('total_classes')}
+                    className={cn("text-center", errors.total_classes && "border-destructive focus-visible:ring-destructive")}
+                    aria-invalid={!!errors.total_classes}
+                    aria-describedby={errors.total_classes ? "total_classes-error" : undefined}
                   />
                   <Button 
                     type="button" 
                     variant="outline" 
                     size="sm"
-                    onClick={() => adjustClasses('total', true)}
+                    onClick={() => {
+                      const newValue = formData.total_classes + 1;
+                      handleFieldChange('total_classes', newValue);
+                    }}
                   >
                     <PlusIcon className="w-4 h-4" />
                   </Button>
                 </div>
+                <FormFieldError error={errors.total_classes} id="total_classes-error" />
               </div>
 
               <div>
-                <Label htmlFor="attended_classes">Attended Classes</Label>
+                <Label htmlFor="attended_classes">Attended Classes *</Label>
                 <div className="flex items-center gap-2">
                   <Button 
                     type="button" 
                     variant="outline" 
                     size="sm"
-                    onClick={() => adjustClasses('attended', false)}
+                    onClick={() => {
+                      const newValue = Math.max(0, formData.attended_classes - 1);
+                      handleFieldChange('attended_classes', newValue);
+                    }}
                   >
                     <Minus className="w-4 h-4" />
                   </Button>
@@ -226,31 +369,37 @@ export function AttendanceEditor({ semesterId }: AttendanceEditorProps) {
                     max={formData.total_classes || undefined}
                     value={formData.attended_classes || ''}
                     onChange={(e) => {
-                      const value = e.target.value === '' ? null : parseInt(e.target.value);
-                      setFormData({ 
-                        ...formData, 
-                        attended_classes: value
-                      });
+                      const value = e.target.value === '' ? 0 : parseInt(e.target.value) || 0;
+                      handleFieldChange('attended_classes', value);
                     }}
                     onBlur={(e) => {
                       if (e.target.value === '') {
-                        setFormData({ 
-                          ...formData, 
-                          attended_classes: 0 
-                        });
+                        handleFieldChange('attended_classes', 0);
                       }
+                      handleFieldBlur('attended_classes');
                     }}
-                    className="text-center"
+                    className={cn("text-center", errors.attended_classes && "border-destructive focus-visible:ring-destructive")}
+                    aria-invalid={!!errors.attended_classes}
+                    aria-describedby={errors.attended_classes ? "attended_classes-error" : undefined}
                   />
                   <Button 
                     type="button" 
                     variant="outline" 
                     size="sm"
-                    onClick={() => adjustClasses('attended', true)}
+                    onClick={() => {
+                      const newValue = formData.attended_classes + 1;
+                      handleFieldChange('attended_classes', newValue);
+                    }}
                   >
                     <PlusIcon className="w-4 h-4" />
                   </Button>
                 </div>
+                <FormFieldError error={errors.attended_classes} id="attended_classes-error" />
+                {!errors.attended_classes && formData.total_classes > 0 && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {formData.attended_classes} of {formData.total_classes} classes attended
+                  </p>
+                )}
               </div>
 
               <div>
@@ -326,10 +475,21 @@ export function AttendanceEditor({ semesterId }: AttendanceEditorProps) {
                   )}
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button variant="ghost" size="sm" onClick={() => handleEdit(record)}>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => handleEdit(record)}
+                    title="Edit attendance record"
+                  >
                     <Edit className="w-4 h-4" />
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={() => handleDelete(record.id)}>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => handleDelete(record.id)}
+                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    title="Delete attendance record"
+                  >
                     <Trash2 className="w-4 h-4" />
                   </Button>
                 </div>

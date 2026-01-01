@@ -97,7 +97,7 @@ export default function Index() {
                       </div>
                        <div>
                          <p className="text-sm text-white/80">Current CGPA</p>
-                         <p className="text-2xl sm:text-3xl font-bold">{summary.cgpa}</p>
+                         <p className="text-2xl sm:text-3xl font-bold">{summary.cgpa.toFixed(2)}</p>
                        </div>
                     </div>
                     {performanceStatus && (
@@ -151,11 +151,11 @@ export default function Index() {
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-academic-primary/70">Academic Progress</span>
                   <span className="font-semibold text-academic-primary">
-                    {summary?.total_semesters ? Math.min((summary.total_semesters / 8) * 100, 100) : 0}%
+                    {summary?.total_semesters ? Math.round(Math.min((summary.total_semesters / 8) * 100, 100)) : 0}%
                   </span>
                 </div>
                 <Progress 
-                  value={summary?.total_semesters ? Math.min((summary.total_semesters / 8) * 100, 100) : 0} 
+                  value={summary?.total_semesters ? Math.round(Math.min((summary.total_semesters / 8) * 100, 100)) : 0} 
                   className="h-2 bg-academic-primary/20"
                 />
               </div>
@@ -181,11 +181,11 @@ export default function Index() {
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-academic-secondary/70">Course Load</span>
                   <span className="font-semibold text-academic-secondary">
-                    {summary?.total_subjects ? Math.min((summary.total_subjects / 40) * 100, 100) : 0}%
+                    {summary?.total_subjects ? Math.round(Math.min((summary.total_subjects / 40) * 100, 100)) : 0}%
                   </span>
                 </div>
                 <Progress 
-                  value={summary?.total_subjects ? Math.min((summary.total_subjects / 40) * 100, 100) : 0} 
+                  value={summary?.total_subjects ? Math.round(Math.min((summary.total_subjects / 40) * 100, 100)) : 0} 
                   className="h-2 bg-academic-secondary/20"
                 />
               </div>
@@ -211,11 +211,11 @@ export default function Index() {
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-academic-secondary/70">Performance</span>
                   <span className="font-semibold text-academic-secondary">
-                    {summary?.cgpa ? Math.min((summary.cgpa / 10) * 100, 100) : 0}%
+                    {summary?.cgpa ? Math.round(Math.min((summary.cgpa / 10) * 100, 100)) : 0}%
                   </span>
                 </div>
                 <Progress 
-                  value={summary?.cgpa ? Math.min((summary.cgpa / 10) * 100, 100) : 0} 
+                  value={summary?.cgpa ? Math.round(Math.min((summary.cgpa / 10) * 100, 100)) : 0} 
                   className="h-2 bg-academic-accent/30"
                 />
               </div>

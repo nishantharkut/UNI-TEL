@@ -112,7 +112,7 @@ export function NotificationsDropdown() {
               {notifications.map((notification) => (
                 <div
                   key={notification.id}
-                  className={`p-3 rounded-lg cursor-pointer transition-colors hover:bg-muted/50 ${
+                  className={`group p-3 rounded-lg cursor-pointer transition-colors hover:bg-muted/50 ${
                     !notification.read ? 'bg-blue-50 border-l-2 border-l-blue-500' : ''
                   }`}
                   onClick={() => handleNotificationClick(notification)}
@@ -132,7 +132,7 @@ export function NotificationsDropdown() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-6 w-6 opacity-0 group-hover:opacity-100"
+                          className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
                           onClick={(e) => {
                             e.stopPropagation();
                             deleteNotification(notification.id);

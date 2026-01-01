@@ -228,11 +228,37 @@ export const attendanceService = {
   },
 
   async delete(id: string) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('User not authenticated');
+
+    // First verify the record exists and belongs to the user
+    const { data: record, error: fetchError } = await supabase
+      .from('attendance_records')
+      .select('id, user_id')
+      .eq('id', id)
+      .single();
+
+    if (fetchError) {
+      if (fetchError.code === 'PGRST116') {
+        throw new Error('Attendance record not found');
+      }
+      throw fetchError;
+    }
+
+    if (record.user_id !== user.id) {
+      throw new Error('You do not have permission to delete this attendance record');
+    }
+
+    // Delete the record from database
     const { error } = await supabase
       .from('attendance_records')
       .delete()
-      .eq('id', id);
+      .eq('id', id)
+      .eq('user_id', user.id); // Extra safety: ensure we only delete user's own records
+
     if (error) throw error;
+    
+    return { success: true, deletedId: id };
   }
 };
 
