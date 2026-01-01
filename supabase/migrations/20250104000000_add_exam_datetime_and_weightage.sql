@@ -24,33 +24,85 @@ ADD CONSTRAINT check_total_marks_non_negative
 CHECK (total_marks >= 0);
 
 -- 5) Update the percentage generated column to handle division by zero
--- Note: We cannot directly modify a GENERATED column, so we need to:
--- 1. Drop the column
--- 2. Recreate it with the new logic
--- This is safe because percentage is a computed column, not stored data
+-- IMPORTANT: This drops and recreates the percentage column, which triggers a warning.
+-- This is SAFE because:
+-- 1. percentage is a GENERATED (computed) column - it contains no stored data
+-- 2. All values will be automatically recalculated when the column is recreated
+-- 3. No data loss occurs - it's just a formula that gets reapplied
+-- 
+-- Note: We cannot directly modify a GENERATED column in PostgreSQL,
+-- so dropping and recreating is the only way to update its definition.
 
--- First, check if percentage column exists and drop it
+-- First, drop dependent views that use the percentage column
+-- These views will be recreated after the percentage column is updated
+DROP VIEW IF EXISTS public.user_custom_exam_types CASCADE;
+DROP VIEW IF EXISTS public.subject_weighted_performance CASCADE;
+
+-- Check if percentage column exists and needs updating (only if it doesn't handle 0 values)
+-- For safety, we'll always update it to ensure it handles division by zero correctly
 DO $$ 
 BEGIN
+  -- Drop the existing percentage column if it exists
+  -- This is safe because it's a computed column with no stored data
   IF EXISTS (
     SELECT 1 FROM information_schema.columns 
     WHERE table_schema = 'public' 
     AND table_name = 'marks_records' 
     AND column_name = 'percentage'
   ) THEN
+    -- Drop the column - this is safe for GENERATED columns
     ALTER TABLE public.marks_records DROP COLUMN percentage;
   END IF;
 END $$;
 
 -- Recreate it with proper null handling for division by zero
+-- This will automatically recalculate all percentage values from existing marks
 ALTER TABLE public.marks_records 
 ADD COLUMN percentage numeric(5,2) GENERATED ALWAYS AS (
   CASE 
     WHEN total_marks > 0 THEN
       ROUND((obtained_marks::numeric / total_marks::numeric) * 100, 2)
-    ELSE NULL
+    ELSE NULL  -- Returns NULL when total_marks = 0 (optional marks)
   END
 ) STORED;
+
+-- Recreate the views that depend on the percentage column
+-- Note: These views reference weightage, which should exist by now (added in step 1)
+CREATE OR REPLACE VIEW public.user_custom_exam_types AS
+SELECT 
+  user_id,
+  exam_type,
+  COUNT(*) as usage_count,
+  AVG(weightage) as avg_weightage,
+  MIN(weightage) as min_weightage,
+  MAX(weightage) as max_weightage,
+  AVG(percentage) as avg_performance
+FROM public.marks_records
+WHERE user_id = auth.uid()
+GROUP BY user_id, exam_type
+ORDER BY usage_count DESC, exam_type;
+
+CREATE OR REPLACE VIEW public.subject_weighted_performance AS
+SELECT 
+  mr.user_id,
+  mr.semester_id,
+  s.number as semester_number,
+  mr.subject_name,
+  COUNT(*) as total_exams,
+  SUM(mr.weightage) as total_weight,
+  public.get_subject_weighted_average(mr.user_id, mr.semester_id, mr.subject_name) as weighted_average,
+  AVG(mr.percentage) as simple_average,
+  MAX(mr.percentage) as best_performance,
+  MIN(mr.percentage) as worst_performance
+FROM public.marks_records mr
+JOIN public.semesters s ON mr.semester_id = s.id
+WHERE mr.user_id = auth.uid()
+GROUP BY mr.user_id, mr.semester_id, s.number, mr.subject_name
+ORDER BY s.number, mr.subject_name;
+
+-- Re-enable security invoker on views
+ALTER VIEW public.user_custom_exam_types SET (security_invoker = true);
+ALTER VIEW public.subject_weighted_performance SET (security_invoker = true);
 
 -- 6) Add weighted_percentage column (calculated field) - must be after percentage is recreated
 ALTER TABLE public.marks_records 
