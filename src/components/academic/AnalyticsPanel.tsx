@@ -138,7 +138,7 @@ export function AnalyticsPanel() {
                     <div key={record.id} className="flex items-center justify-between text-sm">
                       <span className="truncate">{record.subject_name}</span>
                       <Badge variant="outline" className="text-amber-600">
-                        {record.percentage?.toFixed(1)}%
+                        {record.percentage != null ? `${record.percentage.toFixed(1)}%` : 'N/A'}
                       </Badge>
                     </div>
                   ))}

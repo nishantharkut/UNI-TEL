@@ -636,10 +636,14 @@ export function MarksEditor({ semesterId }: MarksEditorProps) {
                       </div>
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="text-sm font-medium text-academic-primary">
-                          {record.percentage?.toFixed(1)}%
+                          {record.total_marks > 0 && record.percentage != null
+                            ? `${record.percentage.toFixed(1)}%`
+                            : record.total_marks === 0
+                            ? 'N/A'
+                            : '0%'}
                         </span>
-                        <Badge className={getPercentageColor(record.percentage || 0)}>
-                          {getPerformanceLabel(record.percentage || 0)}
+                        <Badge className={getPercentageColor(record.percentage ?? (record.total_marks > 0 ? 0 : 0))}>
+                          {getPerformanceLabel(record.percentage ?? (record.total_marks > 0 ? 0 : 0))}
                         </Badge>
                       </div>
                     </div>

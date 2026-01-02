@@ -317,7 +317,10 @@ export function ActiveMarksCard({ records }: ActiveMarksCardProps) {
                               <Badge variant="outline" className="text-xs">{getSemesterName(record.semester_id)}</Badge>
                             </div>
                             <div className="text-sm text-muted-foreground">
-                              {record.obtained_marks}/{record.total_marks} marks ({percentage.toFixed(1)}%)
+                              {record.obtained_marks}/{record.total_marks} marks 
+                              {record.total_marks > 0 
+                                ? `(${percentage.toFixed(1)}%)`
+                                : '(N/A)'}
                             </div>
                           </div>
                           <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
