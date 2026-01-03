@@ -22,6 +22,10 @@ import {
 import { useSemesters, useSubjects, useAttendance, useMarks, useAcademicSummary } from '@/hooks/useAcademic';
 import { computeCGPA, getGradeColor, getAttendanceStatus } from '@/utils/gradeCalculations';
 import { LazyAnalyticsPanel } from '@/components/academic/LazyAnalyticsPanel';
+import { AttendanceHeatmap } from '@/components/academic/AttendanceHeatmap';
+import { AdvancedPerformanceTrends } from '@/components/academic/AdvancedPerformanceTrends';
+import { GradeDistributionHistogram } from '@/components/academic/GradeDistributionHistogram';
+import { ExportButton } from '@/components/academic/ExportButton';
 
 export default function Analytics() {
   const { data: semesters = [] } = useSemesters();
@@ -100,18 +104,21 @@ export default function Analytics() {
           <div className="relative z-10">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
               <div className="space-y-4 sm:space-y-6">
-                <div className="flex items-center gap-3">
-                  <div className="p-3 rounded-2xl bg-white/20 backdrop-blur-sm">
-                    <BarChart3 className="w-6 h-6 sm:w-8 sm:h-8" />
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="p-3 rounded-2xl bg-white/20 backdrop-blur-sm">
+                      <BarChart3 className="w-6 h-6 sm:w-8 sm:h-8" />
+                    </div>
+                    <div>
+                      <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white">
+                        Analytics Dashboard
+                      </h1>
+                      <p className="text-white/80 text-sm sm:text-base">
+                        Comprehensive academic performance insights
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white">
-                      Analytics Dashboard
-                    </h1>
-                    <p className="text-white/80 text-sm sm:text-base">
-                      Comprehensive academic performance insights
-                    </p>
-                  </div>
+                  <ExportButton />
                 </div>
                 
                 {summary?.cgpa && (
@@ -265,6 +272,15 @@ export default function Analytics() {
           </Card>
         </div>
 
+        {/* Advanced Charts Section */}
+        <div className="grid grid-cols-1 gap-6 lg:gap-8">
+          {/* Advanced Performance Trends */}
+          <AdvancedPerformanceTrends showPrediction={true} />
+          
+          {/* Attendance Heatmap */}
+          <AttendanceHeatmap />
+        </div>
+
         {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
           {/* CGPA Trend */}
@@ -321,14 +337,19 @@ export default function Analytics() {
             </CardContent>
           </Card>
 
-          {/* Grade Distribution */}
+          {/* Grade Distribution Histogram */}
+          <GradeDistributionHistogram />
+        </div>
+
+        {/* Additional Grade Distribution Pie Chart */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
           <Card className="border-0 shadow-lg bg-gradient-to-br from-card to-card/80 backdrop-blur-sm">
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-3 text-xl">
                 <div className="p-2 rounded-xl color-accent-light">
                   <PieChartIcon className="w-5 h-5 text-academic-secondary" />
                 </div>
-                Grade Distribution
+                Grade Distribution (Pie Chart)
               </CardTitle>
             </CardHeader>
             <CardContent>

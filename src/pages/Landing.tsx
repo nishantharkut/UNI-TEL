@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   BarChart3, 
@@ -27,11 +27,16 @@ import {
   Sparkles,
   Quote,
   ChevronRight,
-  ExternalLink
+  ExternalLink,
+  HelpCircle,
+  X,
+  Plus,
+  Minus
 } from 'lucide-react';
 
 export default function Landing() {
   const navigate = useNavigate();
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   useEffect(() => {
     // Add smooth scrolling behavior
@@ -156,47 +161,83 @@ export default function Landing() {
             <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
               <div className="space-y-6 lg:space-y-8">
                 <div className="space-y-4">
+                  {/* Badge */}
+                  <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-academic-primary/10 border border-academic-primary/20 animate-fade-in">
+                    <Sparkles className="h-3 w-3 text-academic-primary" />
+                    <span className="text-xs sm:text-sm font-medium text-academic-primary">Trusted by 10,000+ students</span>
+                  </div>
+                  
                   <h1 className="academic-heading display text-balance text-reveal text-3xl sm:text-4xl lg:text-5xl xl:text-6xl">
-                    Transform Your Academic Journey with{' '}
-                    <span className="gradient-text">Smart Analytics</span>
+                    Take Control of Your{' '}
+                    <span className="gradient-text">Academic Success</span>
                   </h1>
                   <p className="academic-subheading text-balance max-w-2xl animate-fade-in stagger-1 text-base sm:text-lg lg:text-xl">
-                    Track grades, monitor attendance, analyze performance, and achieve academic excellence. 
-                    Join thousands of students who are taking control of their education.
+                    The all-in-one platform that helps students track grades, monitor attendance, and improve performance. 
+                    <strong className="text-foreground"> Join thousands achieving better results.</strong>
                   </p>
+                  
+                  {/* Key Benefits */}
+                  <div className="flex flex-wrap gap-3 pt-2 animate-fade-in stagger-1">
+                    {[
+                      { icon: CheckCircle, text: 'Free Forever' },
+                      { icon: CheckCircle, text: 'No Credit Card' },
+                      { icon: CheckCircle, text: '5-Min Setup' }
+                    ].map((item, idx) => (
+                      <div key={idx} className="flex items-center space-x-2 text-sm text-muted-foreground">
+                        <item.icon className="h-4 w-4 text-academic-success" />
+                        <span>{item.text}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
                 
                 <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 animate-fade-in stagger-2">
                   <button 
                     onClick={() => navigate('/auth')}
-                    className="academic-button primary lg button-glow hover-scale magnetic w-full sm:w-auto"
+                    className="academic-button primary lg button-glow hover-scale magnetic w-full sm:w-auto group"
                   >
                     Start Free Trial
-                    <ArrowRight className="h-4 w-4" />
+                    <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
                   </button>
                   <button 
-                    onClick={() => scrollToSection('features')}
-                    className="academic-button secondary lg hover-lift w-full sm:w-auto"
+                    onClick={() => scrollToSection('demo')}
+                    className="academic-button secondary lg hover-lift w-full sm:w-auto flex items-center justify-center"
                   >
-                    Explore Features
+                    <Play className="h-4 w-4 mr-2" />
+                    Watch Demo
                   </button>
                 </div>
 
-                {/* Trust Indicators */}
-                <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6 pt-4 animate-fade-in stagger-3">
-                  <div className="flex items-center space-x-2">
+                {/* Enhanced Trust Indicators */}
+                <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-8 pt-4 animate-fade-in stagger-3 border-t border-border/40">
+                  <div className="flex items-center space-x-3">
                     <div className="flex -space-x-2">
                       {[1, 2, 3, 4].map((i) => (
-                        <div key={i} className={`h-6 w-6 sm:h-8 sm:w-8 rounded-full bg-academic-primary/20 border-2 border-background animate-float-slow stagger-${i}`} />
+                        <div key={i} className={`h-8 w-8 rounded-full bg-gradient-to-br from-academic-primary/30 to-academic-secondary/30 border-2 border-background animate-float-slow`} style={{ animationDelay: `${i * 0.1}s` }} />
                       ))}
                     </div>
-                    <span className="text-xs sm:text-sm text-muted-foreground">10,000+ students</span>
+                    <div>
+                      <div className="text-sm font-semibold">10,000+</div>
+                      <div className="text-xs text-muted-foreground">Active Students</div>
+                    </div>
                   </div>
-                  <div className="flex items-center space-x-1">
-                    {[1, 2, 3, 4, 5].map((i) => (
-                      <Star key={i} className={`h-3 w-3 sm:h-4 sm:w-4 fill-academic-warning text-academic-warning animate-bounce-in stagger-${i}`} />
-                    ))}
-                    <span className="text-xs sm:text-sm text-muted-foreground ml-1">4.9/5 rating</span>
+                  <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-1">
+                      {[1, 2, 3, 4, 5].map((i) => (
+                        <Star key={i} className={`h-4 w-4 fill-academic-warning text-academic-warning`} />
+                      ))}
+                    </div>
+                    <div>
+                      <div className="text-sm font-semibold">4.9/5</div>
+                      <div className="text-xs text-muted-foreground">Average Rating</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <TrendingUp className="h-5 w-5 text-academic-success" />
+                    <div>
+                      <div className="text-sm font-semibold">95%</div>
+                      <div className="text-xs text-muted-foreground">See Improvement</div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -253,41 +294,141 @@ export default function Landing() {
           </div>
         </section>
 
-        {/* Features Section */}
+        {/* Demo/Video Section */}
+        <section id="demo" className="landing-section academic-section bg-muted/30">
+          <div className="academic-container">
+            <div className="max-w-4xl mx-auto">
+              <div className="text-center space-y-4 mb-8">
+                <h2 className="academic-heading h2 text-2xl sm:text-3xl lg:text-4xl">See UNI-TEL in Action</h2>
+                <p className="academic-subheading max-w-2xl mx-auto text-sm sm:text-base lg:text-lg">
+                  Watch how students use UNI-TEL to track their progress and achieve better grades in just 2 minutes.
+                </p>
+              </div>
+              <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-academic-primary/10 to-academic-secondary/10 aspect-video hover-lift">
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <button className="flex items-center justify-center w-20 h-20 rounded-full bg-academic-primary text-white hover:bg-academic-primary/90 transition-all hover:scale-110 shadow-lg">
+                    <Play className="h-8 w-8 ml-1" />
+                  </button>
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Features Section - Enhanced with Alternating Layout */}
         <section id="features" className="landing-section academic-section">
           <div className="academic-container">
-            <div className="text-center space-y-4 mb-8 lg:mb-12">
+            <div className="text-center space-y-4 mb-12 lg:mb-16">
               <h2 className="academic-heading h2 text-2xl sm:text-3xl lg:text-4xl">Everything You Need for Academic Success</h2>
               <p className="academic-subheading max-w-2xl mx-auto text-sm sm:text-base lg:text-lg">
                 Comprehensive tools designed specifically for students to track, analyze, and improve their academic performance.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-              <div className="academic-card card-hover space-y-4 hover-lift animate-stagger stagger-1">
-                <div className="flex items-center space-x-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-academic-primary/10 hover-rotate">
-                    <BarChart3 className="h-6 w-6 text-academic-primary" />
+            {/* Feature 1 - Alternating Layout */}
+            <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center mb-16 lg:mb-20">
+              <div className="order-2 lg:order-1">
+                <div className="academic-card p-6 lg:p-8 hover-lift">
+                  <div className="flex items-center space-x-3 mb-4">
+                    <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-academic-primary/10">
+                      <BarChart3 className="h-7 w-7 text-academic-primary" />
+                    </div>
+                    <h3 className="academic-heading h3 text-xl lg:text-2xl">Grade Tracking Made Simple</h3>
                   </div>
-                  <h3 className="academic-heading h3">Grade Tracking</h3>
+                  <p className="text-muted-foreground mb-4 text-base lg:text-lg">
+                    Monitor your marks across all subjects, calculate CGPA automatically, and track semester performance with beautiful visualizations.
+                  </p>
+                  <ul className="space-y-2">
+                    {['Real-time CGPA calculation', 'Subject-wise performance tracking', 'Semester comparison charts', 'Grade prediction insights'].map((item, idx) => (
+                      <li key={idx} className="flex items-center space-x-2 text-sm text-muted-foreground">
+                        <CheckCircle className="h-4 w-4 text-academic-success flex-shrink-0" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-                <p className="text-muted-foreground">
-                  Monitor your marks across all subjects, calculate CGPA, track semester performance, and identify areas for improvement.
-                </p>
-                </div>
-                
-              <div className="academic-card card-hover space-y-4 hover-lift animate-stagger stagger-2">
-                <div className="flex items-center space-x-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-academic-warning/10 hover-rotate">
-                    <Clock className="h-6 w-6 text-academic-warning" />
+              </div>
+              <div className="order-1 lg:order-2 relative floating" data-speed="0.1">
+                <div className="relative rounded-2xl bg-gradient-to-br from-academic-primary/10 to-academic-secondary/10 p-6 lg:p-8 hover-lift">
+                  <div className="space-y-4">
+                    <div className="academic-card p-4">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-sm font-medium">Semester 1</span>
+                        <span className="text-lg font-bold text-academic-primary">3.85 CGPA</span>
+                      </div>
+                      <div className="h-2 bg-muted rounded-full overflow-hidden">
+                        <div className="h-full bg-academic-primary rounded-full" style={{ width: '77%' }} />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      {['Math', 'Physics', 'Chemistry', 'English'].map((subject, idx) => (
+                        <div key={idx} className="academic-card p-3">
+                          <div className="text-xs text-muted-foreground mb-1">{subject}</div>
+                          <div className="text-lg font-bold">{85 + idx * 2}%</div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  <h3 className="academic-heading h3">Attendance Management</h3>
                 </div>
-                <p className="text-muted-foreground">
-                  Keep track of your attendance across all subjects, get warnings for low attendance, and maintain required percentages.
-                </p>
+              </div>
+            </div>
+
+            {/* Feature 2 - Alternating Layout */}
+            <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center mb-16 lg:mb-20">
+              <div className="relative floating" data-speed="0.1">
+                <div className="relative rounded-2xl bg-gradient-to-br from-academic-warning/10 to-academic-danger/10 p-6 lg:p-8 hover-lift">
+                  <div className="space-y-4">
+                    <div className="academic-card p-4">
+                      <div className="flex justify-between items-center mb-3">
+                        <span className="text-sm font-medium">Attendance Status</span>
+                        <span className="text-sm font-bold text-academic-warning">92%</span>
+                      </div>
+                      {['Math', 'Physics', 'Chemistry', 'English'].map((subject, idx) => (
+                        <div key={idx} className="mb-3 last:mb-0">
+                          <div className="flex justify-between text-xs mb-1">
+                            <span>{subject}</span>
+                            <span className={idx === 2 ? 'text-academic-danger' : 'text-academic-success'}>
+                              {85 + idx * 3}%
+                            </span>
+                          </div>
+                          <div className="h-2 bg-muted rounded-full overflow-hidden">
+                            <div 
+                              className={`h-full rounded-full ${idx === 2 ? 'bg-academic-danger' : 'bg-academic-success'}`} 
+                              style={{ width: `${85 + idx * 3}%` }} 
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-                
+              </div>
+              <div>
+                <div className="academic-card p-6 lg:p-8 hover-lift">
+                  <div className="flex items-center space-x-3 mb-4">
+                    <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-academic-warning/10">
+                      <Clock className="h-7 w-7 text-academic-warning" />
+                    </div>
+                    <h3 className="academic-heading h3 text-xl lg:text-2xl">Never Miss a Class</h3>
+                  </div>
+                  <p className="text-muted-foreground mb-4 text-base lg:text-lg">
+                    Keep track of your attendance across all subjects with smart warnings and automatic calculations.
+                  </p>
+                  <ul className="space-y-2">
+                    {['Automatic attendance tracking', 'Low attendance warnings', 'Required percentage monitoring', 'Subject-wise breakdown'].map((item, idx) => (
+                      <li key={idx} className="flex items-center space-x-2 text-sm text-muted-foreground">
+                        <CheckCircle className="h-4 w-4 text-academic-success flex-shrink-0" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            {/* Other Features Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
               <div className="academic-card card-hover space-y-4 hover-lift animate-stagger stagger-3">
                 <div className="flex items-center space-x-3">
                   <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-academic-success/10 hover-rotate">
@@ -484,56 +625,131 @@ export default function Landing() {
           </div>
         </section>
 
-        {/* CTA Section */}
-        <section className="landing-section academic-section bg-gradient-to-r from-academic-primary to-academic-secondary text-white gradient-animate">
-          <div className="academic-container text-center space-y-8">
+        {/* FAQ Section */}
+        <section className="landing-section academic-section bg-muted/30">
+          <div className="academic-container">
+            <div className="text-center space-y-4 mb-12">
+              <h2 className="academic-heading h2 text-2xl sm:text-3xl lg:text-4xl">Frequently Asked Questions</h2>
+              <p className="academic-subheading max-w-2xl mx-auto text-sm sm:text-base lg:text-lg">
+                Everything you need to know about UNI-TEL. Can't find the answer? Contact our support team.
+              </p>
+            </div>
+
+            <div className="max-w-3xl mx-auto space-y-4">
+              {[
+                {
+                  q: 'Is UNI-TEL really free?',
+                  a: 'Yes! UNI-TEL offers a free forever plan with all core features. You can track grades, monitor attendance, and analyze performance without any cost. No credit card required.'
+                },
+                {
+                  q: 'How long does it take to set up?',
+                  a: 'Setting up UNI-TEL takes less than 5 minutes. Simply create an account, add your subjects, and start tracking. You can import existing data or start fresh.'
+                },
+                {
+                  q: 'Is my data secure?',
+                  a: 'Absolutely. We use industry-standard encryption to protect your data. Your academic information is private and secure. We never share your data with third parties.'
+                },
+                {
+                  q: 'Can I use UNI-TEL on mobile?',
+                  a: 'Yes! UNI-TEL is fully responsive and works seamlessly on all devices - desktop, tablet, and mobile. Access your academic data anywhere, anytime.'
+                },
+                {
+                  q: 'What if I need help?',
+                  a: 'We offer comprehensive help documentation and email support. Our team typically responds within 24 hours. Premium users get priority support.'
+                },
+                {
+                  q: 'Can I export my data?',
+                  a: 'Yes, you can export all your data at any time in various formats (CSV, PDF). Your data belongs to you, and you have full control over it.'
+                }
+              ].map((faq, idx) => (
+                <div key={idx} className="academic-card overflow-hidden">
+                  <button
+                    onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
+                    className="w-full flex items-center justify-between p-4 lg:p-6 text-left hover:bg-muted/50 transition-colors"
+                  >
+                    <span className="font-semibold text-base lg:text-lg pr-4">{faq.q}</span>
+                    {openFaq === idx ? (
+                      <Minus className="h-5 w-5 text-academic-primary flex-shrink-0" />
+                    ) : (
+                      <Plus className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                    )}
+                  </button>
+                  {openFaq === idx && (
+                    <div className="px-4 lg:px-6 pb-4 lg:pb-6 text-muted-foreground text-sm lg:text-base">
+                      {faq.a}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Enhanced CTA Section */}
+        <section className="landing-section academic-section bg-gradient-to-r from-academic-primary to-academic-secondary text-white gradient-animate relative overflow-hidden">
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute top-0 left-0 w-96 h-96 bg-white rounded-full blur-3xl" />
+            <div className="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl" />
+          </div>
+          <div className="academic-container text-center space-y-8 relative z-10">
             <div className="space-y-4 animate-fade-in">
-              <h2 className="academic-heading h2 text-white">Ready to Transform Your Academic Journey?</h2>
-              <p className="text-xl text-white/90 max-w-2xl mx-auto">
-                Join thousands of students who are already using UNI-TEL to achieve academic excellence. 
-                Start your free trial today and experience the difference.
+              <div className="inline-flex items-center space-x-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 mb-4">
+                <Rocket className="h-4 w-4" />
+                <span className="text-sm font-medium">Join 10,000+ students already succeeding</span>
+              </div>
+              <h2 className="academic-heading h2 text-white text-3xl sm:text-4xl lg:text-5xl">Start Your Free Trial Today</h2>
+              <p className="text-lg sm:text-xl text-white/90 max-w-2xl mx-auto">
+                No credit card required. Set up in 5 minutes. See results in your first semester.
               </p>
             </div>
             
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center animate-fade-in stagger-1">
               <button 
                 onClick={() => navigate('/auth')}
-                className="academic-button lg bg-white text-academic-primary hover:bg-white/90 hover-scale magnetic w-full sm:w-auto"
+                className="academic-button lg bg-white text-academic-primary hover:bg-white/90 hover-scale magnetic w-full sm:w-auto group shadow-xl"
               >
                 Get Started Free
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </button>
               <button 
-                onClick={() => scrollToSection('features')}
-                className="academic-button secondary lg border-white/20 text-white hover:bg-white/10 hover-lift w-full sm:w-auto"
+                onClick={() => scrollToSection('demo')}
+                className="academic-button secondary lg border-white/20 text-white hover:bg-white/10 hover-lift w-full sm:w-auto flex items-center justify-center"
               >
-                Learn More
+                <Play className="h-4 w-4 mr-2" />
+                Watch Demo
               </button>
             </div>
 
             {/* Additional CTA Features */}
             <div className="grid md:grid-cols-3 gap-8 mt-12 pt-8 border-t border-white/20">
               <div className="text-center space-y-2">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/10 mx-auto">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/10 mx-auto hover:bg-white/20 transition-colors">
                   <Zap className="h-6 w-6 text-white" />
                 </div>
                 <h4 className="font-semibold text-white">Quick Setup</h4>
                 <p className="text-sm text-white/80">Get started in under 5 minutes</p>
               </div>
               <div className="text-center space-y-2">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/10 mx-auto">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/10 mx-auto hover:bg-white/20 transition-colors">
                   <Shield className="h-6 w-6 text-white" />
                 </div>
                 <h4 className="font-semibold text-white">Secure & Private</h4>
                 <p className="text-sm text-white/80">Your data is always protected</p>
               </div>
               <div className="text-center space-y-2">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/10 mx-auto">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/10 mx-auto hover:bg-white/20 transition-colors">
                   <Heart className="h-6 w-6 text-white" />
                 </div>
                 <h4 className="font-semibold text-white">Student-First</h4>
                 <p className="text-sm text-white/80">Built by students, for students</p>
               </div>
+            </div>
+            
+            {/* Trust Badge */}
+            <div className="mt-8 pt-8 border-t border-white/20">
+              <p className="text-sm text-white/70">
+                ✓ Free forever • ✓ No credit card • ✓ Cancel anytime
+              </p>
             </div>
           </div>
         </section>

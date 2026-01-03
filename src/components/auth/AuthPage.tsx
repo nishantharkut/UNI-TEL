@@ -6,7 +6,24 @@ import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Card } from '../ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
-import { Mail, Lock, Eye, EyeOff, User, ArrowRight, CheckCircle, BarChart3, Shield, Zap } from 'lucide-react';
+import { 
+  Mail, 
+  Lock, 
+  Eye, 
+  EyeOff, 
+  User, 
+  ArrowRight, 
+  CheckCircle, 
+  BarChart3, 
+  Shield, 
+  Zap,
+  TrendingUp,
+  BookOpen,
+  Target,
+  Sparkles,
+  Star,
+  AlertCircle
+} from 'lucide-react';
 import { useToast } from '../../hooks/use-toast';
 
 const AuthPage = () => {
@@ -16,10 +33,33 @@ const AuthPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showSignupPassword, setShowSignupPassword] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const [passwordStrength, setPasswordStrength] = useState(0);
+  const [activeTab, setActiveTab] = useState('signin');
 
   useEffect(() => {
     setIsVisible(true);
   }, []);
+
+  const calculatePasswordStrength = (password: string) => {
+    let strength = 0;
+    if (password.length >= 6) strength += 1;
+    if (password.length >= 8) strength += 1;
+    if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength += 1;
+    if (/\d/.test(password)) strength += 1;
+    if (/[^a-zA-Z\d]/.test(password)) strength += 1;
+    return strength;
+  };
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const password = e.target.value;
+    setPasswordStrength(calculatePasswordStrength(password));
+  };
+
+  const getPasswordStrengthLabel = () => {
+    if (passwordStrength <= 1) return { label: 'Weak', color: 'text-academic-danger' };
+    if (passwordStrength <= 3) return { label: 'Medium', color: 'text-academic-warning' };
+    return { label: 'Strong', color: 'text-academic-success' };
+  };
 
   const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -87,105 +127,129 @@ const AuthPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-academic-primary/5 flex flex-col p-4">
-      {/* Back Button */}
-      <div className="w-full max-w-6xl mx-auto mb-4">
-        <Button 
-          variant="ghost" 
-          onClick={() => navigate('/')}
-          className="text-muted-foreground hover:text-foreground"
-        >
-          ← Back to Landing
-        </Button>
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-academic-primary/5 flex flex-col relative overflow-hidden">
+      {/* Background Decorations */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-academic-primary/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-academic-secondary/5 rounded-full blur-3xl" />
       </div>
 
-      {/* Logo Section */}
-      <div className="flex justify-center mb-8">
-        <div className="flex items-center gap-3">
-          <img 
-            src="/logo.png" 
-            alt="UNI-TEL Logo" 
-            className="h-12 w-12 sm:h-16 sm:w-16 object-contain"
-          />
-          <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-academic-primary to-academic-secondary bg-clip-text text-transparent">
-            UNI-TEL
-          </h1>
+      <div className="relative z-10 flex flex-col p-4 sm:p-6 lg:p-8">
+        {/* Back Button */}
+        <div className="w-full max-w-7xl mx-auto mb-4 sm:mb-6">
+          <Button 
+            variant="ghost" 
+            onClick={() => navigate('/')}
+            className="text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all"
+          >
+            ← Back to Landing
+          </Button>
         </div>
-      </div>
 
-      <div className="w-full max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-start">
+        {/* Logo Section */}
+        <div className="flex justify-center mb-6 sm:mb-8 lg:mb-12">
+          <div className="flex items-center gap-3 group cursor-pointer" onClick={() => navigate('/')}>
+            <div className="relative">
+              <img 
+                src="/logo.png" 
+                alt="UNI-TEL Logo" 
+                className="h-12 w-12 sm:h-16 sm:w-16 object-contain transition-transform group-hover:scale-110"
+              />
+              <div className="absolute inset-0 bg-academic-primary/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
+            </div>
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-academic-primary to-academic-secondary bg-clip-text text-transparent">
+              UNI-TEL
+            </h1>
+          </div>
+        </div>
+
+      <div className="w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 xl:gap-16 items-start">
         {/* Auth Form */}
         <div className={`transition-all duration-1000 delay-300 ${isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'} lg:order-2`}>
-          <Card className="border-0 shadow-2xl bg-background/80 backdrop-blur-sm w-full max-w-md mx-auto lg:max-w-none lg:min-h-[500px]">
-            <Tabs defaultValue="signin" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 bg-muted">
-                <TabsTrigger value="signin" className="data-[state=active]:bg-background data-[state=active]:shadow-sm text-sm sm:text-base">
+          <Card className="border-2 border-border/50 shadow-2xl bg-background/95 backdrop-blur-md w-full max-w-md mx-auto lg:max-w-none lg:min-h-[600px] hover:shadow-3xl transition-shadow">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="grid w-full grid-cols-2 bg-muted/50 p-1 h-12">
+                <TabsTrigger 
+                  value="signin" 
+                  className="data-[state=active]:bg-background data-[state=active]:shadow-md data-[state=active]:text-academic-primary font-semibold text-sm sm:text-base transition-all"
+                >
                   Sign In
                 </TabsTrigger>
-                <TabsTrigger value="signup" className="data-[state=active]:bg-background data-[state=active]:shadow-sm text-sm sm:text-base">
+                <TabsTrigger 
+                  value="signup" 
+                  className="data-[state=active]:bg-background data-[state=active]:shadow-md data-[state=active]:text-academic-primary font-semibold text-sm sm:text-base transition-all"
+                >
                   Sign Up
                 </TabsTrigger>
               </TabsList>
               
-              <TabsContent value="signin" className="p-4 sm:p-6 lg:p-8">
-                <div className="space-y-4 sm:space-y-6 min-h-[400px] flex flex-col justify-center">
-                  <div>
-                    <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-1 sm:mb-2">Welcome Back!</h3>
+              <TabsContent value="signin" className="p-6 sm:p-8 lg:p-10 mt-6">
+                <div className="space-y-6 sm:space-y-8">
+                  <div className="space-y-2">
+                    <h3 className="text-2xl sm:text-3xl font-bold text-foreground">Welcome Back!</h3>
                     <p className="text-sm sm:text-base text-muted-foreground">Sign in to continue your academic journey</p>
                   </div>
                   
-                  <form onSubmit={handleSignIn} className="space-y-4 sm:space-y-6">
-                    <div>
-                      <Label htmlFor="signin-email" className="text-xs sm:text-sm font-medium text-foreground">Email Address</Label>
-                      <div className="relative mt-1 sm:mt-2">
-                        <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
+                  <form onSubmit={handleSignIn} className="space-y-5 sm:space-y-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="signin-email" className="text-sm font-semibold text-foreground">Email Address</Label>
+                      <div className="relative">
+                        <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                         <Input
                           id="signin-email"
                           name="email"
                           type="email"
-                          placeholder="Enter your email"
-                          className="pl-10 sm:pl-12 h-10 sm:h-12 border-2 focus:border-academic-primary transition-colors text-sm sm:text-base"
+                          placeholder="you@example.com"
+                          className="pl-12 h-12 border-2 focus:border-academic-primary focus:ring-2 focus:ring-academic-primary/20 transition-all text-base"
                           required
                         />
                       </div>
                     </div>
                     
-                    <div>
-                      <Label htmlFor="signin-password" className="text-xs sm:text-sm font-medium text-foreground">Password</Label>
-                      <div className="relative mt-1 sm:mt-2">
-                        <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <Label htmlFor="signin-password" className="text-sm font-semibold text-foreground">Password</Label>
+                        <button
+                          type="button"
+                          className="text-xs text-academic-primary hover:text-academic-primary/80 font-medium"
+                        >
+                          Forgot password?
+                        </button>
+                      </div>
+                      <div className="relative">
+                        <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                         <Input
                           id="signin-password"
                           name="password"
                           type={showPassword ? "text" : "password"}
                           placeholder="Enter your password"
-                          className="pl-10 sm:pl-12 pr-10 sm:pr-12 h-10 sm:h-12 border-2 focus:border-academic-primary transition-colors text-sm sm:text-base"
+                          className="pl-12 pr-12 h-12 border-2 focus:border-academic-primary focus:ring-2 focus:ring-academic-primary/20 transition-all text-base"
                           required
                         />
                         <button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                          className="absolute right-4 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                         >
-                          {showPassword ? <EyeOff className="w-4 h-4 sm:w-5 sm:h-5" /> : <Eye className="w-4 h-4 sm:w-5 sm:h-5" />}
+                          {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                         </button>
                       </div>
                     </div>
                     
                     <Button 
                       type="submit" 
-                      className="w-full h-10 sm:h-12 bg-gradient-to-r from-academic-primary to-academic-secondary hover:from-academic-primary/90 hover:to-academic-secondary/90 text-sm sm:text-base lg:text-lg font-semibold"
+                      className="w-full h-12 bg-gradient-to-r from-academic-primary to-academic-secondary hover:from-academic-primary/90 hover:to-academic-secondary/90 text-base font-semibold shadow-lg hover:shadow-xl transition-all group"
                       disabled={loading}
                     >
                       {loading ? (
                         <div className="flex items-center gap-2">
-                          <div className="w-3 h-3 sm:w-4 sm:h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                          <span className="text-xs sm:text-sm">Signing in...</span>
+                          <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                          <span>Signing in...</span>
                         </div>
                       ) : (
                         <div className="flex items-center gap-2">
-                          <span className="text-xs sm:text-sm">Sign In</span>
-                          <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5" />
+                          <span>Sign In</span>
+                          <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                         </div>
                       )}
                     </Button>
@@ -193,82 +257,116 @@ const AuthPage = () => {
                 </div>
               </TabsContent>
               
-              <TabsContent value="signup" className="p-4 sm:p-6 lg:p-8">
-                <div className="space-y-4 sm:space-y-6 min-h-[400px] flex flex-col justify-center">
-                  <div>
-                    <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-1 sm:mb-2">Create Account</h3>
+              <TabsContent value="signup" className="p-6 sm:p-8 lg:p-10 mt-6">
+                <div className="space-y-6 sm:space-y-8">
+                  <div className="space-y-2">
+                    <h3 className="text-2xl sm:text-3xl font-bold text-foreground">Create Account</h3>
                     <p className="text-sm sm:text-base text-muted-foreground">Join thousands of students already using UNI-TEL</p>
                   </div>
                   
-                  <form onSubmit={handleSignUp} className="space-y-4 sm:space-y-6">
-                    <div>
-                      <Label htmlFor="signup-name" className="text-xs sm:text-sm font-medium text-foreground">Full Name</Label>
-                      <div className="relative mt-1 sm:mt-2">
-                        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
+                  <form onSubmit={handleSignUp} className="space-y-5 sm:space-y-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-name" className="text-sm font-semibold text-foreground">Full Name</Label>
+                      <div className="relative">
+                        <User className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                         <Input
                           id="signup-name"
                           name="fullName"
                           type="text"
-                          placeholder="Enter your full name"
-                          className="pl-10 sm:pl-12 h-10 sm:h-12 border-2 focus:border-academic-primary transition-colors text-sm sm:text-base"
+                          placeholder="John Doe"
+                          className="pl-12 h-12 border-2 focus:border-academic-primary focus:ring-2 focus:ring-academic-primary/20 transition-all text-base"
                           required
                         />
                       </div>
                     </div>
                     
-                    <div>
-                      <Label htmlFor="signup-email" className="text-xs sm:text-sm font-medium text-foreground">Email Address</Label>
-                      <div className="relative mt-1 sm:mt-2">
-                        <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-email" className="text-sm font-semibold text-foreground">Email Address</Label>
+                      <div className="relative">
+                        <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                         <Input
                           id="signup-email"
                           name="email"
                           type="email"
-                          placeholder="Enter your email"
-                          className="pl-10 sm:pl-12 h-10 sm:h-12 border-2 focus:border-academic-primary transition-colors text-sm sm:text-base"
+                          placeholder="you@example.com"
+                          className="pl-12 h-12 border-2 focus:border-academic-primary focus:ring-2 focus:ring-academic-primary/20 transition-all text-base"
                           required
                         />
                       </div>
                     </div>
                     
-                    <div>
-                      <Label htmlFor="signup-password" className="text-xs sm:text-sm font-medium text-foreground">Password</Label>
-                      <div className="relative mt-1 sm:mt-2">
-                        <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-password" className="text-sm font-semibold text-foreground">Password</Label>
+                      <div className="relative">
+                        <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                         <Input
                           id="signup-password"
                           name="password"
                           type={showSignupPassword ? "text" : "password"}
                           placeholder="Create a strong password"
-                          className="pl-10 sm:pl-12 pr-10 sm:pr-12 h-10 sm:h-12 border-2 focus:border-academic-primary transition-colors text-sm sm:text-base"
+                          className="pl-12 pr-12 h-12 border-2 focus:border-academic-primary focus:ring-2 focus:ring-academic-primary/20 transition-all text-base"
                           required
                           minLength={6}
+                          onChange={handlePasswordChange}
                         />
                         <button
                           type="button"
                           onClick={() => setShowSignupPassword(!showSignupPassword)}
-                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                          className="absolute right-4 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                         >
-                          {showSignupPassword ? <EyeOff className="w-4 h-4 sm:w-5 sm:h-5" /> : <Eye className="w-4 h-4 sm:w-5 sm:h-5" />}
+                          {showSignupPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                         </button>
                       </div>
-                      <p className="text-xs text-muted-foreground mt-1">Minimum 6 characters</p>
+                      {/* Password Strength Indicator */}
+                      {passwordStrength > 0 && (
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between text-xs">
+                            <span className={getPasswordStrengthLabel().color + ' font-medium'}>
+                              {getPasswordStrengthLabel().label}
+                            </span>
+                            <span className="text-muted-foreground">{passwordStrength}/5</span>
+                          </div>
+                          <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                            <div 
+                              className={`h-full transition-all duration-300 ${
+                                passwordStrength <= 1 ? 'bg-academic-danger' :
+                                passwordStrength <= 3 ? 'bg-academic-warning' : 'bg-academic-success'
+                              }`}
+                              style={{ width: `${(passwordStrength / 5) * 100}%` }}
+                            />
+                          </div>
+                        </div>
+                      )}
+                      <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+                        <div className={`flex items-center gap-1 ${passwordStrength >= 1 ? 'text-academic-success' : ''}`}>
+                          <CheckCircle className={`w-3 h-3 ${passwordStrength >= 1 ? 'fill-academic-success text-academic-success' : ''}`} />
+                          <span>6+ characters</span>
+                        </div>
+                        <div className={`flex items-center gap-1 ${passwordStrength >= 3 ? 'text-academic-success' : ''}`}>
+                          <CheckCircle className={`w-3 h-3 ${passwordStrength >= 3 ? 'fill-academic-success text-academic-success' : ''}`} />
+                          <span>Mixed case</span>
+                        </div>
+                        <div className={`flex items-center gap-1 ${passwordStrength >= 4 ? 'text-academic-success' : ''}`}>
+                          <CheckCircle className={`w-3 h-3 ${passwordStrength >= 4 ? 'fill-academic-success text-academic-success' : ''}`} />
+                          <span>Numbers</span>
+                        </div>
+                      </div>
                     </div>
                     
                     <Button 
                       type="submit" 
-                      className="w-full h-10 sm:h-12 bg-gradient-to-r from-academic-primary to-academic-secondary hover:from-academic-primary/90 hover:to-academic-secondary/90 text-sm sm:text-base lg:text-lg font-semibold"
+                      className="w-full h-12 bg-gradient-to-r from-academic-primary to-academic-secondary hover:from-academic-primary/90 hover:to-academic-secondary/90 text-base font-semibold shadow-lg hover:shadow-xl transition-all group"
                       disabled={loading}
                     >
                       {loading ? (
                         <div className="flex items-center gap-2">
-                          <div className="w-3 h-3 sm:w-4 sm:h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                          <span className="text-xs sm:text-sm">Creating account...</span>
+                          <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                          <span>Creating account...</span>
                         </div>
                       ) : (
                         <div className="flex items-center gap-2">
-                          <span className="text-xs sm:text-sm">Create Account</span>
-                          <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5" />
+                          <span>Create Account</span>
+                          <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                         </div>
                       )}
                     </Button>
@@ -279,59 +377,84 @@ const AuthPage = () => {
           </Card>
         </div>
 
-        {/* Content Section */}
-        <div className={`space-y-6 lg:space-y-8 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-8'} lg:order-1 lg:sticky lg:top-8`}>
-          <div>
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-foreground mb-4 sm:mb-6 text-center lg:text-left">
-              Welcome to Your
-              <span className="bg-gradient-to-r from-academic-primary to-academic-secondary bg-clip-text text-transparent"> Academic Hub</span>
+        {/* Enhanced Content Section */}
+        <div className={`space-y-8 lg:space-y-10 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-8'} lg:order-1 lg:sticky lg:top-8`}>
+          <div className="space-y-4">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-academic-primary/10 border border-academic-primary/20 mb-4">
+              <Sparkles className="w-4 h-4 text-academic-primary" />
+              <span className="text-sm font-medium text-academic-primary">Trusted by 10,000+ students</span>
+            </div>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-foreground leading-tight text-center lg:text-left">
+              Start Your
+              <span className="block bg-gradient-to-r from-academic-primary to-academic-secondary bg-clip-text text-transparent"> Academic Journey</span>
             </h2>
-            <p className="text-base sm:text-lg lg:text-xl text-muted-foreground mb-6 sm:mb-8 leading-relaxed text-center lg:text-left">
-              Track your academic journey with intelligent analytics, smart attendance management, 
-              and beautiful performance insights.
+            <p className="text-lg sm:text-xl lg:text-2xl text-muted-foreground leading-relaxed text-center lg:text-left max-w-xl">
+              Join thousands of students who are achieving better grades with smart tracking and analytics.
             </p>
           </div>
 
-          {/* Features List */}
-          <div className="space-y-3 sm:space-y-4">
-            <div className="flex items-center gap-2 sm:gap-3 justify-center lg:justify-start">
-              <div className="p-1.5 sm:p-2 rounded-lg bg-academic-success/10">
-                <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-academic-success" />
+          {/* Enhanced Features List */}
+          <div className="space-y-4 sm:space-y-5">
+            {[
+              { icon: BarChart3, title: 'Smart Grade Tracking', desc: 'Real-time CGPA calculation', bgColor: 'bg-academic-primary/10', iconColor: 'text-academic-primary' },
+              { icon: TrendingUp, title: 'Performance Analytics', desc: 'Visual insights & trends', bgColor: 'bg-academic-success/10', iconColor: 'text-academic-success' },
+              { icon: BookOpen, title: 'Attendance Management', desc: 'Never miss a class', bgColor: 'bg-academic-warning/10', iconColor: 'text-academic-warning' },
+              { icon: Target, title: 'Goal Setting', desc: 'Track your academic goals', bgColor: 'bg-academic-danger/10', iconColor: 'text-academic-danger' },
+              { icon: Shield, title: 'Secure & Private', desc: 'Your data is protected', bgColor: 'bg-academic-accent/10', iconColor: 'text-academic-accent' }
+            ].map((feature, idx) => (
+              <div 
+                key={idx} 
+                className="flex items-start gap-4 p-4 rounded-xl bg-muted/30 hover:bg-muted/50 transition-all group cursor-default justify-center lg:justify-start"
+              >
+                <div className={`p-3 rounded-lg ${feature.bgColor} group-hover:scale-110 transition-transform`}>
+                  <feature.icon className={`w-6 h-6 ${feature.iconColor}`} />
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-semibold text-foreground mb-1">{feature.title}</h4>
+                  <p className="text-sm text-muted-foreground">{feature.desc}</p>
+                </div>
               </div>
-              <span className="text-sm sm:text-base text-foreground">Smart Academic Tracking</span>
+            ))}
+          </div>
+
+          {/* Enhanced Stats */}
+          <div className="grid grid-cols-3 gap-4 sm:gap-6 pt-8 border-t border-border">
+            <div className="text-center">
+              <div className="text-2xl sm:text-3xl font-bold text-academic-primary mb-1">10K+</div>
+              <div className="text-xs sm:text-sm text-muted-foreground">Students</div>
             </div>
-            <div className="flex items-center gap-2 sm:gap-3 justify-center lg:justify-start">
-              <div className="p-1.5 sm:p-2 rounded-lg bg-academic-primary/10">
-                <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5 text-academic-primary" />
+            <div className="text-center">
+              <div className="flex items-center justify-center gap-1 text-2xl sm:text-3xl font-bold text-academic-warning mb-1">
+                <Star className="w-5 h-5 fill-academic-warning" />
+                <span>4.9</span>
               </div>
-              <span className="text-sm sm:text-base text-foreground">Advanced Analytics & Insights</span>
+              <div className="text-xs sm:text-sm text-muted-foreground">Rating</div>
             </div>
-            <div className="flex items-center gap-2 sm:gap-3 justify-center lg:justify-start">
-              <div className="p-1.5 sm:p-2 rounded-lg bg-academic-warning/10">
-                <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-academic-warning" />
-              </div>
-              <span className="text-sm sm:text-base text-foreground">Secure & Private Data</span>
-            </div>
-            <div className="flex items-center gap-2 sm:gap-3 justify-center lg:justify-start">
-              <div className="p-1.5 sm:p-2 rounded-lg bg-academic-danger/10">
-                <Zap className="w-4 h-4 sm:w-5 sm:h-5 text-academic-danger" />
-              </div>
-              <span className="text-sm sm:text-base text-foreground">Real-time Performance Updates</span>
+            <div className="text-center">
+              <div className="text-2xl sm:text-3xl font-bold text-academic-success mb-1">95%</div>
+              <div className="text-xs sm:text-sm text-muted-foreground">Improve</div>
             </div>
           </div>
 
-          {/* Stats */}
-          <div className="grid grid-cols-2 gap-4 sm:gap-6 pt-6 sm:pt-8 border-t border-border">
-            <div className="text-center">
-              <div className="text-xl sm:text-2xl font-bold text-foreground">10K+</div>
-              <div className="text-xs sm:text-sm text-muted-foreground">Active Students</div>
-            </div>
-            <div className="text-center">
-              <div className="text-xl sm:text-2xl font-bold text-foreground">4.9/5</div>
-              <div className="text-xs sm:text-sm text-muted-foreground">User Rating</div>
+          {/* Trust Badges */}
+          <div className="pt-6 border-t border-border">
+            <div className="flex flex-wrap items-center gap-4 justify-center lg:justify-start text-sm text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <CheckCircle className="w-4 h-4 text-academic-success" />
+                <span>Free Forever</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Shield className="w-4 h-4 text-academic-primary" />
+                <span>Secure</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Zap className="w-4 h-4 text-academic-warning" />
+                <span>5-Min Setup</span>
+              </div>
             </div>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );
