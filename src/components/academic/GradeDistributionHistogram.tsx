@@ -71,35 +71,36 @@ export function GradeDistributionHistogram() {
 
   return (
     <Card className="border-0 shadow-lg bg-gradient-to-br from-card to-card/80 backdrop-blur-sm">
-      <CardHeader className="pb-4">
-        <CardTitle className="flex items-center gap-3 text-xl">
+      <CardHeader className="pb-3 sm:pb-4">
+        <CardTitle className="flex items-center gap-2 sm:gap-3 text-lg sm:text-xl">
           <div className="p-2 rounded-xl color-accent-light">
-            <Award className="w-5 h-5 text-academic-secondary" />
+            <Award className="w-4 h-4 sm:w-5 sm:h-5 text-academic-secondary" />
           </div>
-          Grade Distribution Histogram
+          Grade Distribution
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {/* Histogram Chart */}
           <div>
-            <ResponsiveContainer width="100%" height={300}>
+            <ResponsiveContainer width="100%" height={250} className="sm:h-[300px]">
               <BarChart data={distributionData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted-foreground))" opacity={0.3} />
                 <XAxis 
                   dataKey="grade" 
                   stroke="hsl(var(--muted-foreground))"
-                  tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                  tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
                 />
                 <YAxis 
                   stroke="hsl(var(--muted-foreground))"
-                  tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                  tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
                 />
                 <Tooltip 
                   contentStyle={{
                     backgroundColor: 'hsl(var(--card))',
                     border: '1px solid hsl(var(--border))',
-                    borderRadius: '8px'
+                    borderRadius: '8px',
+                    fontSize: '12px'
                   }}
                   formatter={(value: number, name: string, props: any) => {
                     return [
@@ -122,46 +123,46 @@ export function GradeDistributionHistogram() {
           </div>
 
           {/* Statistics */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <div className="p-4 bg-green-50 dark:bg-green-950/30 rounded-lg">
-              <div className="flex items-center gap-2 mb-2">
-                <TrendingUp className="w-4 h-4 text-green-600 dark:text-green-400" />
-                <p className="text-sm font-medium text-green-800 dark:text-green-200">Excellent</p>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
+            <div className="p-3 sm:p-4 bg-green-50 dark:bg-green-950/30 rounded-lg">
+              <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
+                <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 text-green-600 dark:text-green-400" />
+                <p className="text-xs sm:text-sm font-medium text-green-800 dark:text-green-200">Excellent</p>
               </div>
-              <p className="text-2xl font-bold text-green-700 dark:text-green-300">{excellentGrades}</p>
+              <p className="text-xl sm:text-2xl font-bold text-green-700 dark:text-green-300">{excellentGrades}</p>
               <p className="text-xs text-green-600 dark:text-green-400">
                 {totalGraded > 0 ? Math.round((excellentGrades / totalGraded) * 100) : 0}% of total
               </p>
             </div>
 
-            <div className="p-4 bg-blue-50 dark:bg-blue-950/30 rounded-lg">
-              <div className="flex items-center gap-2 mb-2">
-                <Award className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                <p className="text-sm font-medium text-blue-800 dark:text-blue-200">Good</p>
+            <div className="p-3 sm:p-4 bg-blue-50 dark:bg-blue-950/30 rounded-lg">
+              <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
+                <Award className="w-3 h-3 sm:w-4 sm:h-4 text-blue-600 dark:text-blue-400" />
+                <p className="text-xs sm:text-sm font-medium text-blue-800 dark:text-blue-200">Good</p>
               </div>
-              <p className="text-2xl font-bold text-blue-700 dark:text-blue-300">{goodGrades}</p>
+              <p className="text-xl sm:text-2xl font-bold text-blue-700 dark:text-blue-300">{goodGrades}</p>
               <p className="text-xs text-blue-600 dark:text-blue-400">
                 {totalGraded > 0 ? Math.round((goodGrades / totalGraded) * 100) : 0}% of total
               </p>
             </div>
 
-            <div className="p-4 bg-yellow-50 dark:bg-yellow-950/30 rounded-lg">
-              <div className="flex items-center gap-2 mb-2">
-                <Award className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
-                <p className="text-sm font-medium text-yellow-800 dark:text-yellow-200">Average</p>
+            <div className="p-3 sm:p-4 bg-yellow-50 dark:bg-yellow-950/30 rounded-lg">
+              <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
+                <Award className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-600 dark:text-yellow-400" />
+                <p className="text-xs sm:text-sm font-medium text-yellow-800 dark:text-yellow-200">Average</p>
               </div>
-              <p className="text-2xl font-bold text-yellow-700 dark:text-yellow-300">{averageGrades}</p>
+              <p className="text-xl sm:text-2xl font-bold text-yellow-700 dark:text-yellow-300">{averageGrades}</p>
               <p className="text-xs text-yellow-600 dark:text-yellow-400">
                 {totalGraded > 0 ? Math.round((averageGrades / totalGraded) * 100) : 0}% of total
               </p>
             </div>
 
-            <div className="p-4 bg-red-50 dark:bg-red-950/30 rounded-lg">
-              <div className="flex items-center gap-2 mb-2">
-                <Award className="w-4 h-4 text-red-600 dark:text-red-400" />
-                <p className="text-sm font-medium text-red-800 dark:text-red-200">Needs Improvement</p>
+            <div className="p-3 sm:p-4 bg-red-50 dark:bg-red-950/30 rounded-lg">
+              <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
+                <Award className="w-3 h-3 sm:w-4 sm:h-4 text-red-600 dark:text-red-400" />
+                <p className="text-xs sm:text-sm font-medium text-red-800 dark:text-red-200">Needs Improvement</p>
               </div>
-              <p className="text-2xl font-bold text-red-700 dark:text-red-300">{poorGrades}</p>
+              <p className="text-xl sm:text-2xl font-bold text-red-700 dark:text-red-300">{poorGrades}</p>
               <p className="text-xs text-red-600 dark:text-red-400">
                 {totalGraded > 0 ? Math.round((poorGrades / totalGraded) * 100) : 0}% of total
               </p>
@@ -169,15 +170,15 @@ export function GradeDistributionHistogram() {
           </div>
 
           {/* Summary */}
-          <div className="p-4 bg-muted/50 rounded-lg">
-            <div className="flex items-center justify-between">
+          <div className="p-3 sm:p-4 bg-muted/50 rounded-lg">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div>
-                <p className="text-sm text-muted-foreground">Total Graded Subjects</p>
-                <p className="text-2xl font-bold">{totalGraded}</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">Total Graded Subjects</p>
+                <p className="text-xl sm:text-2xl font-bold">{totalGraded}</p>
               </div>
-              <div className="text-right">
-                <p className="text-sm text-muted-foreground">Overall Performance</p>
-                <p className="text-2xl font-bold text-academic-primary">
+              <div className="text-left sm:text-right">
+                <p className="text-xs sm:text-sm text-muted-foreground">Overall Performance</p>
+                <p className="text-xl sm:text-2xl font-bold text-academic-primary">
                   {excellentGrades + goodGrades > 0 
                     ? Math.round(((excellentGrades + goodGrades) / totalGraded) * 100) 
                     : 0}%

@@ -106,23 +106,23 @@ export function AdvancedPerformanceTrends({
 
   return (
     <Card className="border-0 shadow-lg bg-gradient-to-br from-card to-card/80 backdrop-blur-sm">
-      <CardHeader className="pb-4">
-        <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-3 text-xl">
+      <CardHeader className="pb-3 sm:pb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <CardTitle className="flex items-center gap-2 sm:gap-3 text-lg sm:text-xl">
             <div className="p-2 rounded-xl color-primary-light">
-              <TrendingUp className="w-5 h-5 text-academic-primary" />
+              <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-academic-primary" />
             </div>
-            Advanced Performance Trends
+            <span>Advanced Performance Trends</span>
             {prediction && (
-              <div className="flex items-center gap-1 ml-2">
-                <Sparkles className="w-4 h-4 text-academic-accent" />
-                <span className="text-sm font-normal text-muted-foreground">with Prediction</span>
+              <div className="flex items-center gap-1 ml-1 sm:ml-2">
+                <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-academic-accent" />
+                <span className="text-xs sm:text-sm font-normal text-muted-foreground">with Prediction</span>
               </div>
             )}
           </CardTitle>
           <div className="flex items-center gap-2">
             <div className={cn(
-              "px-3 py-1 rounded-full text-xs font-medium",
+              "px-2 sm:px-3 py-1 rounded-full text-xs font-medium",
               trendDirection === 'improving' && "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
               trendDirection === 'declining' && "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
               trendDirection === 'stable' && "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"
@@ -135,31 +135,32 @@ export function AdvancedPerformanceTrends({
         </div>
       </CardHeader>
       <CardContent>
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {/* CGPA Trend with Prediction */}
           <div>
-            <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
-              <Target className="w-4 h-4" />
+            <h4 className="text-xs sm:text-sm font-medium mb-2 sm:mb-3 flex items-center gap-2">
+              <Target className="w-3 h-3 sm:w-4 sm:h-4" />
               CGPA Trend {prediction && '(with Prediction)'}
             </h4>
-            <ResponsiveContainer width="100%" height={300}>
+            <ResponsiveContainer width="100%" height={250} className="sm:h-[300px]">
               <LineChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted-foreground))" opacity={0.3} />
                 <XAxis 
                   dataKey="semester" 
                   stroke="hsl(var(--muted-foreground))"
-                  tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                  tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
                 />
                 <YAxis 
                   domain={[0, 10]} 
                   stroke="hsl(var(--muted-foreground))"
-                  tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                  tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
                 />
                 <Tooltip 
                   contentStyle={{
                     backgroundColor: 'hsl(var(--card))',
                     border: '1px solid hsl(var(--border))',
-                    borderRadius: '8px'
+                    borderRadius: '8px',
+                    fontSize: '12px'
                   }}
                   formatter={(value: number, name: string, props: any) => {
                     if (props.payload.isPrediction) {
@@ -209,12 +210,12 @@ export function AdvancedPerformanceTrends({
 
           {/* Insights */}
           {trendData.length >= 2 && (
-            <div className="p-4 bg-muted/50 rounded-lg space-y-2">
-              <h5 className="font-medium text-sm flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-academic-accent" />
+            <div className="p-3 sm:p-4 bg-muted/50 rounded-lg space-y-2">
+              <h5 className="font-medium text-xs sm:text-sm flex items-center gap-2">
+                <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-academic-accent" />
                 Performance Insights
               </h5>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3 text-xs sm:text-sm">
                 <div>
                   <p className="text-muted-foreground">Current CGPA</p>
                   <p className="font-semibold text-lg">

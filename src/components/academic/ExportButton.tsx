@@ -68,12 +68,13 @@ export function ExportButton() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="gap-2">
-          <Download className="w-4 h-4" />
-          Export
+        <Button variant="outline" className="gap-2 text-xs sm:text-sm">
+          <Download className="w-3 h-3 sm:w-4 sm:h-4" />
+          <span className="hidden sm:inline">Export</span>
+          <span className="sm:hidden">Export</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-48">
+      <DropdownMenuContent align="end" className="w-40 sm:w-48">
         <DropdownMenuItem 
           onClick={handleExportPDF}
           disabled={!hasData}

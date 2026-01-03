@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   BarChart3, 
   Clock, 
@@ -36,7 +38,43 @@ import {
 
 export default function Landing() {
   const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
+  const [userProfile, setUserProfile] = useState<{ full_name?: string; email?: string } | null>(null);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+
+  useEffect(() => {
+    // Load user profile if logged in
+    const loadUserProfile = async () => {
+      if (user) {
+        try {
+          const { data } = await supabase
+            .from('profiles')
+            .select('full_name, email')
+            .eq('id', user.id)
+            .single();
+          
+          if (data) {
+            setUserProfile({
+              full_name: data.full_name || user.user_metadata?.full_name || 'User',
+              email: data.email || user.email
+            });
+          } else {
+            setUserProfile({
+              full_name: user.user_metadata?.full_name || 'User',
+              email: user.email
+            });
+          }
+        } catch (error) {
+          setUserProfile({
+            full_name: user.user_metadata?.full_name || 'User',
+            email: user.email
+          });
+        }
+      }
+    };
+    
+    loadUserProfile();
+  }, [user]);
 
   useEffect(() => {
     // Add smooth scrolling behavior
@@ -113,6 +151,12 @@ export default function Landing() {
     }
   };
 
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    setUserProfile(null);
+    navigate('/');
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Navigation Header */}
@@ -130,25 +174,66 @@ export default function Landing() {
             </div>
 
             {/* Desktop Navigation */}
-              <nav className="hidden md:flex items-center space-x-8">
-              </nav>
+            <nav className="hidden md:flex items-center space-x-6 lg:space-x-8">
+              {user && (
+                <button 
+                  onClick={() => navigate('/dashboard')}
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Dashboard
+                </button>
+              )}
+            </nav>
 
-            {/* Auth Buttons */}
+            {/* Auth Buttons / User Menu */}
             <div className="flex items-center space-x-2 sm:space-x-3 lg:space-x-4">
-              <button 
-                onClick={() => navigate('/auth')}
-                className="academic-button secondary sm hover-lift text-xs sm:text-sm px-3 sm:px-4 py-2"
-              >
-                Sign In
-              </button>
-              <button 
-                onClick={() => navigate('/auth')}
-                className="academic-button primary sm hover-scale magnetic text-xs sm:text-sm px-3 sm:px-4 py-2"
-              >
-                <span className="hidden sm:inline">Get Started</span>
-                <span className="sm:hidden">Start</span>
-                <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4 ml-1" />
-              </button>
+              {authLoading ? (
+                <div className="w-8 h-8 border-2 border-academic-primary/20 border-t-academic-primary rounded-full animate-spin" />
+              ) : user ? (
+                <>
+                  <div className="hidden sm:flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-muted/50">
+                    <div className="h-6 w-6 rounded-full bg-academic-primary/20 flex items-center justify-center">
+                      <span className="text-xs font-semibold text-academic-primary">
+                        {userProfile?.full_name?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase() || 'U'}
+                      </span>
+                    </div>
+                    <span className="text-xs sm:text-sm font-medium text-foreground max-w-[100px] truncate">
+                      {userProfile?.full_name || 'User'}
+                    </span>
+                  </div>
+                  <button 
+                    onClick={() => navigate('/dashboard')}
+                    className="academic-button primary sm hover-scale magnetic text-xs sm:text-sm px-3 sm:px-4 py-2"
+                  >
+                    <span className="hidden sm:inline">Go to Dashboard</span>
+                    <span className="sm:hidden">Dashboard</span>
+                    <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4 ml-1" />
+                  </button>
+                  <button 
+                    onClick={handleSignOut}
+                    className="academic-button secondary sm hover-lift text-xs sm:text-sm px-3 sm:px-4 py-2"
+                  >
+                    Sign Out
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button 
+                    onClick={() => navigate('/auth')}
+                    className="academic-button secondary sm hover-lift text-xs sm:text-sm px-3 sm:px-4 py-2"
+                  >
+                    Sign In
+                  </button>
+                  <button 
+                    onClick={() => navigate('/auth')}
+                    className="academic-button primary sm hover-scale magnetic text-xs sm:text-sm px-3 sm:px-4 py-2"
+                  >
+                    <span className="hidden sm:inline">Get Started</span>
+                    <span className="sm:hidden">Start</span>
+                    <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4 ml-1" />
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>
