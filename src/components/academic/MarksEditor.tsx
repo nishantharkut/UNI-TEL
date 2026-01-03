@@ -228,7 +228,7 @@ export function MarksEditor({ semesterId }: MarksEditorProps) {
               Add Marks
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
                 {editingRecord ? 'Edit Marks' : 'Add Marks Record'}
@@ -558,9 +558,9 @@ export function MarksEditor({ semesterId }: MarksEditorProps) {
                     <Target className="h-4 w-4" />
                     <span className="font-medium">Performance Preview</span>
                   </div>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <span className="text-muted-foreground">Raw Score:</span>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                    <div className="space-y-1">
+                      <span className="text-muted-foreground block">Raw Score:</span>
                       <div className="font-medium">
                         {formData.obtained_marks} / {formData.total_marks} 
                         ({getPreviewPercentage()}%)
@@ -569,8 +569,8 @@ export function MarksEditor({ semesterId }: MarksEditorProps) {
                         {getPerformanceLabel(getPreviewPercentage())}
                       </Badge>
                     </div>
-                    <div>
-                      <span className="text-muted-foreground">Weighted Score:</span>
+                    <div className="space-y-1">
+                      <span className="text-muted-foreground block">Weighted Score:</span>
                       <div className="font-medium">
                         {Math.round(getPreviewPercentage() * formData.weightage / 100 * 100) / 100}%
                       </div>
@@ -585,11 +585,19 @@ export function MarksEditor({ semesterId }: MarksEditorProps) {
                 </div>
               )}
 
-              <div className="flex justify-end space-x-2">
-                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+              <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-2">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => setIsDialogOpen(false)}
+                  className="w-full sm:w-auto"
+                >
                   Cancel
                 </Button>
-                <Button type="submit">
+                <Button 
+                  type="submit"
+                  className="w-full sm:w-auto"
+                >
                   {editingRecord ? 'Update' : 'Create'} Record
                 </Button>
               </div>

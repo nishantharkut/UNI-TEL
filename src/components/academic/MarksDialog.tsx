@@ -313,7 +313,7 @@ export function MarksDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {editingRecord ? 'Edit Marks' : 'Add Marks Record'}
@@ -484,9 +484,9 @@ export function MarksDialog({
                 <Calculator className="w-4 h-4" />
                 <span className="font-medium">Performance Preview</span>
               </div>
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <span className="text-muted-foreground">Raw Score:</span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                <div className="space-y-1">
+                  <span className="text-muted-foreground block">Raw Score:</span>
                   <div className="font-medium">
                     {formData.obtained_marks}/{formData.total_marks} ({getPercentage()}%)
                   </div>
@@ -494,8 +494,8 @@ export function MarksDialog({
                     {getPerformanceLabel(getPercentage())}
                   </Badge>
                 </div>
-                <div>
-                  <span className="text-muted-foreground">Weighted Score:</span>
+                <div className="space-y-1">
+                  <span className="text-muted-foreground block">Weighted Score:</span>
                   <div className="font-medium">
                     {Math.round(getPercentage() * formData.weightage / 100 * 100) / 100}%
                   </div>
@@ -510,8 +510,13 @@ export function MarksDialog({
             </div>
           )}
 
-          <div className="flex justify-end space-x-2">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-2">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => onOpenChange(false)}
+              className="w-full sm:w-auto"
+            >
               Cancel
             </Button>
             <Button 
@@ -526,6 +531,7 @@ export function MarksDialog({
                 !!errors.weightage || 
                 !!errors.semester_id
               }
+              className="w-full sm:w-auto"
             >
               {createMarks.isPending || updateMarks.isPending ? (
                 <>Saving...</>

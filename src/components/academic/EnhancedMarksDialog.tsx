@@ -163,11 +163,13 @@ export function EnhancedMarksDialog({
     }
     // Marks are optional - only validate if provided
     if (formData.total_marks > 0) {
-      if (formData.total_marks <= 0) {
-        errors.push('Total marks must be greater than 0');
-      }
       if (formData.obtained_marks < 0 || formData.obtained_marks > formData.total_marks) {
         errors.push('Obtained marks must be between 0 and total marks');
+      }
+    } else if (formData.total_marks === 0 && formData.obtained_marks > 0) {
+      // If total_marks is 0, obtained_marks should also be 0
+      if (formData.obtained_marks < 0) {
+        errors.push('Obtained marks cannot be negative');
       }
     }
 
@@ -253,7 +255,7 @@ export function EnhancedMarksDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="max-w-[95vw] sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Calculator className="h-5 w-5" />
@@ -454,7 +456,7 @@ export function EnhancedMarksDialog({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="total_marks">Total Marks</Label>
               <Input
@@ -481,6 +483,7 @@ export function EnhancedMarksDialog({
                   }
                 }}
                 placeholder="Optional - enter later"
+                className="w-full"
               />
             </div>
             <div>
@@ -500,14 +503,16 @@ export function EnhancedMarksDialog({
                   if (/^\d+$/.test(value)) {
                     const numValue = parseInt(value, 10);
                     if (!isNaN(numValue)) {
+                      const maxMarks = formData.total_marks > 0 ? formData.total_marks : Infinity;
                       setFormData({ 
                         ...formData, 
-                        obtained_marks: Math.min(numValue, formData.total_marks)
+                        obtained_marks: Math.min(numValue, maxMarks)
                       });
                     }
                   }
                 }}
                 placeholder="Optional - enter later"
+                className="w-full"
               />
             </div>
           </div>
@@ -574,37 +579,48 @@ export function EnhancedMarksDialog({
             </div>
           )}
 
-          {/* Performance Preview */}
-          <div className="p-4 bg-muted/50 rounded-lg space-y-3">
-            <div className="flex items-center gap-2">
-              <Target className="h-4 w-4" />
-              <span className="font-medium">Performance Preview</span>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-              <div className="space-y-1">
-                <span className="text-muted-foreground">Raw Percentage:</span>
-                <Badge className={`${getPercentageColor(getPercentage())}`}>
-                  {getPercentage()}% - {getPerformanceLabel(getPercentage())}
-                </Badge>
+          {/* Performance Preview - Only show when marks are entered */}
+          {formData.total_marks > 0 && (
+            <div className="p-4 bg-muted/50 rounded-lg space-y-3">
+              <div className="flex items-center gap-2">
+                <Target className="h-4 w-4" />
+                <span className="font-medium">Performance Preview</span>
               </div>
-              <div className="space-y-1">
-                <span className="text-muted-foreground">Weighted Score:</span>
-                <Badge className={`${getPercentageColor(getWeightedPercentage())}`}>
-                  {getWeightedPercentage()}%
-                </Badge>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                <div className="space-y-1">
+                  <span className="text-muted-foreground block">Raw Percentage:</span>
+                  <Badge className={`${getPercentageColor(getPercentage())}`}>
+                    {getPercentage()}% - {getPerformanceLabel(getPercentage())}
+                  </Badge>
+                </div>
+                <div className="space-y-1">
+                  <span className="text-muted-foreground block">Weighted Score:</span>
+                  <Badge className={`${getPercentageColor(getWeightedPercentage())}`}>
+                    {getWeightedPercentage()}%
+                  </Badge>
+                </div>
+              </div>
+              <div className="text-xs text-muted-foreground">
+                Weighted Score = Raw Percentage × Weightage ÷ 100
               </div>
             </div>
-            <div className="text-xs text-muted-foreground">
-              Weighted Score = Raw Percentage × Weightage ÷ 100
-            </div>
-          </div>
+          )}
 
-          <div className="flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-2">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => onOpenChange(false)}
+              className="w-full sm:w-auto"
+            >
               Cancel
             </Button>
-            <Button type="submit" disabled={createMarks.isPending || updateMarks.isPending}>
-              {editingRecord ? 'Update' : 'Add'} Record
+            <Button 
+              type="submit" 
+              disabled={createMarks.isPending || updateMarks.isPending}
+              className="w-full sm:w-auto"
+            >
+              {createMarks.isPending || updateMarks.isPending ? 'Saving...' : editingRecord ? 'Update' : 'Add'} Record
             </Button>
           </div>
         </form>
