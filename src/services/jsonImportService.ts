@@ -36,11 +36,48 @@ export interface ImportResult {
   errors?: string[];
 }
 
+/**
+ * Normalises all numeric fields in the import payload to proper integers,
+ * preventing type-coercion bugs (e.g. "7" + 0 → "70") that can occur when
+ * the caller parses untrusted JSON or receives loosely-typed values.
+ * Fields that cannot be parsed as integers are left unchanged so that the
+ * edge function can report meaningful validation errors.
+ */
+function normaliseImportData(data: ImportData): ImportData {
+  const toInt = (val: unknown): number => {
+    const parsed = parseInt(String(val), 10);
+    return isNaN(parsed) ? (val as number) : parsed;
+  };
+
+  return {
+    ...data,
+    semesters: (data.semesters ?? []).map(sem => ({
+      ...sem,
+      number: toInt(sem.number),
+      subjects: (sem.subjects ?? []).map(sub => ({
+        ...sub,
+        credits: toInt(sub.credits),
+      })),
+      attendance: (sem.attendance ?? []).map(att => ({
+        ...att,
+        total_classes: toInt(att.total_classes),
+        attended_classes: toInt(att.attended_classes),
+      })),
+      marks: (sem.marks ?? []).map(mark => ({
+        ...mark,
+        total_marks: toInt(mark.total_marks),
+        obtained_marks: toInt(mark.obtained_marks),
+      })),
+    })),
+  };
+}
+
 export const jsonImportService = {
   async importData(data: ImportData): Promise<ImportResult> {
     try {
+      const normalisedData = normaliseImportData(data);
       const { data: result, error } = await supabase.functions.invoke('import-academic-data', {
-        body: { importData: data }
+        body: { importData: normalisedData }
       });
 
       if (error) {
