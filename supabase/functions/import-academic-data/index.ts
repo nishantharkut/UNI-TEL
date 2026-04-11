@@ -113,6 +113,21 @@ serve(async (req) => {
           continue
         }
 
+        // Remove any legacy corrupted record for this semester number.
+        // e.g. if semNumber is 7 and a record with number=70 exists (from an
+        // old type-coercion bug where "7" + 0 === "70"), delete it first so
+        // the upsert below produces a single, correctly-numbered record.
+        // We start at legacyNumber >= 20 because semNumber=1 gives legacyNumber=10
+        // which is a valid semester number and must not be removed.
+        const legacyNumber = semNumber * 10
+        if (legacyNumber >= 20 && legacyNumber <= 120) {
+          await supabaseClient
+            .from('semesters')
+            .delete()
+            .eq('user_id', user.id)
+            .eq('number', legacyNumber)
+        }
+
         // Create/update semester (total_credits is omitted; the trigger recalculates it)
         const { data: semester, error: semesterError } = await supabaseClient
           .from('semesters')

@@ -124,7 +124,7 @@ export const jsonImportService = {
 
       return {
         semesters: semesters.map(semester => ({
-          number: semester.number,
+          number: normaliseSemesterNumber(semester.number),
           subjects: semester.subjects || [],
           attendance: semester.attendance || [],
           marks: semester.marks || []
