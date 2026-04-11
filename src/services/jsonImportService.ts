@@ -36,6 +36,20 @@ export interface ImportResult {
   errors?: string[];
 }
 
+function normaliseSemesterNumber(val: unknown): number {
+  const parsed = parseInt(String(val).trim(), 10);
+  if (isNaN(parsed)) return val as number;
+
+  if (parsed > 12 && parsed % 10 === 0) {
+    const deConcatenated = parsed / 10;
+    if (deConcatenated >= 1 && deConcatenated <= 12) {
+      return deConcatenated;
+    }
+  }
+
+  return parsed;
+}
+
 /**
  * Normalises all numeric fields in the import payload to proper integers,
  * preventing type-coercion bugs (e.g. "7" + 0 → "70") that can occur when
@@ -53,7 +67,7 @@ function normaliseImportData(data: ImportData): ImportData {
     ...data,
     semesters: (data.semesters ?? []).map(sem => ({
       ...sem,
-      number: toInt(sem.number),
+      number: normaliseSemesterNumber(sem.number),
       subjects: (sem.subjects ?? []).map(sub => ({
         ...sub,
         credits: toInt(sub.credits),

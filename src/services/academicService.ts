@@ -1,6 +1,20 @@
 
 import { supabase } from '@/integrations/supabase/client';
 
+function normaliseSemesterNumber(value: unknown): number {
+  const parsed = parseInt(String(value).trim(), 10);
+  if (isNaN(parsed)) return value as number;
+
+  if (parsed > 12 && parsed % 10 === 0) {
+    const deConcatenated = parsed / 10;
+    if (deConcatenated >= 1 && deConcatenated <= 12) {
+      return deConcatenated;
+    }
+  }
+
+  return parsed;
+}
+
 export interface Semester {
   id: string;
   user_id: string;
@@ -75,7 +89,10 @@ export const semesterService = {
       .select('*')
       .order('number');
     if (error) throw error;
-    return data as Semester[];
+    return (data as Semester[]).map((semester) => ({
+      ...semester,
+      number: normaliseSemesterNumber(semester.number)
+    }));
   },
 
   async create(semester: Omit<Semester, 'id' | 'user_id' | 'created_at' | 'updated_at'>) {
@@ -86,6 +103,7 @@ export const semesterService = {
       .from('semesters')
       .insert({ 
         ...semester, 
+        number: normaliseSemesterNumber(semester.number),
         user_id: user.id,
         source_json_import: semester.source_json_import ?? false,
         total_credits: semester.total_credits ?? 0
@@ -97,9 +115,14 @@ export const semesterService = {
   },
 
   async update(id: string, updates: Partial<Semester>) {
+    const normalisedUpdates = {
+      ...updates,
+      ...(updates.number !== undefined ? { number: normaliseSemesterNumber(updates.number) } : {})
+    };
+
     const { data, error } = await supabase
       .from('semesters')
-      .update(updates)
+      .update(normalisedUpdates)
       .eq('id', id)
       .select()
       .single();

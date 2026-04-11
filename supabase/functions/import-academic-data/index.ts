@@ -42,6 +42,20 @@ interface ImportResult {
   errors?: string[];
 }
 
+function normaliseSemesterNumber(value: unknown): number {
+  const parsed = parseInt(String(value).trim(), 10)
+  if (isNaN(parsed)) return value as number
+
+  if (parsed > 12 && parsed % 10 === 0) {
+    const deConcatenated = parsed / 10
+    if (deConcatenated >= 1 && deConcatenated <= 12) {
+      return deConcatenated
+    }
+  }
+
+  return parsed
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -93,7 +107,7 @@ serve(async (req) => {
     for (const semesterData of importData.semesters) {
       try {
         // Ensure number is a proper integer to avoid type-coercion bugs
-        const semNumber = parseInt(String(semesterData.number), 10)
+        const semNumber = normaliseSemesterNumber(semesterData.number)
         if (isNaN(semNumber) || semNumber < 1 || semNumber > 12) {
           result.errors?.push(`Semester ${semesterData.number}: invalid semester number (must be between 1 and 12)`)
           continue
