@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 function normaliseSemesterNumber(value: unknown): number {
   const parsed = parseInt(String(value).trim(), 10);
-  if (isNaN(parsed)) return value as number;
+  if (isNaN(parsed)) return -1;
 
   if (parsed > 12 && parsed % 10 === 0) {
     const deConcatenated = parsed / 10;

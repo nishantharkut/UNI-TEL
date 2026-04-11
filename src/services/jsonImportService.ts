@@ -38,7 +38,7 @@ export interface ImportResult {
 
 function normaliseSemesterNumber(val: unknown): number {
   const parsed = parseInt(String(val).trim(), 10);
-  if (isNaN(parsed)) return val as number;
+  if (isNaN(parsed)) return -1;
 
   if (parsed > 12 && parsed % 10 === 0) {
     const deConcatenated = parsed / 10;
