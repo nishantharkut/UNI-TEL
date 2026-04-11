@@ -224,7 +224,7 @@ export function exportToExcel(
   // Semesters Sheet
   if (semesters.length > 0) {
     const semesterData = [
-      ['Semester', 'SGPA', 'Credits', 'Start Date', 'End Date']
+      ['Semester', 'SGPA', 'Credits']
     ];
     
     semesters.forEach(sem => {
@@ -232,8 +232,6 @@ export function exportToExcel(
         `Semester ${sem.number}`,
         sem.sgpa?.toFixed(2) || 'N/A',
         sem.total_credits?.toString() || '0',
-        sem.start_date ? format(new Date(sem.start_date), 'yyyy-MM-dd') : 'N/A',
-        sem.end_date ? format(new Date(sem.end_date), 'yyyy-MM-dd') : 'N/A'
       ]);
     });
 
