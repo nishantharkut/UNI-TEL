@@ -196,3 +196,4 @@ export function AttendanceHeatmap({ month = new Date() }: AttendanceHeatmapProps
   );
 }
 
+
