@@ -42,6 +42,20 @@ interface ImportResult {
   errors?: string[];
 }
 
+function normaliseSemesterNumber(value: unknown): number {
+  const parsed = parseInt(String(value).trim(), 10)
+  if (isNaN(parsed)) return -1
+
+  if (parsed > 12 && parsed % 10 === 0) {
+    const deConcatenated = parsed / 10
+    if (deConcatenated >= 1 && deConcatenated <= 12) {
+      return deConcatenated
+    }
+  }
+
+  return parsed
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -92,13 +106,34 @@ serve(async (req) => {
     // Process each semester
     for (const semesterData of importData.semesters) {
       try {
-        // Create/update semester
+        // Ensure number is a proper integer to avoid type-coercion bugs
+        const semNumber = normaliseSemesterNumber(semesterData.number)
+        if (isNaN(semNumber) || semNumber < 1 || semNumber > 12) {
+          result.errors?.push(`Semester ${semesterData.number}: invalid semester number (must be between 1 and 12)`)
+          continue
+        }
+
+        // Remove any legacy corrupted record for this semester number.
+        // e.g. if semNumber is 7 and a record with number=70 exists (from an
+        // old type-coercion bug where "7" + 0 === "70"), delete it first so
+        // the upsert below produces a single, correctly-numbered record.
+        // We start at legacyNumber >= 20 because semNumber=1 gives legacyNumber=10
+        // which is a valid semester number and must not be removed.
+        const legacyNumber = semNumber * 10
+        if (legacyNumber >= 20 && legacyNumber <= 120) {
+          await supabaseClient
+            .from('semesters')
+            .delete()
+            .eq('user_id', user.id)
+            .eq('number', legacyNumber)
+        }
+
+        // Create/update semester (total_credits is omitted; the trigger recalculates it)
         const { data: semester, error: semesterError } = await supabaseClient
           .from('semesters')
           .upsert({
             user_id: user.id,
-            number: semesterData.number,
-            total_credits: 0,
+            number: semNumber,
             source_json_import: true
           }, {
             onConflict: 'user_id,number'
@@ -107,7 +142,7 @@ serve(async (req) => {
           .single()
 
         if (semesterError) {
-          result.errors?.push(`Semester ${semesterData.number}: ${semesterError.message}`)
+          result.errors?.push(`Semester ${semNumber}: ${semesterError.message}`)
           continue
         }
 
@@ -117,13 +152,18 @@ serve(async (req) => {
         if (semesterData.subjects && semesterData.subjects.length > 0) {
           for (const subjectData of semesterData.subjects) {
             try {
+              const subCredits = parseInt(String(subjectData.credits), 10)
+              if (isNaN(subCredits)) {
+                result.errors?.push(`Subject ${subjectData.name}: invalid credits value "${subjectData.credits}"`)
+                continue
+              }
               const { error: subjectError } = await supabaseClient
                 .from('subjects')
                 .upsert({
                   user_id: user.id,
                   semester_id: semester.id,
                   name: subjectData.name,
-                  credits: subjectData.credits,
+                  credits: subCredits,
                   grade: subjectData.grade,
                   source_json_import: true
                 }, {
@@ -145,14 +185,20 @@ serve(async (req) => {
         if (semesterData.attendance && semesterData.attendance.length > 0) {
           for (const attendanceData of semesterData.attendance) {
             try {
+              const totalClasses = parseInt(String(attendanceData.total_classes), 10)
+              const attendedClasses = parseInt(String(attendanceData.attended_classes), 10)
+              if (isNaN(totalClasses) || isNaN(attendedClasses)) {
+                result.errors?.push(`Attendance ${attendanceData.subject_name}: invalid class count values`)
+                continue
+              }
               const { error: attendanceError } = await supabaseClient
                 .from('attendance_records')
                 .upsert({
                   user_id: user.id,
                   semester_id: semester.id,
                   subject_name: attendanceData.subject_name,
-                  total_classes: attendanceData.total_classes,
-                  attended_classes: attendanceData.attended_classes,
+                  total_classes: totalClasses,
+                  attended_classes: attendedClasses,
                   note: attendanceData.note,
                   source_json_import: true
                 }, {
@@ -174,6 +220,12 @@ serve(async (req) => {
         if (semesterData.marks && semesterData.marks.length > 0) {
           for (const marksData of semesterData.marks) {
             try {
+              const totalMarks = parseInt(String(marksData.total_marks), 10)
+              const obtainedMarks = parseInt(String(marksData.obtained_marks), 10)
+              if (isNaN(totalMarks) || isNaN(obtainedMarks)) {
+                result.errors?.push(`Marks ${marksData.subject_name} ${marksData.exam_type}: invalid marks values`)
+                continue
+              }
               const { error: marksError } = await supabaseClient
                 .from('marks_records')
                 .insert({
@@ -181,8 +233,8 @@ serve(async (req) => {
                   semester_id: semester.id,
                   subject_name: marksData.subject_name,
                   exam_type: marksData.exam_type,
-                  total_marks: marksData.total_marks,
-                  obtained_marks: marksData.obtained_marks,
+                  total_marks: totalMarks,
+                  obtained_marks: obtainedMarks,
                   source_json_import: true
                 })
 
@@ -197,7 +249,7 @@ serve(async (req) => {
           }
         }
       } catch (error) {
-        result.errors?.push(`Semester ${semesterData.number}: ${error.message}`)
+        result.errors?.push(`Semester ${semesterData.number ?? 'unknown'}: ${error.message}`)
       }
     }
 

@@ -36,11 +36,62 @@ export interface ImportResult {
   errors?: string[];
 }
 
+function normaliseSemesterNumber(val: unknown): number {
+  const parsed = parseInt(String(val).trim(), 10);
+  if (isNaN(parsed)) return -1;
+
+  if (parsed > 12 && parsed % 10 === 0) {
+    const deConcatenated = parsed / 10;
+    if (deConcatenated >= 1 && deConcatenated <= 12) {
+      return deConcatenated;
+    }
+  }
+
+  return parsed;
+}
+
+/**
+ * Normalises all numeric fields in the import payload to proper integers,
+ * preventing type-coercion bugs (e.g. "7" + 0 → "70") that can occur when
+ * the caller parses untrusted JSON or receives loosely-typed values.
+ * Fields that cannot be parsed as integers are left unchanged so that the
+ * edge function can report meaningful validation errors.
+ */
+function normaliseImportData(data: ImportData): ImportData {
+  const toInt = (val: unknown): number => {
+    const parsed = parseInt(String(val), 10);
+    return isNaN(parsed) ? (val as number) : parsed;
+  };
+
+  return {
+    ...data,
+    semesters: (data.semesters ?? []).map(sem => ({
+      ...sem,
+      number: normaliseSemesterNumber(sem.number),
+      subjects: (sem.subjects ?? []).map(sub => ({
+        ...sub,
+        credits: toInt(sub.credits),
+      })),
+      attendance: (sem.attendance ?? []).map(att => ({
+        ...att,
+        total_classes: toInt(att.total_classes),
+        attended_classes: toInt(att.attended_classes),
+      })),
+      marks: (sem.marks ?? []).map(mark => ({
+        ...mark,
+        total_marks: toInt(mark.total_marks),
+        obtained_marks: toInt(mark.obtained_marks),
+      })),
+    })),
+  };
+}
+
 export const jsonImportService = {
   async importData(data: ImportData): Promise<ImportResult> {
     try {
+      const normalisedData = normaliseImportData(data);
       const { data: result, error } = await supabase.functions.invoke('import-academic-data', {
-        body: { importData: data }
+        body: { importData: normalisedData }
       });
 
       if (error) {
@@ -73,7 +124,7 @@ export const jsonImportService = {
 
       return {
         semesters: semesters.map(semester => ({
-          number: semester.number,
+          number: normaliseSemesterNumber(semester.number),
           subjects: semester.subjects || [],
           attendance: semester.attendance || [],
           marks: semester.marks || []
